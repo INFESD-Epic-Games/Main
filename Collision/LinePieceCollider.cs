@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Microsoft.Xna.Framework;
 
 namespace SpellFall.Collision
@@ -30,8 +31,7 @@ namespace SpellFall.Collision
         {
             get
             {
-                // TODO: Implement
-                return 0;
+                return Start.Y - End.Y;
             }
         }
 
@@ -42,8 +42,7 @@ namespace SpellFall.Collision
         {
             get
             {
-                // TODO: Implement
-                return 0;
+                return End.X - Start.X;
             }
         }
 
@@ -54,8 +53,7 @@ namespace SpellFall.Collision
         {
             get
             {
-                // TODO: Implement
-                return 0;
+                return Start.X * End.Y - End.X * Start.Y;
             }
         }
 
@@ -78,8 +76,7 @@ namespace SpellFall.Collision
         /// <returns> The angle in radians between the the up vector and the direction to the cursor.</returns>
         public static float GetAngle(Vector2 direction)
         {
-            // TODO: Implement
-            return 0;
+            return (float)Math.Atan2(direction.X, -direction.Y);
         }
 
 
@@ -89,8 +86,19 @@ namespace SpellFall.Collision
         /// <returns> A Vector2 containing the direction from point1 to point2. </returns>
         public static Vector2 GetDirection(Vector2 point1, Vector2 point2)
         {
-            // TODO Implement, currently pointing up.
-            return -Vector2.UnitY;
+            Vector2 direction = point1 - point2;
+            return -Vector2.Normalize(direction);
+        }
+
+
+        /// <summary>
+        /// Calculates the normalized vector pointing from the start to the end of the line.
+        /// </summary>
+        /// <param name="point">The point to calculate the distance to.</param>
+        /// <returns></returns>
+        public float StandardLineForm(Vector2 point)
+        {
+            return StandardA * point.X + StandardB * point.Y + StandardC;
         }
 
 
@@ -113,8 +121,9 @@ namespace SpellFall.Collision
         /// <returns>true there is any overlap between the two Circles.</returns>
         public override bool Intersects(CircleCollider other)
         {
-            // TODO Implement hint, you can use the NearestPointOnLine function defined below.
-            return false;
+            Vector2 nearestPoint = NearestPointOnLine(other.Center);
+            Vector2 toCircle = other.Center - nearestPoint;
+            return toCircle.Length() <= other.Radius;
         }
 
         /// <summary>
@@ -124,8 +133,17 @@ namespace SpellFall.Collision
         /// <returns>true there is any overlap between the Circle and the Rectangle.</returns>
         public override bool Intersects(RectangleCollider other)
         {
-            // TODO Implement
-            return false;
+            var box = other.GetBoundingBox();
+
+            float[] results =
+            {
+                StandardLineForm(new Vector2(box.Left,  box.Top)),
+                StandardLineForm(new Vector2(box.Right, box.Top)),
+                StandardLineForm(new Vector2(box.Left,  box.Bottom)),
+                StandardLineForm(new Vector2(box.Right, box.Bottom))
+            };
+
+            return !(results.All(r => r > 0) || results.All(r => r < 0));
         }
 
         /// <summary>
@@ -146,8 +164,18 @@ namespace SpellFall.Collision
         /// <returns>The nearest point on the line.</returns>
         public Vector2 NearestPointOnLine(Vector2 other)
         {
-            // TODO Implement
-            return Vector2.Zero;
+            Vector2 direction = End - Start;
+            float length = direction.Length();
+            if (length == 0)
+            {
+                return Start;
+            }
+            direction.Normalize();
+            Vector2 toOther = other - Start;
+            float dot = Vector2.Dot(toOther, direction);
+            float clampedDot = MathHelper.Clamp(dot, 0, length);
+            Vector2 nearest = Start + clampedDot * direction;
+            return nearest;
         }
 
         /// <summary>

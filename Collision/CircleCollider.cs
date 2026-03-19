@@ -61,8 +61,8 @@ namespace SpellFall.Collision
         /// <returns>true there is any overlap between the two Circles.</returns>
         public override bool Intersects(CircleCollider other)
         {
-            // TODO Implement
-            return false;
+            float distance = (Center - other.Center).Length();
+            return distance < (Radius + other.Radius);
         }
 
 
@@ -73,8 +73,22 @@ namespace SpellFall.Collision
         /// <returns>true there is any overlap between the Circle and the Rectangle.</returns>
         public override bool Intersects(RectangleCollider other)
         {
-            // TODO Implement
-            return  false;
+            if(Y < other.GetBoundingBox().Bottom && Y > other.GetBoundingBox().Top)
+            {
+                if(X + Radius > other.GetBoundingBox().Left && X - Radius < other.GetBoundingBox().Right)
+                {
+                    return true;
+                }
+            }
+            else if(X < other.GetBoundingBox().Right && X > other.GetBoundingBox().Left)
+            {
+                if(Y + Radius > other.GetBoundingBox().Top && Y - Radius < other.GetBoundingBox().Bottom)
+                {
+                    return true;
+                }
+            }
+            
+            return false;
         }
         /// <summary>
         /// Gets whether or not the Circle intersects the Line
