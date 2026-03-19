@@ -1,2 +1,2 @@
-﻿using var game = new Main.Game1();
+﻿using var game = new SpellFall.Game1();
 game.Run();
