@@ -11,9 +11,14 @@ namespace SpellFall.Character
         public RectangleCollider rectangleCollider { get; private set; }
         private Texture2D _texture;
 
+        float speed = 5f;
+        Vector2 lastDirection = Vector2.UnitY;
+        Vector2 position;
+
         public Player(Point Position)
         {
             rectangleCollider = new RectangleCollider(new Rectangle(Position, Point.Zero));
+            position = Position.ToVector2();
             SetCollider(rectangleCollider);
         }
 
@@ -35,6 +40,36 @@ namespace SpellFall.Character
         public Rectangle GetPosition()
         {
             return rectangleCollider.shape;
+        }
+
+        public override void Update(GameTime gameTime)
+        {
+            Vector2 inputDirection = Vector2.Zero;
+
+            var keyboardstate = Microsoft.Xna.Framework.Input.Keyboard.GetState();
+            if (keyboardstate.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.W))
+                inputDirection.Y -= 1;
+
+            if (keyboardstate.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.S))
+                inputDirection.Y += 1;
+
+            if (keyboardstate.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.A))
+                inputDirection.X -= 1;
+
+            if (keyboardstate.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.D))
+                inputDirection.X += 1;
+
+            if (inputDirection != Vector2.Zero)
+            {
+                inputDirection.Normalize();
+                lastDirection = inputDirection;
+
+                position += inputDirection * speed;
+            }
+
+            rectangleCollider.shape.Location = position.ToPoint();
+
+            base.Update(gameTime);
         }
     }
 }
