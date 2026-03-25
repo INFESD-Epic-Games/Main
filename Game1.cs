@@ -5,6 +5,7 @@ using SpellFall.Engine;
 using SpellFall.Collision;
 using SpellFall.Character;
 using Microsoft.Xna.Framework.Content;
+using SpellFall.Weapons;
 
 namespace SpellFall
 {
@@ -35,10 +36,13 @@ namespace SpellFall
 
             // Place the player at the center of the screen
             Player player = new Player(new Point(GraphicsDevice.Viewport.Width/2 - 100, GraphicsDevice.Viewport.Height/2 - 100));
+            StartingWeapon startingWeapon = new StartingWeapon();
+            player.EquipWeapon(startingWeapon);
 
             // Add the starting objects to the GameManager
             _gameManager.Initialize(Content, this, player);
             _gameManager.AddGameObject(player);
+            _gameManager.AddGameObject(startingWeapon);
         }
 
         protected override void LoadContent()

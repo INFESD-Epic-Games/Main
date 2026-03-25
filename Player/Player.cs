@@ -10,6 +10,7 @@ namespace SpellFall.Character
     {
         public RectangleCollider rectangleCollider { get; private set; }
         private Texture2D _texture;
+        private GameObject _equippedWeapon;
 
         float speed = 5f;
         Vector2 lastDirection = Vector2.UnitY;
@@ -40,6 +41,10 @@ namespace SpellFall.Character
         public Rectangle GetPosition()
         {
             return rectangleCollider.shape;
+        }
+        public void EquipWeapon(GameObject weapon)
+        {
+            _equippedWeapon = weapon;
         }
 
         public override void Update(GameTime gameTime)
