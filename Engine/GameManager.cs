@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using SpellFall.Character;
 
 namespace SpellFall.Engine
 {
@@ -16,7 +17,8 @@ namespace SpellFall.Engine
         private ContentManager _content;
 
         public Random RNG { get; private set; }
-        // public Player Player { get; private set; }
+        public Camera Camera { get; private set; }
+        public Player Player { get; private set; }
         public InputManager InputManager { get; private set; }
         public Game Game { get; private set; }
 
@@ -32,14 +34,15 @@ namespace SpellFall.Engine
             _toBeRemoved = new List<GameObject>();
             _toBeAdded = new List<GameObject>();
             InputManager = new InputManager();
+            Camera = new Camera();
             RNG = new Random();
         }
 
-        public void Initialize(ContentManager content, Game game)//, Ship player)
+        public void Initialize(ContentManager content, Game game, Player player)
         {
             Game = game;
             _content = content;
-            // Player = player;
+            Player = player;
         }
 
         public void Load(ContentManager content)
@@ -79,6 +82,8 @@ namespace SpellFall.Engine
         {
             InputManager.Update();
 
+            Camera.Follow(Player);
+
             // Handle input
             HandleInput(InputManager);
 
@@ -109,7 +114,8 @@ namespace SpellFall.Engine
 
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch) 
         {
-            spriteBatch.Begin();
+            // spriteBatch.Begin();
+            spriteBatch.Begin(transformMatrix: Camera.Transform);
             foreach (GameObject gameObject in _gameObjects)
             {
                 gameObject.Draw(gameTime, spriteBatch);
