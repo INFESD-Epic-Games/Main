@@ -3,6 +3,7 @@ using SpellFall.Collision;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 
 namespace SpellFall.Character
 {
@@ -14,6 +15,9 @@ namespace SpellFall.Character
 
         float speed = 5f;
         Vector2 lastDirection = Vector2.UnitY;
+        private Vector2 _thrustInput = Vector2.Zero;
+        private Vector2 velocity = Vector2.Zero;
+
         Vector2 position;
 
         public Player(Point Position)
@@ -47,31 +51,32 @@ namespace SpellFall.Character
             _equippedWeapon = weapon;
         }
 
+        public override void HandleInput(InputManager inputManager)
+        {
+            _thrustInput = Vector2.Zero;
+
+            if (inputManager.IsKeyDown(Keys.W))
+                _thrustInput.Y -= 1;
+            if (inputManager.IsKeyDown(Keys.S))
+                _thrustInput.Y += 1;
+            if (inputManager.IsKeyDown(Keys.A))
+                _thrustInput.X -= 1;
+            if (inputManager.IsKeyDown(Keys.D))
+                _thrustInput.X += 1;
+
+            base.HandleInput(inputManager);
+        }
+
+
         public override void Update(GameTime gameTime)
         {
-            Vector2 inputDirection = Vector2.Zero;
-
-            var keyboardstate = Microsoft.Xna.Framework.Input.Keyboard.GetState();
-            if (keyboardstate.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.W))
-                inputDirection.Y -= 1;
-
-            if (keyboardstate.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.S))
-                inputDirection.Y += 1;
-
-            if (keyboardstate.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.A))
-                inputDirection.X -= 1;
-
-            if (keyboardstate.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.D))
-                inputDirection.X += 1;
-
-            if (inputDirection != Vector2.Zero)
+            if (_thrustInput != Vector2.Zero)
             {
-                inputDirection.Normalize();
-                lastDirection = inputDirection;
+                _thrustInput.Normalize();
+                lastDirection = _thrustInput;
 
-                position += inputDirection * speed;
+                position += _thrustInput * speed;
             }
-
             rectangleCollider.shape.Location = position.ToPoint();
 
             base.Update(gameTime);
