@@ -18,7 +18,7 @@ namespace SpellFall
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
-            _graphics.IsFullScreen = false;
+            _graphics.IsFullScreen = true;
 
             // Set the size of the screen
             _graphics.PreferredBackBufferWidth = 2000;
