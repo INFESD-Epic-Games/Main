@@ -16,8 +16,8 @@ namespace SpellFall.Character
         float speed = 5f;
         Vector2 lastDirection = Vector2.UnitY;
         private Vector2 _thrustInput = Vector2.Zero;
-        private const int _dashDistance = 100;
-        private float _dashCooldown = 0f; // seconds
+        private const int _dashDistance = 200;
+        private float _dashCooldown = 5f; // seconds
         private float _dashTimer = 0f;
         private bool _canDash = true;
 

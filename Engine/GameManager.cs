@@ -82,8 +82,6 @@ namespace SpellFall.Engine
         {
             InputManager.Update();
 
-            Camera.Follow(Player);
-
             // Handle input
             HandleInput(InputManager);
 
@@ -93,6 +91,9 @@ namespace SpellFall.Engine
             {
                 gameObject.Update(gameTime);
             }
+
+            Camera.Follow(Player);
+
 
             // Check Collission
             CheckCollision();
