@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 using SpellFall.Collision;
 using SpellFall.Engine;
 using SpellFall.Weapons.Projectiles;
+using SpellFall.Items;
 
 namespace SpellFall.Enemies
 {
@@ -13,6 +14,7 @@ namespace SpellFall.Enemies
         private const float MoveSpeed = 40f;
         private const float AlienScale = 1.2f;
         private const float HitboxScale = 0.6f;
+        private float luck {get; set;} = 1f;
 
         private readonly GameManager _gameManager;
         private readonly RectangleCollider _rectangleCollider;
@@ -20,6 +22,7 @@ namespace SpellFall.Enemies
         private Texture2D _texture;
         private Vector2 _position;
         private Random Randomnum = new Random();
+        private Loot loot = new Loot();
 
         public Alien(Point startPosition)
         {
@@ -52,12 +55,22 @@ namespace SpellFall.Enemies
             base.Update(gameTime);
         }
 
+        public void RandomDropchance()
+        {
+            int rng = Randomnum.Next(0,100);
+            if (rng >= 90)
+            {
+                loot.GetRandomRarity(luck);
+            }
+        }
+
         public override void OnCollision(GameObject other)
         {
             // dit moet nog veranderd worden, wanneer er meer wapens en projectiles zijn.
             if (other is Arrow)
             {
                 _gameManager.RemoveGameObject(this);
+                RandomDropchance();
             }
 
             base.OnCollision(other);

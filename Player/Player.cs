@@ -67,14 +67,14 @@ namespace SpellFall.Character
             if (keyboardstate.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.D))
                 inputDirection.X += 1;
 
-            var current = Keyboard.GetState();
+            // var current = Keyboard.GetState();
 
-            if (current.IsKeyDown(Keys.T) && previousKeyboardState.IsKeyUp(Keys.T))
-            {
-                var rarity = loot.GetRandomRarity(luck);
-            }
+            // if (current.IsKeyDown(Keys.T) && previousKeyboardState.IsKeyUp(Keys.T))
+            // {
+            //     var rarity = loot.GetRandomRarity(luck);
+            // }
 
-            previousKeyboardState = current;
+            // previousKeyboardState = current;
 
             if (inputDirection != Vector2.Zero)
             {
