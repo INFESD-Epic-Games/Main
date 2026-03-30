@@ -3,6 +3,8 @@ using SpellFall.Collision;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using SpellFall.Items;
+using Microsoft.Xna.Framework.Input;
 
 namespace SpellFall.Character
 {
@@ -11,10 +13,11 @@ namespace SpellFall.Character
         public RectangleCollider rectangleCollider { get; private set; }
         private Texture2D _texture;
         private GameObject _equippedWeapon;
-
         float speed = 5f;
-        Vector2 lastDirection = Vector2.UnitY;
         Vector2 position;
+        private float luck {get; set;} = 1f;
+        private Loot loot = new Loot();
+        private KeyboardState previousKeyboardState;
 
         public Player(Point Position)
         {
@@ -64,10 +67,18 @@ namespace SpellFall.Character
             if (keyboardstate.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.D))
                 inputDirection.X += 1;
 
+            var current = Keyboard.GetState();
+
+            if (current.IsKeyDown(Keys.T) && previousKeyboardState.IsKeyUp(Keys.T))
+            {
+                var rarity = loot.GetRandomRarity(luck);
+            }
+
+            previousKeyboardState = current;
+
             if (inputDirection != Vector2.Zero)
             {
                 inputDirection.Normalize();
-                lastDirection = inputDirection;
 
                 position += inputDirection * speed;
             }
