@@ -1,3 +1,4 @@
+using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -18,6 +19,7 @@ namespace SpellFall.Enemies
 
         private Texture2D _texture;
         private Vector2 _position;
+        private Random Randomnum = new Random();
 
         public Alien(Point startPosition)
         {
