@@ -85,9 +85,9 @@ namespace SpellFall.Weapons
 
 		private Vector2 GetBowCenter()
 		{
-			Rectangle playerRect = _gameManager.Player.GetPosition();
+			Rectangle playerRect = _gameManager.Player.GetVisualBounds();
 			Vector2 aimDirection = LinePieceCollider.GetDirection(playerRect.Center, _target);
-			float bowOffsetDistance = (playerRect.Width / 2f) + (_bowTexture.Height * BowScale * 0.15f);
+			float bowOffsetDistance = playerRect.Width / 2f;
 			return playerRect.Center.ToVector2() + aimDirection * bowOffsetDistance;
 		}
 	}

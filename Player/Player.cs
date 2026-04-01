@@ -11,6 +11,7 @@ namespace SpellFall.Character
 {
     public class Player : GameObject
     {
+        private const float PlayerScale = 0.5f;
         public RectangleCollider rectangleCollider { get; private set; }
         private GameObject _equippedWeapon;
         float speed = 5f;
@@ -173,7 +174,7 @@ namespace SpellFall.Character
                 (int)(position.Y - colliderHeight / 2)
             );
 
-            _healthBar.SetPosition(new Vector2(rectangleCollider.shape.X, rectangleCollider.shape.Y - 30));
+            _healthBar.SetPosition(rectangleCollider.shape);
             _healthBar.Update(gameTime);
             base.Update(gameTime);
         }
@@ -197,7 +198,7 @@ namespace SpellFall.Character
                 Color.White,
                 0f,
                 origin,
-                0.5f,
+                PlayerScale,
                 SpriteEffects.None,
                 0f
             );
@@ -209,6 +210,15 @@ namespace SpellFall.Character
         {
             return rectangleCollider.shape;
         }
+
+        // Gets the box the game uses to draw the player sprite on screen.
+        public Rectangle GetVisualBounds() => new Rectangle(
+            (int)(position.X - (currentTexture.Width / 8f) * PlayerScale),
+            (int)(position.Y - (currentTexture.Height / 2f) * PlayerScale),
+            (int)((currentTexture.Width / 4f) * PlayerScale),
+            (int)(currentTexture.Height * PlayerScale)
+        );
+
         public void EquipWeapon(GameObject weapon)
         {
             _equippedWeapon = weapon;

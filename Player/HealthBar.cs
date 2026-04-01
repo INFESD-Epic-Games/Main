@@ -11,7 +11,7 @@ namespace SpellFall.Character
         public int maxHealth { get; private set; }
         private int _currentHealth;
         public int currentHealth { get { return _currentHealth; } }
-        private Vector2 _position;
+        private Rectangle _ownerBounds;
         private Texture2D _healthBarTexture;
 
         private float _regenTimer = 0f;
@@ -25,9 +25,9 @@ namespace SpellFall.Character
             this._currentHealth = maxHealth;
         }
 
-        public void SetPosition(Vector2 position)
+        public void SetPosition(Rectangle ownerBounds)
         {
-            _position = position;
+            _ownerBounds = ownerBounds;
         }
 
         public void TakeDamage(int damage)
@@ -83,7 +83,10 @@ namespace SpellFall.Character
 
             float healthPercentage = (float)currentHealth / maxHealth;
 
-            Vector2 barPosition  = _position + new Vector2(-70, -20);
+            Vector2 barPosition = new Vector2(
+                _ownerBounds.Center.X - (barWidth / 2f),
+                _ownerBounds.Y + 150 // als jullie dit te hoog of te laag vinden, pas het aan of een betere berekening gebruiken ik heb geen idee
+            );
 
             // Background
             spriteBatch.Draw(_healthBarTexture,
