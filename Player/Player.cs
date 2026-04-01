@@ -3,6 +3,7 @@ using SpellFall.Collision;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 
 namespace SpellFall.Character
 {
@@ -14,6 +15,16 @@ namespace SpellFall.Character
 
         float speed = 5f;
         Vector2 lastDirection = Vector2.UnitY;
+        private Vector2 _thrustInput = Vector2.Zero;
+        private const int _dashDistance = 200;
+        private float _dashCooldown = 5f; // seconds
+        private float _dashTimer = 0f;
+        private bool _canDash = true;
+
+        private HealthBar _healthBar;
+        private const int _maxHealth = 100;
+        public int currentHealth = 100;
+
         Vector2 position;
 
         public Player(Point Position)
@@ -21,6 +32,8 @@ namespace SpellFall.Character
             rectangleCollider = new RectangleCollider(new Rectangle(Position, Point.Zero));
             position = Position.ToVector2();
             SetCollider(rectangleCollider);
+
+            _healthBar = new HealthBar(_maxHealth);
         }
 
         // Placeholder player. Remove when updating
@@ -29,11 +42,67 @@ namespace SpellFall.Character
             base.Load(content);
             _texture = content.Load<Texture2D>("ship_body");
            rectangleCollider.shape.Size = _texture.Bounds.Size;
-           rectangleCollider.shape.Location -= new Point(_texture.Bounds.Width / 2, _texture.Bounds.Height / 2);
+        }
+
+        public override void HandleInput(InputManager inputManager)
+        {
+            _thrustInput = Vector2.Zero;
+
+            if (inputManager.IsKeyDown(Keys.W))
+                _thrustInput.Y -= 1;
+            if (inputManager.IsKeyDown(Keys.S))
+                _thrustInput.Y += 1;
+            if (inputManager.IsKeyDown(Keys.A))
+                _thrustInput.X -= 1;
+            if (inputManager.IsKeyDown(Keys.D))
+                _thrustInput.X += 1;
+            
+            // Temporary damage input for testing health bar
+            // TODO: Remove when implementing actual damage sources
+            if (inputManager.IsKeyPress(Keys.Down))
+                _healthBar.TakeDamage(10);
+            
+            if(inputManager.IsKeyPress(Keys.Space))
+                Dash();
+
+            base.HandleInput(inputManager);
+        }
+
+
+        public override void Update(GameTime gameTime)
+        {
+            float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            // Update cooldown timer
+            if (!_canDash)
+            {
+                _dashTimer -= deltaTime;
+                if (_dashTimer <= 0f)
+                {
+                    _canDash = true;
+                }
+            }
+
+
+            if (_thrustInput != Vector2.Zero)
+            {
+                _thrustInput.Normalize();
+                lastDirection = _thrustInput;
+
+                position += _thrustInput * speed;
+            }
+            rectangleCollider.shape.Location = new Point(
+                (int)(position.X - _texture.Width / 2),
+                (int)(position.Y - _texture.Height / 2)
+            );
+
+            _healthBar.SetPosition(new Vector2(rectangleCollider.shape.X, rectangleCollider.shape.Y - 30));
+            _healthBar.Update(gameTime);
+            base.Update(gameTime);
         }
 
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
+            _healthBar.DrawHealthBar(spriteBatch);
             spriteBatch.Draw(_texture, rectangleCollider.GetBoundingBox(), Color.White);
             base.Draw(gameTime, spriteBatch);
         }
@@ -47,34 +116,20 @@ namespace SpellFall.Character
             _equippedWeapon = weapon;
         }
 
-        public override void Update(GameTime gameTime)
+        private void Dash()
         {
-            Vector2 inputDirection = Vector2.Zero;
+            if (!_canDash)
+                return;
 
-            var keyboardstate = Microsoft.Xna.Framework.Input.Keyboard.GetState();
-            if (keyboardstate.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.W))
-                inputDirection.Y -= 1;
+            Vector2 dashDirection = _thrustInput != Vector2.Zero 
+                ? Vector2.Normalize(_thrustInput) 
+                : lastDirection;
 
-            if (keyboardstate.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.S))
-                inputDirection.Y += 1;
+            position += dashDirection * _dashDistance;
 
-            if (keyboardstate.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.A))
-                inputDirection.X -= 1;
-
-            if (keyboardstate.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.D))
-                inputDirection.X += 1;
-
-            if (inputDirection != Vector2.Zero)
-            {
-                inputDirection.Normalize();
-                lastDirection = inputDirection;
-
-                position += inputDirection * speed;
-            }
-
-            rectangleCollider.shape.Location = position.ToPoint();
-
-            base.Update(gameTime);
+            // Start cooldown
+            _canDash = false;
+            _dashTimer = _dashCooldown;
         }
     }
 }

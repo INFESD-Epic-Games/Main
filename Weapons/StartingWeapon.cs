@@ -43,7 +43,7 @@ namespace SpellFall.Weapons
 			{
 				Rectangle playerRect = _gameManager.Player.GetPosition();
 				Vector2 aimDirection = LinePieceCollider.GetDirection(playerRect.Center, _target);
-				_gameManager.AddGameObject(new Arrow(_bowCenter, aimDirection, 100f));
+				_gameManager.AddGameObject(new Arrow(_bowCenter, aimDirection, 350f));
 				_shotCooldownTimer = _shotCooldownDuration;
 			}
 
