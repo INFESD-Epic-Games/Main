@@ -19,11 +19,12 @@ namespace SpellFall
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
-            _graphics.IsFullScreen = false;
+            _graphics.IsFullScreen = true;
+            _graphics.PreferredBackBufferWidth = 1920;
+            _graphics.PreferredBackBufferHeight = 1080;
+            _graphics.ApplyChanges();
 
             // Set the size of the screen
-            _graphics.PreferredBackBufferWidth = 2000;
-            _graphics.PreferredBackBufferHeight = 1200;
             
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
