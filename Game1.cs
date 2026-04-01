@@ -6,6 +6,7 @@ using SpellFall.Collision;
 using SpellFall.Character;
 using Microsoft.Xna.Framework.Content;
 using SpellFall.Weapons;
+using SpellFall.Enemies;
 
 namespace SpellFall
 {
@@ -19,10 +20,11 @@ namespace SpellFall
         {
             _graphics = new GraphicsDeviceManager(this);
             _graphics.IsFullScreen = true;
+            _graphics.PreferredBackBufferWidth = 1920;
+            _graphics.PreferredBackBufferHeight = 1080;
+            _graphics.ApplyChanges();
 
             // Set the size of the screen
-            _graphics.PreferredBackBufferWidth = 2000;
-            _graphics.PreferredBackBufferHeight = 1200;
             
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
@@ -43,6 +45,27 @@ namespace SpellFall
             _gameManager.Initialize(Content, this, player);
             _gameManager.AddGameObject(player);
             _gameManager.AddGameObject(startingWeapon);
+
+            // Dit is puur voor testen, en ben er niet trots op.
+            Vector2 playerCenter = player.GetPosition().Center.ToVector2();
+            for (int i = 0; i < 4; i++)
+            {
+                Vector2 offset;
+                float distance;
+
+                do
+                {
+                    float x = _gameManager.RNG.Next(-800, 800);
+                    float y = _gameManager.RNG.Next(-800, 800);
+                    offset = new Vector2(x, y);
+                    distance = offset.Length();
+                }
+                while (distance < 600f || distance > 800f);
+
+                Point spawnPoint = (playerCenter + offset).ToPoint();
+
+                _gameManager.AddGameObject(new Alien(spawnPoint));
+            }
         }
 
         protected override void LoadContent()
