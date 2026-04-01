@@ -10,8 +10,8 @@ namespace SpellFall.Enemies
     public class Alien : GameObject
     {
         private const float MoveSpeed = 40f;
-        private const float AlienScale = 1.2f;
-        private const float HitboxScale = 0.6f;
+        private const float AlienScale = 0.67f;
+        private const float HitboxScale = 0.420f;
 
         private readonly GameManager _gameManager;
         private readonly RectangleCollider _rectangleCollider;
@@ -30,7 +30,6 @@ namespace SpellFall.Enemies
         public override void Load(ContentManager content)
         {
             _texture = content.Load<Texture2D>("alien");
-
             UpdateCollider();
             base.Load(content);
         }
@@ -52,7 +51,6 @@ namespace SpellFall.Enemies
 
         public override void OnCollision(GameObject other)
         {
-            // dit moet nog veranderd worden, wanneer er meer wapens en projectiles zijn.
             if (other is Arrow)
             {
                 _gameManager.RemoveGameObject(this);
