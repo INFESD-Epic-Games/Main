@@ -12,7 +12,6 @@ namespace SpellFall.Character
     public class Player : GameObject
     {
         public RectangleCollider rectangleCollider { get; private set; }
-        private Texture2D _texture;
         private GameObject _equippedWeapon;
         float speed = 5f;
         Vector2 lastDirection = Vector2.UnitY;
@@ -24,12 +23,11 @@ namespace SpellFall.Character
 
         private HealthBar _healthBar;
         private const int _maxHealth = 100;
-        public int currentHealth = 100;
-
+        // public int currentHealth = 100;
         Vector2 position;
-        private float luck {get; set;} = 1f;
-        private Loot loot = new Loot();
-        private KeyboardState previousKeyboardState;
+        // private float luck {get; set;} = 1f;
+        // private Loot loot = new Loot();
+        // private KeyboardState previousKeyboardState;
 
         enum Direction
         {
@@ -44,8 +42,6 @@ namespace SpellFall.Character
         private float animationTimer = 0f;
         private float animationSpeed = 0.15f;
         private bool isMoving = false;
-        private int frameWidth = 64;
-        private int frameHeight = 64;
 
         private Texture2D walkNorth;
         private Texture2D walkSouth;
@@ -63,21 +59,21 @@ namespace SpellFall.Character
             _healthBar = new HealthBar(_maxHealth);
         }
 
-        // Placeholder player. Remove when updating
-        // public override void Load(ContentManager content)
-        // {
-        //     base.Load(content);
-        //     _texture = content.Load<Texture2D>("ship_body");
-        //     rectangleCollider.shape.Size = _texture.Bounds.Size;
-        //     rectangleCollider.shape.Location -= new Point(_texture.Bounds.Width / 2, _texture.Bounds.Height / 2);
-        //     walkNorth = content.Load<Texture2D>("Walk_north");
-        //     walkSouth = content.Load<Texture2D>("Walk_south");
-        //     walkEast  = content.Load<Texture2D>("Walk_east");
-        //     walkWest  = content.Load<Texture2D>("Walk_west");
+        public override void Load(ContentManager content)
+        {
+            base.Load(content);
+            walkNorth = content.Load<Texture2D>("Walk_north");
+            walkSouth = content.Load<Texture2D>("Walk_south");
+            walkEast  = content.Load<Texture2D>("Walk_east");
+            walkWest  = content.Load<Texture2D>("Walk_west");
 
-        //     currentTexture = walkSouth;
-        //    rectangleCollider.shape.Size = _texture.Bounds.Size;
-        // }
+            currentTexture = walkSouth;
+
+            int colliderWidth = currentTexture.Width / 4;
+            int colliderHeight = currentTexture.Height;
+            rectangleCollider.shape.Size = new Point(colliderWidth, colliderHeight);
+            rectangleCollider.shape.Location -= new Point(colliderWidth / 2, colliderHeight / 2);
+        }
 
         public override void HandleInput(InputManager inputManager)
         {
@@ -118,16 +114,63 @@ namespace SpellFall.Character
             }
 
 
-            if (_thrustInput != Vector2.Zero)
-            {
-                _thrustInput.Normalize();
-                lastDirection = _thrustInput;
+            isMoving = _thrustInput != Vector2.Zero;
 
-                position += _thrustInput * speed;
+            if (isMoving)
+            {
+                Vector2 inputDirection = _thrustInput;
+                inputDirection.Normalize();
+                lastDirection = inputDirection;
+
+                position += inputDirection * speed;
+
+                if (Math.Abs(inputDirection.X) > Math.Abs(inputDirection.Y))
+                {
+                    if (inputDirection.X > 0)
+                    {
+                        currentDirection = Direction.Right;
+                        currentTexture = walkEast;
+                    }
+                    else
+                    {
+                        currentDirection = Direction.Left;
+                        currentTexture = walkWest;
+                    }
+                }
+                else
+                {
+                    if (inputDirection.Y > 0)
+                    {
+                        currentDirection = Direction.Down;
+                        currentTexture = walkSouth;
+                    }
+                    else
+                    {
+                        currentDirection = Direction.Up;
+                        currentTexture = walkNorth;
+                    }
+                }
+
+                animationTimer += deltaTime;
+                if (animationTimer >= animationSpeed)
+                {
+                    currentFrame++;
+                    if (currentFrame >= 4)
+                        currentFrame = 0;
+
+                    animationTimer = 0f;
+                }
             }
+            else
+            {
+                currentFrame = 0;
+            }
+
+            int colliderWidth = currentTexture.Width / 4;
+            int colliderHeight = currentTexture.Height;
             rectangleCollider.shape.Location = new Point(
-                (int)(position.X - _texture.Width / 2),
-                (int)(position.Y - _texture.Height / 2)
+                (int)(position.X - colliderWidth / 2),
+                (int)(position.Y - colliderHeight / 2)
             );
 
             _healthBar.SetPosition(new Vector2(rectangleCollider.shape.X, rectangleCollider.shape.Y - 30));
@@ -159,7 +202,6 @@ namespace SpellFall.Character
                 0f
             );
             _healthBar.DrawHealthBar(spriteBatch);
-            spriteBatch.Draw(_texture, rectangleCollider.GetBoundingBox(), Color.White);
             base.Draw(gameTime, spriteBatch);
         }
 
@@ -182,76 +224,6 @@ namespace SpellFall.Character
                 : lastDirection;
 
             position += dashDirection * _dashDistance;
-
-            if (keyboardstate.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.A))
-                inputDirection.X -= 1;
-
-            if (keyboardstate.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.D))
-                inputDirection.X += 1;
-
-            // var current = Keyboard.GetState();
-
-            // if (current.IsKeyDown(Keys.T) && previousKeyboardState.IsKeyUp(Keys.T))
-            // {
-            //     var rarity = loot.GetRandomRarity(luck);
-            // }
-
-            // previousKeyboardState = current;
-
-            isMoving = inputDirection != Vector2.Zero;
-
-            if (isMoving)
-            {
-                inputDirection.Normalize();
-                position += inputDirection * speed;
-                if (Math.Abs(inputDirection.X) > Math.Abs(inputDirection.Y))
-                {
-                    if (inputDirection.X > 0)
-                    {
-                        currentDirection = Direction.Right;
-                        currentTexture = walkEast;
-                    }
-                    else
-                    {
-                        currentDirection = Direction.Left;
-                        currentTexture = walkWest;
-                    }
-                }
-                else
-                {
-                    if (inputDirection.Y > 0)
-                    {
-                        currentDirection = Direction.Down;
-                        currentTexture = walkSouth;
-                    }
-                    else
-                    {
-                        currentDirection = Direction.Up;
-                        currentTexture = walkNorth;
-                    }
-                }
-            }
-
-            animationTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
-
-            if (isMoving)
-            {
-                if (animationTimer >= animationSpeed)
-                {
-                    currentFrame++;
-                    if (currentFrame >= 4)
-                        currentFrame = 0;
-
-                    animationTimer = 0f;
-                }
-            }
-            else
-            {
-                currentFrame = 0;
-            }
-            rectangleCollider.shape.Location = position.ToPoint();
-
-            base.Update(gameTime);
             // Start cooldown
             _canDash = false;
             _dashTimer = _dashCooldown;
