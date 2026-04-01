@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using SpellFall.Items;
 using Microsoft.Xna.Framework.Input;
+using System;
 
 namespace SpellFall.Character
 {
@@ -19,6 +20,29 @@ namespace SpellFall.Character
         private Loot loot = new Loot();
         private KeyboardState previousKeyboardState;
 
+        enum Direction
+        {
+            Down,
+            Up,
+            Left,
+            Right
+        }
+
+        private Direction currentDirection = Direction.Down;
+        private int currentFrame = 0;
+        private float animationTimer = 0f;
+        private float animationSpeed = 0.15f;
+        private bool isMoving = false;
+        private int frameWidth = 64;
+        private int frameHeight = 64;
+
+        private Texture2D walkNorth;
+        private Texture2D walkSouth;
+        private Texture2D walkEast;
+        private Texture2D walkWest;
+
+        private Texture2D currentTexture;
+
         public Player(Point Position)
         {
             rectangleCollider = new RectangleCollider(new Rectangle(Position, Point.Zero));
@@ -31,13 +55,28 @@ namespace SpellFall.Character
         {
             base.Load(content);
             _texture = content.Load<Texture2D>("ship_body");
-           rectangleCollider.shape.Size = _texture.Bounds.Size;
-           rectangleCollider.shape.Location -= new Point(_texture.Bounds.Width / 2, _texture.Bounds.Height / 2);
+            rectangleCollider.shape.Size = _texture.Bounds.Size;
+            rectangleCollider.shape.Location -= new Point(_texture.Bounds.Width / 2, _texture.Bounds.Height / 2);
+            walkNorth = content.Load<Texture2D>("Walk North");
+            walkSouth = content.Load<Texture2D>("Walk South");
+            walkEast  = content.Load<Texture2D>("Walk East");
+            walkWest  = content.Load<Texture2D>("Walk West");
+
+            currentTexture = walkSouth;
         }
 
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(_texture, rectangleCollider.GetBoundingBox(), Color.White);
+            int frameWidth = currentTexture.Width / 2; 
+            int frameHeight = currentTexture.Height;
+
+            Rectangle sourceRect = new Rectangle(
+                currentFrame * frameWidth,
+                0,
+                frameWidth,
+                frameHeight
+            );
+            spriteBatch.Draw(currentTexture, position, sourceRect, Color.White);
             base.Draw(gameTime, spriteBatch);
         }
 
@@ -76,13 +115,55 @@ namespace SpellFall.Character
 
             // previousKeyboardState = current;
 
-            if (inputDirection != Vector2.Zero)
-            {
-                inputDirection.Normalize();
+            isMoving = inputDirection != Vector2.Zero;
 
-                position += inputDirection * speed;
+            if (isMoving)
+            {
+                if (Math.Abs(inputDirection.X) > Math.Abs(inputDirection.Y))
+                {
+                    if (inputDirection.X > 0)
+                    {
+                        currentDirection = Direction.Right;
+                        currentTexture = walkEast;
+                    }
+                    else
+                    {
+                        currentDirection = Direction.Left;
+                        currentTexture = walkWest;
+                    }
+                }
+                else
+                {
+                    if (inputDirection.Y > 0)
+                    {
+                        currentDirection = Direction.Down;
+                        currentTexture = walkSouth;
+                    }
+                    else
+                    {
+                        currentDirection = Direction.Up;
+                        currentTexture = walkNorth;
+                    }
+                }
             }
 
+            animationTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            if (isMoving)
+            {
+                if (animationTimer >= animationSpeed)
+                {
+                    currentFrame++;
+                    if (currentFrame >= 2)
+                        currentFrame = 0;
+
+                    animationTimer = 0f;
+                }
+            }
+            else
+            {
+                currentFrame = 0;
+            }
             rectangleCollider.shape.Location = position.ToPoint();
 
             base.Update(gameTime);
