@@ -57,17 +57,17 @@ namespace SpellFall.Character
             _texture = content.Load<Texture2D>("ship_body");
             rectangleCollider.shape.Size = _texture.Bounds.Size;
             rectangleCollider.shape.Location -= new Point(_texture.Bounds.Width / 2, _texture.Bounds.Height / 2);
-            walkNorth = content.Load<Texture2D>("Walk North");
-            walkSouth = content.Load<Texture2D>("Walk South");
-            walkEast  = content.Load<Texture2D>("Walk East");
-            walkWest  = content.Load<Texture2D>("Walk West");
+            walkNorth = content.Load<Texture2D>("Walk_north");
+            walkSouth = content.Load<Texture2D>("Walk_south");
+            walkEast  = content.Load<Texture2D>("Walk_east");
+            walkWest  = content.Load<Texture2D>("Walk_west");
 
             currentTexture = walkSouth;
         }
 
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            int frameWidth = currentTexture.Width / 2; 
+            int frameWidth = currentTexture.Width / 4; 
             int frameHeight = currentTexture.Height;
 
             Rectangle sourceRect = new Rectangle(
@@ -76,7 +76,18 @@ namespace SpellFall.Character
                 frameWidth,
                 frameHeight
             );
-            spriteBatch.Draw(currentTexture, position, sourceRect, Color.White);
+            Vector2 origin = new Vector2(frameWidth / 2f, frameHeight / 2f);
+            spriteBatch.Draw(
+                currentTexture,
+                position,
+                sourceRect,
+                Color.White,
+                0f,
+                origin,
+                0.5f,
+                SpriteEffects.None,
+                0f
+            );
             base.Draw(gameTime, spriteBatch);
         }
 
@@ -119,6 +130,8 @@ namespace SpellFall.Character
 
             if (isMoving)
             {
+                inputDirection.Normalize();
+                position += inputDirection * speed;
                 if (Math.Abs(inputDirection.X) > Math.Abs(inputDirection.Y))
                 {
                     if (inputDirection.X > 0)
@@ -154,7 +167,7 @@ namespace SpellFall.Character
                 if (animationTimer >= animationSpeed)
                 {
                     currentFrame++;
-                    if (currentFrame >= 2)
+                    if (currentFrame >= 4)
                         currentFrame = 0;
 
                     animationTimer = 0f;
