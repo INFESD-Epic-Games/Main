@@ -21,6 +21,10 @@ namespace SpellFall.Character
         private float _dashTimer = 0f;
         private bool _canDash = true;
 
+        private HealthBar _healthBar;
+        private const int _maxHealth = 100;
+        public int currentHealth = 100;
+
         Vector2 position;
 
         public Player(Point Position)
@@ -28,6 +32,8 @@ namespace SpellFall.Character
             rectangleCollider = new RectangleCollider(new Rectangle(Position, Point.Zero));
             position = Position.ToVector2();
             SetCollider(rectangleCollider);
+
+            _healthBar = new HealthBar(_maxHealth);
         }
 
         // Placeholder player. Remove when updating
@@ -50,6 +56,11 @@ namespace SpellFall.Character
                 _thrustInput.X -= 1;
             if (inputManager.IsKeyDown(Keys.D))
                 _thrustInput.X += 1;
+            
+            // Temporary damage input for testing health bar
+            // TODO: Remove when implementing actual damage sources
+            if (inputManager.IsKeyPress(Keys.Down))
+                _healthBar.TakeDamage(10);
             
             if(inputManager.IsKeyPress(Keys.Space))
                 Dash();
@@ -83,11 +94,15 @@ namespace SpellFall.Character
                 (int)(position.X - _texture.Width / 2),
                 (int)(position.Y - _texture.Height / 2)
             );
+
+            _healthBar.SetPosition(new Vector2(rectangleCollider.shape.X, rectangleCollider.shape.Y - 30));
+            _healthBar.Update(gameTime);
             base.Update(gameTime);
         }
 
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
+            _healthBar.DrawHealthBar(spriteBatch);
             spriteBatch.Draw(_texture, rectangleCollider.GetBoundingBox(), Color.White);
             base.Draw(gameTime, spriteBatch);
         }
