@@ -1,12 +1,15 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Linq;
+using Gum.Forms;
+using Gum.Wireframe;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using MonoGameGum;
 using SpellFall.Engine;
-using SpellFall.Collision;
 using SpellFall.Character;
-using Microsoft.Xna.Framework.Content;
 using SpellFall.Weapons;
 using SpellFall.Enemies;
+using SpellFall.UI;
 
 namespace SpellFall
 {
@@ -15,16 +18,20 @@ namespace SpellFall
         private SpriteBatch _spriteBatch;
         private static GraphicsDeviceManager _graphics;
         private GameManager _gameManager;
+        
+        private readonly MainMenu _mainMenu = new MainMenu();
+        private readonly Settings _settings = new Settings();
+        
+        GumService GumUI => GumService.Default;
 
         public Game1()
         {
+            DisplayMode mode = Settings.Resolutions.Last();
+            
             _graphics = new GraphicsDeviceManager(this);
-            _graphics.IsFullScreen = true;
-            _graphics.PreferredBackBufferWidth = 1920;
-            _graphics.PreferredBackBufferHeight = 1080;
+            _graphics.PreferredBackBufferWidth = mode.Width;
+            _graphics.PreferredBackBufferHeight = mode.Height;
             _graphics.ApplyChanges();
-
-            // Set the size of the screen
             
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
@@ -32,10 +39,59 @@ namespace SpellFall
 
         protected override void Initialize()
         {
-            //Initialize the GameManager
+            // Initialize the GameManager
             _gameManager = GameManager.GetGameManager();
+            
+            // Initialize the UI
+            GumUI.Initialize(this, DefaultVisualsVersion.Newest);
+            InitializeInterface();
+            
             base.Initialize();
+            
+        }
 
+        protected void InitializeInterface()
+        {
+            _mainMenu.CreatePanel();
+            _mainMenu.NewGameClicked += () =>
+            {
+                GameState.InMainMenu = false;
+                _mainMenu.IsVisible = false;
+                InitializeGame();
+            };
+            _mainMenu.QuitClicked += Exit;
+            _mainMenu.SettingsClicked += () =>
+            {
+                _mainMenu.IsVisible = false;
+                _settings.IsVisible = true;
+            };
+
+            _settings.CreatePanel();
+            _settings.IsVisible = false;
+            _settings.ResolutionChanged += (res) =>
+            {
+                _graphics.PreferredBackBufferWidth = res.Width;
+                _graphics.PreferredBackBufferHeight = res.Height;
+                GraphicalUiElement.CanvasWidth = res.Width;
+                GraphicalUiElement.CanvasHeight = res.Height;
+                _graphics.ApplyChanges();
+            };
+            _settings.FullscreenChanged += (fullscreen) =>
+            {
+                _graphics.IsFullScreen = fullscreen;
+                GraphicalUiElement.CanvasWidth = _graphics.PreferredBackBufferWidth;
+                GraphicalUiElement.CanvasHeight = _graphics.PreferredBackBufferHeight;
+                _graphics.ApplyChanges();
+            };
+            _settings.ReturnClicked += () =>
+            {
+                _settings.IsVisible = false;
+                _mainMenu.IsVisible = true;
+            };
+        }
+
+        protected void InitializeGame()
+        {
             // Place the player at the center of the screen
             Player player = new Player(new Point(GraphicsDevice.Viewport.Width/2 - 100, GraphicsDevice.Viewport.Height/2 - 100));
             StartingWeapon startingWeapon = new StartingWeapon();
@@ -78,6 +134,8 @@ namespace SpellFall
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
+            
+            GumUI.Update(gameTime);
             _gameManager.Update(gameTime);
             base.Update(gameTime);
         }
@@ -85,8 +143,8 @@ namespace SpellFall
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.Black);
+            GumUI.Draw();
             _gameManager.Draw(gameTime, _spriteBatch);
-
             base.Draw(gameTime);
         }
 

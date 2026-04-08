@@ -78,8 +78,10 @@ namespace SpellFall.Engine
             
         }
         
-        public void Update(GameTime gameTime) 
+        public void Update(GameTime gameTime)
         {
+            if (GameState.InMainMenu) return;
+            
             InputManager.Update();
 
             // Handle input
