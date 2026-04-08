@@ -6,28 +6,25 @@ using SpellFall.Collision;
 using SpellFall.Engine;
 using SpellFall.Weapons.Projectiles;
 using SpellFall.Items;
+using SpellFall.Character;
 
 namespace SpellFall.Enemies
 {
     public class Alien : GameObject
     {
         private const float MoveSpeed = 40f;
-        private const float AlienScale = 1.2f;
-        private const float HitboxScale = 0.6f;
-        private float luck {get; set;} = 1f;
+        private const float AlienScale = 0.5f;
+        private const float HitboxScale = 0.4f;
 
         private readonly GameManager _gameManager;
         private readonly RectangleCollider _rectangleCollider;
 
         private Texture2D _texture;
         private Vector2 _position;
-<<<<<<< Updated upstream
         private Random Randomnum = new Random();
         private Loot loot = new Loot();
-=======
         private int _frameWidth;
         private int _frameHeight;
->>>>>>> Stashed changes
 
         public Alien(Point startPosition)
         {
@@ -66,7 +63,7 @@ namespace SpellFall.Enemies
             int rng = Randomnum.Next(0,100);
             if (rng >= 90)
             {
-                loot.GetRandomRarity(luck);
+                loot.GetRandomRarity(_gameManager.Player.Stats.Luck);
             }
         }
 

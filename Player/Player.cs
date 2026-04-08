@@ -14,7 +14,6 @@ namespace SpellFall.Character
         private const float PlayerScale = 0.5f;
         public RectangleCollider rectangleCollider { get; private set; }
         private GameObject _equippedWeapon;
-        float speed = 5f;
         Vector2 lastDirection = Vector2.UnitY;
         private Vector2 _thrustInput = Vector2.Zero;
         private const int _dashDistance = 200;
@@ -23,22 +22,13 @@ namespace SpellFall.Character
         private bool _canDash = true;
 
         private HealthBar _healthBar;
-        private const int _maxHealth = 100;
+        public PlayerStats Stats { get; }
         // public int currentHealth = 100;
         Vector2 position;
         // private float luck {get; set;} = 1f;
         // private Loot loot = new Loot();
         // private KeyboardState previousKeyboardState;
 
-        enum Direction
-        {
-            Down,
-            Up,
-            Left,
-            Right
-        }
-
-        private Direction currentDirection = Direction.Down;
         private int currentFrame = 0;
         private float animationTimer = 0f;
         private float animationSpeed = 0.15f;
@@ -53,11 +43,12 @@ namespace SpellFall.Character
 
         public Player(Point Position)
         {
+            Stats = new PlayerStats();
             rectangleCollider = new RectangleCollider(new Rectangle(Position, Point.Zero));
             position = Position.ToVector2();
             SetCollider(rectangleCollider);
 
-            _healthBar = new HealthBar(_maxHealth);
+            _healthBar = new HealthBar(Stats);
         }
 
         public override void Load(ContentManager content)
@@ -123,18 +114,16 @@ namespace SpellFall.Character
                 inputDirection.Normalize();
                 lastDirection = inputDirection;
 
-                position += inputDirection * speed;
+                position += inputDirection * Stats.Speed;
 
                 if (Math.Abs(inputDirection.X) > Math.Abs(inputDirection.Y))
                 {
                     if (inputDirection.X > 0)
                     {
-                        currentDirection = Direction.Right;
                         currentTexture = walkEast;
                     }
                     else
                     {
-                        currentDirection = Direction.Left;
                         currentTexture = walkWest;
                     }
                 }
@@ -142,12 +131,10 @@ namespace SpellFall.Character
                 {
                     if (inputDirection.Y > 0)
                     {
-                        currentDirection = Direction.Down;
                         currentTexture = walkSouth;
                     }
                     else
                     {
-                        currentDirection = Direction.Up;
                         currentTexture = walkNorth;
                     }
                 }
