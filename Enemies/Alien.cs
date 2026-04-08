@@ -7,6 +7,7 @@ using SpellFall.Engine;
 using SpellFall.Weapons.Projectiles;
 using SpellFall.Items;
 using SpellFall.Character;
+using SpellFall.Quests;
 
 namespace SpellFall.Enemies
 {
@@ -72,6 +73,7 @@ namespace SpellFall.Enemies
             if (other is Arrow)
             {
                 _gameManager.RemoveGameObject(this);
+                _gameManager.QuestManager.AddProgress("KillAliens", 1);
                 RandomDropchance();
             }
 

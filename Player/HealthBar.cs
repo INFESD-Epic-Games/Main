@@ -39,6 +39,16 @@ namespace SpellFall.Character
             _regenTimer = 0f; // Reset regen timer so it waits again
             _regenBuffer = 0f;
         }
+        public void IncreaseMaxHealth(int amount)
+        {
+            maxHealth += amount;
+
+            _currentHealth += amount;
+
+            if (_currentHealth > maxHealth)
+                _currentHealth = maxHealth;
+        }
+        
         public override void Update(GameTime gameTime)
         {
             float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
