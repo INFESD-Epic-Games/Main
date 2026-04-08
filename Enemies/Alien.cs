@@ -21,8 +21,13 @@ namespace SpellFall.Enemies
 
         private Texture2D _texture;
         private Vector2 _position;
+<<<<<<< Updated upstream
         private Random Randomnum = new Random();
         private Loot loot = new Loot();
+=======
+        private int _frameWidth;
+        private int _frameHeight;
+>>>>>>> Stashed changes
 
         public Alien(Point startPosition)
         {
@@ -35,6 +40,8 @@ namespace SpellFall.Enemies
         public override void Load(ContentManager content)
         {
             _texture = content.Load<Texture2D>("alien");
+            _frameWidth = _texture.Width / 4;
+            _frameHeight = _texture.Height;
             UpdateCollider();
             base.Load(content);
         }
@@ -77,10 +84,8 @@ namespace SpellFall.Enemies
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
             int frameIndex = GetFrameIndex(_gameManager.Player.GetPosition().Center.ToVector2());
-            int frameWidth = _texture.Width / 4;
-            int frameHeight = _texture.Height;
-            Rectangle sourceRectangle = new Rectangle(frameIndex * frameWidth, 0, frameWidth, frameHeight);
-            Vector2 origin = new Vector2(frameWidth / 2f, frameHeight / 2f);
+            Rectangle sourceRectangle = new Rectangle(frameIndex * _frameWidth, 0, _frameWidth, _frameHeight);
+            Vector2 origin = new Vector2(_frameWidth / 2f, _frameHeight / 2f);
 
             spriteBatch.Draw(
                 _texture,
@@ -121,11 +126,8 @@ namespace SpellFall.Enemies
 
         private void UpdateCollider()
         {
-            int frameWidth = _texture == null ? 0 : _texture.Width / 4;
-            int frameHeight = _texture == null ? 0 : _texture.Height;
-
-            int colliderWidth = (int)(frameWidth * AlienScale * HitboxScale);
-            int colliderHeight = (int)(frameHeight * AlienScale * HitboxScale);
+            int colliderWidth = (int)(_frameWidth * AlienScale * HitboxScale);
+            int colliderHeight = (int)(_frameHeight * AlienScale * HitboxScale);
             Point colliderLocation = (_position - new Vector2(colliderWidth / 2f, colliderHeight / 2f)).ToPoint();
 
             _rectangleCollider.shape = new Rectangle(colliderLocation, new Point(colliderWidth, colliderHeight));
