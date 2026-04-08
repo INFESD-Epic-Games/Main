@@ -13,6 +13,7 @@ using SpellFall.UI;
 using SpellFall.Quests;
 using SpellFall.Npcs;
 using SpellFall.Character;
+using SpellFall.Background;
 
 namespace SpellFall
 {
@@ -118,6 +119,7 @@ namespace SpellFall
 
             // Add the starting objects to the GameManager
             _gameManager.Initialize(Content, this, player);
+            _gameManager.AddGameObject(new Map());
             _gameManager.AddGameObject(player);
             _gameManager.AddGameObject(startingWeapon);
 
