@@ -31,6 +31,11 @@ namespace SpellFall.Character
 
         public void TakeDamage(int damage)
         {
+            if (damage <= 0)
+            {
+                return;
+            }
+
             _currentHealth -= damage;
             if (_currentHealth < 0)
                 _currentHealth = 0;
@@ -39,14 +44,17 @@ namespace SpellFall.Character
             _regenTimer = 0f; // Reset regen timer so it waits again
             _regenBuffer = 0f;
         }
+        
         public void IncreaseMaxHealth(int amount)
         {
-            maxHealth += amount;
+            if (amount <= 0)
+            {
+                return;
+            }
 
-            _currentHealth += amount;
-
-            if (_currentHealth > maxHealth)
-                _currentHealth = maxHealth;
+            _playerStats.IncreaseMaxHealth(amount);
+            maxHealth = _playerStats.MaxHealth;
+            _currentHealth = _playerStats.CurrentHealth;
         }
         
         public override void Update(GameTime gameTime)
@@ -90,12 +98,11 @@ namespace SpellFall.Character
 
             int barWidth = 200;
             int barHeight = 20;
-
             float healthPercentage = (float)currentHealth / maxHealth;
 
             Vector2 barPosition = new Vector2(
                 _ownerBounds.Center.X - (barWidth / 2f),
-                _ownerBounds.Y + 150 // als jullie dit te hoog of te laag vinden, pas het aan of een betere berekening gebruiken ik heb geen idee
+                _ownerBounds.Y - barHeight - 8
             );
 
             // Background

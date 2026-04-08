@@ -19,5 +19,20 @@ namespace SpellFall.Character
         {
             CurrentHealth = MaxHealth;
         }
+
+        public void IncreaseMaxHealth(int amount)
+        {
+            if (amount <= 0)
+            {
+                return;
+            }
+
+            MaxHealth += amount;
+            CurrentHealth += amount;
+            if (CurrentHealth > MaxHealth)
+            {
+                CurrentHealth = MaxHealth;
+            }
+        }
     }
 }

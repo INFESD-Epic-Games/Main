@@ -1,3 +1,4 @@
+using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -18,14 +19,16 @@ namespace SpellFall.Weapons.Projectiles
         private readonly float _rotation;
         private readonly float _maxLifetime;
         private float _lifetime;
+        public int Damage { get; }
 
-        public Arrow(Vector2 location, Vector2 direction, float speed, float maxLifetime = 10f)
+        public Arrow(Vector2 location, Vector2 direction, float speed, int damage, float maxLifetime = 10f)
         {
             _gameManager = GameManager.GetGameManager();
             _circleCollider = new CircleCollider(location, 8f);
             SetCollider(_circleCollider);
             _velocity = direction * speed;
             _rotation = LinePieceCollider.GetAngle(direction);
+            Damage = Math.Max(0, damage);
             _maxLifetime = maxLifetime;
             _lifetime = 0f;
         }

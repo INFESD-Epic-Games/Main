@@ -10,13 +10,14 @@ namespace SpellFall.Weapons
 	public class StartingWeapon : GameObject
 	{
 		private const float BowScale = 0.45f;
+		private const int WeaponDamage = 5;
 		private readonly GameManager _gameManager;
 
 		private Texture2D _bowTexture;
 		private Point _target;
 		private Vector2 _bowCenter;
 
-		private readonly float _shotCooldownDuration = 0.2f;
+		private readonly float _shotCooldownDuration = 0.6f;
 		private float _shotCooldownTimer;
 
 		public StartingWeapon()
@@ -43,7 +44,8 @@ namespace SpellFall.Weapons
 			{
 				Rectangle playerRect = _gameManager.Player.GetPosition();
 				Vector2 aimDirection = LinePieceCollider.GetDirection(playerRect.Center, _target);
-				_gameManager.AddGameObject(new Arrow(_bowCenter, aimDirection, 350f));
+				int totalDamage = _gameManager.Player.Stats.Damage + WeaponDamage;
+				_gameManager.AddGameObject(new Arrow(_bowCenter, aimDirection, 350f, totalDamage));
 				_shotCooldownTimer = _shotCooldownDuration;
 			}
 

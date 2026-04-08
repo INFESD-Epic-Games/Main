@@ -12,16 +12,19 @@ namespace SpellFall.Character
     public class Player : GameObject
     {
         private const float PlayerScale = 0.5f;
+        private const float ColliderWidthScale = 0.55f;
+        private const float ColliderHeightScale = 0.75f;
         public RectangleCollider rectangleCollider { get; private set; }
         private GameObject _equippedWeapon;
         Vector2 lastDirection = Vector2.UnitY;
         private Vector2 _thrustInput = Vector2.Zero;
+        private Vector2 _previousPosition;
         private const int _dashDistance = 200;
         private float _dashCooldown = 5f; // seconds
         private float _dashTimer = 0f;
         private bool _canDash = true;
-
         private HealthBar _healthBar;
+        public HealthBar HealthBar => _healthBar;
         public PlayerStats Stats { get; }
         // public int currentHealth = 100;
         Vector2 position;
@@ -60,11 +63,7 @@ namespace SpellFall.Character
             walkWest  = content.Load<Texture2D>("Walk_west");
 
             currentTexture = walkSouth;
-
-            int colliderWidth = currentTexture.Width / 4;
-            int colliderHeight = currentTexture.Height;
-            rectangleCollider.shape.Size = new Point(colliderWidth, colliderHeight);
-            rectangleCollider.shape.Location -= new Point(colliderWidth / 2, colliderHeight / 2);
+            UpdateCollider();
         }
 
         public override void HandleInput(InputManager inputManager)
@@ -83,7 +82,7 @@ namespace SpellFall.Character
             // Temporary damage input for testing health bar
             // TODO: Remove when implementing actual damage sources
             if (inputManager.IsKeyPress(Keys.Down))
-                HealthBar.TakeDamage(10);
+                _healthBar.TakeDamage(10);
             
             if(inputManager.IsKeyPress(Keys.Space))
                 Dash();
@@ -95,6 +94,7 @@ namespace SpellFall.Character
         public override void Update(GameTime gameTime)
         {
             float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            _previousPosition = position;
             // Update cooldown timer
             if (!_canDash)
             {
@@ -154,16 +154,23 @@ namespace SpellFall.Character
                 currentFrame = 0;
             }
 
-            int colliderWidth = currentTexture.Width / 4;
-            int colliderHeight = currentTexture.Height;
-            rectangleCollider.shape.Location = new Point(
-                (int)(position.X - colliderWidth / 2),
-                (int)(position.Y - colliderHeight / 2)
-            );
+            UpdateCollider();
 
-            HealthBar.SetPosition(rectangleCollider.shape);
-            HealthBar.Update(gameTime);
+            _healthBar.SetPosition(GetVisualBounds());
+            _healthBar.Update(gameTime);
             base.Update(gameTime);
+        }
+
+        public override void OnCollision(GameObject other)
+        {
+            if (other is Enemies.AlienSpawner)
+            {
+                position = _previousPosition;
+                UpdateCollider();
+                _healthBar.SetPosition(GetVisualBounds());
+            }
+
+            base.OnCollision(other);
         }
 
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
@@ -189,7 +196,7 @@ namespace SpellFall.Character
                 SpriteEffects.None,
                 0f
             );
-            HealthBar.DrawHealthBar(spriteBatch);
+            _healthBar.DrawHealthBar(spriteBatch);
             base.Draw(gameTime, spriteBatch);
         }
 
@@ -199,12 +206,7 @@ namespace SpellFall.Character
         }
 
         // Gets the box the game uses to draw the player sprite on screen.
-        public Rectangle GetVisualBounds() => new Rectangle(
-            (int)(position.X - (currentTexture.Width / 8f) * PlayerScale),
-            (int)(position.Y - (currentTexture.Height / 2f) * PlayerScale),
-            (int)((currentTexture.Width / 4f) * PlayerScale),
-            (int)(currentTexture.Height * PlayerScale)
-        );
+        public Rectangle GetVisualBounds() => GetSpriteBounds();
 
         public void EquipWeapon(GameObject weapon)
         {
@@ -224,6 +226,33 @@ namespace SpellFall.Character
             // Start cooldown
             _canDash = false;
             _dashTimer = _dashCooldown;
+        }
+
+        private Rectangle GetSpriteBounds()
+        {
+            int frameWidth = currentTexture.Width / 4;
+            int frameHeight = currentTexture.Height;
+            int scaledWidth = (int)(frameWidth * PlayerScale);
+            int scaledHeight = (int)(frameHeight * PlayerScale);
+
+            return new Rectangle(
+                (int)(position.X - scaledWidth / 2f),
+                (int)(position.Y - scaledHeight / 2f),
+                scaledWidth,
+                scaledHeight);
+        }
+
+        private void UpdateCollider()
+        {
+            Rectangle spriteBounds = GetSpriteBounds();
+            int colliderWidth = (int)(spriteBounds.Width * ColliderWidthScale);
+            int colliderHeight = (int)(spriteBounds.Height * ColliderHeightScale);
+
+            rectangleCollider.shape = new Rectangle(
+                spriteBounds.Center.X - colliderWidth / 2,
+                spriteBounds.Center.Y - colliderHeight / 2,
+                colliderWidth,
+                colliderHeight);
         }
     }
 }

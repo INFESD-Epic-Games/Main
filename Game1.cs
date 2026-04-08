@@ -12,7 +12,6 @@ using SpellFall.Enemies;
 using SpellFall.UI;
 using SpellFall.Quests;
 using SpellFall.Npcs;
-using SpellFall.Character;
 using SpellFall.Background;
 
 namespace SpellFall
@@ -123,26 +122,10 @@ namespace SpellFall
             _gameManager.AddGameObject(player);
             _gameManager.AddGameObject(startingWeapon);
 
-            // Dit is puur voor testen, en ben er niet trots op.
-            Vector2 playerCenter = player.GetPosition().Center.ToVector2();
-            for (int i = 0; i < 4; i++)
-            {
-                Vector2 offset;
-                float distance;
-
-                do
-                {
-                    float x = _gameManager.RNG.Next(-800, 800);
-                    float y = _gameManager.RNG.Next(-800, 800);
-                    offset = new Vector2(x, y);
-                    distance = offset.Length();
-                }
-                while (distance < 600f || distance > 800f);
-
-                Point spawnPoint = (playerCenter + offset).ToPoint();
-
-                _gameManager.AddGameObject(new Alien(spawnPoint));
-            }
+            Point spawnerPosition = new Point(
+                player.GetPosition().Center.X + 420,
+                player.GetPosition().Center.Y - 180);
+            _gameManager.AddGameObject(new AlienSpawner(spawnerPosition));
         }
 
         protected override void LoadContent()
