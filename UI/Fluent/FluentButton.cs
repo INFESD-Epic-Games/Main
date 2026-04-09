@@ -21,7 +21,6 @@ public class FluentButton : Button
 
     public FluentButton(Texture2D texture)
     {
-        // 1. Initialize NineSlice Background
         _background = new NineSliceRuntime
         {
             IsEnabled = true,
@@ -33,7 +32,6 @@ public class FluentButton : Button
             TextureTop = 0,
         };
 
-        // 2. Initialize Text Element
         _textElement = new TextRuntime
         {
             HasEvents = false,
