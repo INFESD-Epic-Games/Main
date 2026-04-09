@@ -11,6 +11,11 @@ namespace SpellFall.UI.Fluent;
 
 public class FluentButton : Button
 {
+    private readonly int _baseWidth;
+    private readonly int _baseHeight;
+    private float _baseFontScale;
+    private float _hoverScaleMultiplier;
+    
     private readonly NineSliceRuntime _background;
     private readonly TextRuntime _textElement;
 
@@ -43,12 +48,27 @@ public class FluentButton : Button
 
         _background.Children.Add(_textElement);
         Visual = _background;
+        
+        _baseWidth = 128;
+        _baseHeight = 40;
+        _baseFontScale = 1.0f;
+        _hoverScaleMultiplier = 1.05f;
+        
+        Width = _baseWidth;
+        Height = _baseHeight;
 
-        Width = 128;
-        Height = 40;
-
-        GotFocus += (_, _) => _background.Color = new Color(220, 220, 220);
-        LostFocus += (_, _) => _background.Color = Color.White;
+        Visual.RollOver += (_, _) =>
+        {
+            Width = _baseWidth * _hoverScaleMultiplier;
+            Height = _baseHeight * _hoverScaleMultiplier;
+            _textElement.FontScale = _baseFontScale * _hoverScaleMultiplier;
+        };
+        Visual.RollOff += (_, _) =>
+        {
+            Width = _baseWidth;
+            Height = _baseHeight;
+            _textElement.FontScale = _baseFontScale;
+        };
         Push += (_, _) => _background.Color = Color.Gray;
         Click += (_, _) => _background.Color = Color.White;
     }
@@ -65,7 +85,10 @@ public class FluentButton : Button
     public FluentButton WithFont(string fontName, float scaling = 0.375f)
     {
         _textElement.UseCustomFont = true;
+        
+        _baseFontScale = scaling;
         _textElement.FontScale = scaling;
+        
         _textElement.CustomFontFile = fontName; 
     
         return this;

@@ -1,4 +1,5 @@
 using System;
+using System.Drawing;
 using Gum.Forms.Controls;
 using Gum.Wireframe;
 using Microsoft.Xna.Framework;
@@ -31,7 +32,7 @@ public class MainMenu
 
     public void CreatePanel(ContentManager content)
     {
-        Texture2D buttonTexture = content.Load<Texture2D>("ui_test2");
+        Texture2D buttonTexture = content.Load<Texture2D>("brown");
         
         _panel = new Panel();
         _panel.Dock(Dock.Fill);
