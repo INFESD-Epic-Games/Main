@@ -1,4 +1,4 @@
-Assets used for characters from: 
+Assets used for characters from Twitter accounts: 
     Gif (@gif_not_jif)
 	Noiracide (@Noiracide)
 	Romi (@DessRomaric)
