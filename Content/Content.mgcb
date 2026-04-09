@@ -37,7 +37,7 @@
 /processorParam:TextureFormat=Color
 /build:BOOG.png
 
-#begin brown.png
+#begin Npc Yellow.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -47,7 +47,7 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:brown.png;ui_test2.png
+/build:Npc Yellow.png
 
 #begin PIJL.png
 /importer:TextureImporter
@@ -73,11 +73,17 @@
 /processorParam:TextureFormat=Color
 /build:ship_body.png
 
-#begin Test.fnt
-/copy:Test.fnt
-
-#begin Test.png
-/copy:Test.png
+#begin TX Tileset Grass.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:TX Tileset Grass.png
 
 #begin Walk_east.png
 /importer:TextureImporter
@@ -126,16 +132,4 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:Walk_west.png
-
-#begin white.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:white.png;ui_test.png
 

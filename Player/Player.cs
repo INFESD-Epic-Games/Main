@@ -22,7 +22,7 @@ namespace SpellFall.Character
         private float _dashTimer = 0f;
         private bool _canDash = true;
 
-        private HealthBar _healthBar;
+        public HealthBar HealthBar { get; private set; }
         private const int _maxHealth = 100;
         // public int currentHealth = 100;
         Vector2 position;
@@ -57,7 +57,7 @@ namespace SpellFall.Character
             position = Position.ToVector2();
             SetCollider(rectangleCollider);
 
-            _healthBar = new HealthBar(_maxHealth);
+            HealthBar = new HealthBar(_maxHealth);
         }
 
         public override void Load(ContentManager content)
@@ -92,7 +92,7 @@ namespace SpellFall.Character
             // Temporary damage input for testing health bar
             // TODO: Remove when implementing actual damage sources
             if (inputManager.IsKeyPress(Keys.Down))
-                _healthBar.TakeDamage(10);
+                HealthBar.TakeDamage(10);
             
             if(inputManager.IsKeyPress(Keys.Space))
                 Dash();
@@ -174,8 +174,8 @@ namespace SpellFall.Character
                 (int)(position.Y - colliderHeight / 2)
             );
 
-            _healthBar.SetPosition(rectangleCollider.shape);
-            _healthBar.Update(gameTime);
+            HealthBar.SetPosition(rectangleCollider.shape);
+            HealthBar.Update(gameTime);
             base.Update(gameTime);
         }
 
@@ -202,7 +202,7 @@ namespace SpellFall.Character
                 SpriteEffects.None,
                 0f
             );
-            _healthBar.DrawHealthBar(spriteBatch);
+            HealthBar.DrawHealthBar(spriteBatch);
             base.Draw(gameTime, spriteBatch);
         }
 

@@ -11,6 +11,10 @@ using SpellFall.Character;
 using SpellFall.Weapons;
 using SpellFall.Enemies; 
 using SpellFall.UI;
+using SpellFall.Quests;
+using SpellFall.Npcs;
+using SpellFall.Character;
+using SpellFall.Background;
 
 namespace SpellFall
 {
@@ -25,6 +29,8 @@ namespace SpellFall
         private readonly Settings _settings = new Settings();
         
         GumService GumUI => GumService.Default;
+        private Npc npc;
+        private QuestManager questManager;
 
         public Game1()
         {
@@ -98,8 +104,23 @@ namespace SpellFall
             StartingWeapon startingWeapon = new StartingWeapon();
             player.EquipWeapon(startingWeapon);
 
+            questManager = new QuestManager();
+
+            Point npcPosition = new Point(
+                player.GetPosition().Center.X + 200,
+                player.GetPosition().Center.Y
+            );
+
+            npc = new Npc(npcPosition);
+            npc.Initialize(questManager);
+            npc.SetPlayerHealthBar(player.HealthBar);
+
+            // Voeg toe aan game
+            _gameManager.AddGameObject(npc);
+
             // Add the starting objects to the GameManager
             _gameManager.Initialize(Content, this, player);
+            _gameManager.AddGameObject(new Map());
             _gameManager.AddGameObject(player);
             _gameManager.AddGameObject(startingWeapon);
 
@@ -133,6 +154,7 @@ namespace SpellFall
 
         protected override void Update(GameTime gameTime)
         {
+    
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
             

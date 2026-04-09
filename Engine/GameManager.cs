@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using SpellFall.Character;
+using SpellFall.Quests;
 
 namespace SpellFall.Engine
 {
@@ -21,6 +22,7 @@ namespace SpellFall.Engine
         public Player Player { get; private set; }
         public InputManager InputManager { get; private set; }
         public Game Game { get; private set; }
+        public QuestManager QuestManager { get; private set; }
 
         public static GameManager GetGameManager()
         {
@@ -43,6 +45,8 @@ namespace SpellFall.Engine
             Game = game;
             _content = content;
             Player = player;
+
+            QuestManager = new QuestManager();
         }
 
         public void Load(ContentManager content)
