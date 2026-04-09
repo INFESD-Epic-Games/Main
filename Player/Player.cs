@@ -59,8 +59,8 @@ namespace SpellFall.Character
             base.Load(content);
             walkNorth = content.Load<Texture2D>("Walk_north");
             walkSouth = content.Load<Texture2D>("Walk_south");
-            walkEast  = content.Load<Texture2D>("Walk_east");
-            walkWest  = content.Load<Texture2D>("Walk_west");
+            walkEast = content.Load<Texture2D>("Walk_east");
+            walkWest = content.Load<Texture2D>("Walk_west");
 
             currentTexture = walkSouth;
             UpdateCollider();
@@ -78,13 +78,13 @@ namespace SpellFall.Character
                 _thrustInput.X -= 1;
             if (inputManager.IsKeyDown(Keys.D))
                 _thrustInput.X += 1;
-            
+
             // Temporary damage input for testing health bar
             // TODO: Remove when implementing actual damage sources
             if (inputManager.IsKeyPress(Keys.Down))
                 _healthBar.TakeDamage(10);
-            
-            if(inputManager.IsKeyPress(Keys.Space))
+
+            if (inputManager.IsKeyPress(Keys.Space))
                 Dash();
 
             base.HandleInput(inputManager);
@@ -175,7 +175,7 @@ namespace SpellFall.Character
 
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            int frameWidth = currentTexture.Width / 4; 
+            int frameWidth = currentTexture.Width / 4;
             int frameHeight = currentTexture.Height;
 
             Rectangle sourceRect = new Rectangle(
@@ -218,8 +218,8 @@ namespace SpellFall.Character
             if (!_canDash)
                 return;
 
-            Vector2 dashDirection = _thrustInput != Vector2.Zero 
-                ? Vector2.Normalize(_thrustInput) 
+            Vector2 dashDirection = _thrustInput != Vector2.Zero
+                ? Vector2.Normalize(_thrustInput)
                 : lastDirection;
 
             position += dashDirection * _dashDistance;

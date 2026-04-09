@@ -5,7 +5,7 @@ using SpellFall.Engine;
 
 namespace SpellFall.Character
 {
-    public class HealthBar: GameObject
+    public class HealthBar : GameObject
     {
         public int maxHealth { get; private set; }
         private int _currentHealth;
@@ -44,7 +44,7 @@ namespace SpellFall.Character
             _regenTimer = 0f; // Reset regen timer so it waits again
             _regenBuffer = 0f;
         }
-        
+
         public void IncreaseMaxHealth(int amount)
         {
             if (amount <= 0)
@@ -56,7 +56,7 @@ namespace SpellFall.Character
             maxHealth = _playerStats.MaxHealth;
             _currentHealth = _playerStats.CurrentHealth;
         }
-        
+
         public override void Update(GameTime gameTime)
         {
             float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -114,7 +114,7 @@ namespace SpellFall.Character
             spriteBatch.Draw(_healthBarTexture,
                 new Rectangle((int)barPosition.X, (int)barPosition.Y, (int)(barWidth * healthPercentage), barHeight),
                 Color.LimeGreen);
-        }   
+        }
 
     }
 }
