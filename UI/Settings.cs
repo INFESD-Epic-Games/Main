@@ -29,6 +29,7 @@ public class Settings
 
     public static readonly List<DisplayMode> Resolutions = GraphicsAdapter.DefaultAdapter.SupportedDisplayModes
         .Distinct()
+        .Where(m => m.Height >= 480)
         .OrderByDescending(m => m.Width)
         .ToList();
 
