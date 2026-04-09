@@ -13,7 +13,7 @@ namespace SpellFall.Npcs
 {
     public class Npc : GameObject
     {
-        private const float NpcScale = 8f;
+        private const float NpcScale = 0.5f;
         private Texture2D walkSouth;
         public RectangleCollider rectangleCollider { get; private set; }
         Vector2 position;
@@ -56,7 +56,7 @@ namespace SpellFall.Npcs
         public override void Load(ContentManager content)
         {
             base.Load(content);
-            walkSouth = content.Load<Texture2D>("Npc Yellow");
+            walkSouth = content.Load<Texture2D>("Npc Rombo");
             
             currentTexture = walkSouth;
 
