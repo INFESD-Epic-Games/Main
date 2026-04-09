@@ -26,6 +26,7 @@ namespace SpellFall.Quests
             if (IsCompleted) return;
 
             CurrentAmount += amount;
+            System.Console.WriteLine("Progress added");
 
             if (CurrentAmount >= RequiredAmount)
             {

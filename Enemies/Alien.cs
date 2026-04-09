@@ -84,7 +84,7 @@ namespace SpellFall.Enemies
 
         public void RandomDropchance()
         {
-            int rng = Randomnum.Next(0,100);
+            int rng = Randomnum.Next(0, 100);
             if (rng >= 90)
             {
                 loot.GetRandomRarity(_gameManager.Player.Stats.Luck);
@@ -144,7 +144,7 @@ namespace SpellFall.Enemies
 
             _isDead = true;
             _gameManager.RemoveGameObject(this);
-            // _gameManager.QuestManager.AddProgress("KillAliens", 1);
+            _gameManager.QuestManager.AddProgress("KillAliens", 1);
             RandomDropchance();
         }
 

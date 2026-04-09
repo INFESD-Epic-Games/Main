@@ -13,7 +13,7 @@ namespace SpellFall.Npcs
 {
     public class Npc : GameObject
     {
-        private const float NpcScale = 8f;
+        private const float NpcScale = 0.5f;
         private Texture2D walkSouth;
         public RectangleCollider rectangleCollider { get; private set; }
         Vector2 position;
@@ -25,6 +25,9 @@ namespace SpellFall.Npcs
         private Quest quest;
         private QuestManager questManager;
         private HealthBar playerHealthBar;
+        private KeyboardState previousKeyboard;
+
+
 
         public void SetPlayerHealthBar(HealthBar healthBar)
         {
@@ -53,7 +56,7 @@ namespace SpellFall.Npcs
         public override void Load(ContentManager content)
         {
             base.Load(content);
-            walkSouth = content.Load<Texture2D>("Npc Yellow");
+            walkSouth = content.Load<Texture2D>("Npc Rombo");
             
             currentTexture = walkSouth;
 
@@ -67,17 +70,17 @@ namespace SpellFall.Npcs
         {
             var player = GameManager.GetGameManager().Player;
 
-            // Check distance (simpel en werkt altijd)
-            float distance = Vector2.Distance(position, player.GetPosition().Center.ToVector2());
+            float distance = Vector2.DistanceSquared(position, player.GetPosition().Center.ToVector2());
 
-            playerInRange = distance < 100f; // pas afstand aan
+            playerInRange = distance < 10000f;
 
-            KeyboardState keyboard = Keyboard.GetState();
+            KeyboardState currentKeyboard = Keyboard.GetState();
 
-            if (playerInRange && keyboard.IsKeyDown(Keys.E))
-            {
-                Interact();
-            }
+            if (playerInRange && currentKeyboard.IsKeyDown(Keys.E) && previousKeyboard.IsKeyUp(Keys.E))
+                {
+                    Interact();
+                }
+            previousKeyboard = currentKeyboard;
         }
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
@@ -111,10 +114,12 @@ namespace SpellFall.Npcs
             {
                 Console.WriteLine("NPC: Hallo! Kun je 3 aliens verslaan?");
                 questManager.AddQuest(quest);
+                System.Console.WriteLine(questManager.ActiveQuests);
                 hasGivenQuest = true;
             }
             else if (!quest.IsCompleted)
             {
+                System.Console.WriteLine(quest.Name);
                 Console.WriteLine("NPC: Je bent nog niet klaar...");
             }
             else if (!questCompletedRewardGiven)

@@ -61,7 +61,7 @@
 /processorParam:TextureFormat=Color
 /build:brown.png
 
-#begin Npc Yellow.png
+#begin Npc Rombo.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -71,7 +71,7 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Npc Yellow.png
+/build:Npc Rombo.png
 
 #begin PIJL.png
 /importer:TextureImporter
@@ -84,6 +84,12 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:PIJL.png
+
+#begin Test.fnt
+/copy:Test.fnt
+
+#begin Test.png
+/copy:Test.png
 
 #begin TX Tileset Grass.png
 /importer:TextureImporter
