@@ -2,13 +2,14 @@
 using Gum.Forms;
 using Gum.Wireframe;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using MonoGameGum;
 using SpellFall.Engine;
 using SpellFall.Character;
 using SpellFall.Weapons;
-using SpellFall.Enemies;
+using SpellFall.Enemies; 
 using SpellFall.UI;
 using SpellFall.Quests;
 using SpellFall.Npcs;
@@ -20,6 +21,7 @@ namespace SpellFall
     {
         private SpriteBatch _spriteBatch;
         private static GraphicsDeviceManager _graphics;
+        private static ContentManager _content;
         private GameManager _gameManager;
         
         private readonly MainMenu _mainMenu = new MainMenu();
@@ -52,12 +54,11 @@ namespace SpellFall
             InitializeInterface();
             
             base.Initialize();
-            
         }
 
         protected void InitializeInterface()
         {
-            _mainMenu.CreatePanel();
+            _mainMenu.CreatePanel(Content);
             _mainMenu.NewGameClicked += () =>
             {
                 GameState.InMainMenu = false;
@@ -157,6 +158,5 @@ namespace SpellFall
         {
             return _graphics;
         }
-
     }
 }

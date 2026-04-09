@@ -1,7 +1,12 @@
 using System;
+using System.Drawing;
 using Gum.Forms.Controls;
+using Gum.Wireframe;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
+using Microsoft.Xna.Framework.Graphics;
 using MonoGameGum;
+using SpellFall.UI.Fluent;
 
 namespace SpellFall.UI;
 
@@ -20,71 +25,52 @@ public class MainMenu
     
     private Panel _panel;
     
-    private Button _loadGameButton;
-    private Button _newGameButton;
-    private Button _settingsButton;
-    private Button _quitButton;
+    private FluentButton _loadGameButton;
+    private FluentButton _newGameButton;
+    private FluentButton _settingsButton;
+    private FluentButton _quitButton;
 
-    public void CreatePanel()
+    public void CreatePanel(ContentManager content)
     {
+        Texture2D buttonTexture = content.Load<Texture2D>("brown");
+        
         _panel = new Panel();
-        _panel.Dock(Gum.Wireframe.Dock.Fill);
+        _panel.Dock(Dock.Fill);
         _panel.AddToRoot();
-        
-        _loadGameButton = new Button();
-        _loadGameButton.Anchor(Gum.Wireframe.Anchor.BottomLeft);
-        _loadGameButton.X = 16;
-        _loadGameButton.Y = -16 -48 -48 -48;
-        _loadGameButton.Width = 128;
-        _loadGameButton.Text = "Load Game";
-        _loadGameButton.Click += OnLoadGameClicked;
-        _panel.AddChild(_loadGameButton);
-        
-        _newGameButton = new Button();
-        _newGameButton.Anchor(Gum.Wireframe.Anchor.BottomLeft);
-        _newGameButton.X = 16;
-        _newGameButton.Y = -16 -48 -48;
-        _newGameButton.Width = 128;
-        _newGameButton.Text = "New Game";
-        _newGameButton.Click += OnNewGameClicked;
-        _panel.AddChild(_newGameButton);
-        
-        _settingsButton = new Button();
-        _settingsButton.Anchor(Gum.Wireframe.Anchor.BottomLeft);
-        _settingsButton.X = 16;
-        _settingsButton.Y = -16 -48;
-        _settingsButton.Width = 128;
-        _settingsButton.Text = "Settings";
-        _settingsButton.Click += OnSettingsClicked;
-        _panel.AddChild(_settingsButton);
-        
-        _quitButton = new Button();
-        _quitButton.Anchor(Gum.Wireframe.Anchor.BottomLeft);
-        _quitButton.X = 16;
-        _quitButton.Y = -16;
-        _quitButton.Width = 128;
-        _quitButton.Text = "Quit";
-        _quitButton.Click += OnQuitClicked;
-        _panel.AddChild(_quitButton);
-    }
 
-    private void OnLoadGameClicked(object sender, EventArgs e)
-    {
-        LoadGameClicked?.Invoke();
-    }
-    
-    private void OnNewGameClicked(object sender, EventArgs e)
-    {
-        NewGameClicked?.Invoke();
-    }
-    
-    private void OnSettingsClicked(object sender, EventArgs e)
-    {
-        SettingsClicked?.Invoke();
-    }
-    
-    private void OnQuitClicked(object sender, EventArgs e)
-    {
-        QuitClicked?.Invoke();
+        const float startX = 16;
+        const float spacing = 48;
+
+        _loadGameButton = new FluentButton(buttonTexture)
+            .WithText("Load Game")
+            .WithFont("Test.fnt")
+            .Anchored(Anchor.BottomLeft)
+            .At(startX, -16 - (spacing * 3))
+            .OnClick(() => LoadGameClicked?.Invoke())
+            .AddTo(_panel);
+
+        _newGameButton = new FluentButton(buttonTexture)
+            .WithText("New Game")
+            .WithFont("Test.fnt")
+            .Anchored(Anchor.BottomLeft)
+            .At(startX, -16 - (spacing * 2))
+            .OnClick(() => NewGameClicked?.Invoke())
+            .AddTo(_panel);
+
+        _settingsButton = new FluentButton(buttonTexture)
+            .WithText("Settings")
+            .WithFont("Test.fnt")
+            .Anchored(Anchor.BottomLeft)
+            .At(startX, -16 - spacing)
+            .OnClick(() => SettingsClicked?.Invoke())
+            .AddTo(_panel);
+
+        _quitButton = new FluentButton(buttonTexture)
+            .WithText("Quit")
+            .WithFont("Test.fnt")
+            .Anchored(Anchor.BottomLeft)
+            .At(startX, -16)
+            .OnClick(() => QuitClicked?.Invoke())
+            .AddTo(_panel);
     }
 }
