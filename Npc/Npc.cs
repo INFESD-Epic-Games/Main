@@ -67,10 +67,9 @@ namespace SpellFall.Npcs
         {
             var player = GameManager.GetGameManager().Player;
 
-            // Check distance (simpel en werkt altijd)
-            float distance = Vector2.Distance(position, player.GetPosition().Center.ToVector2());
+            float distance = Vector2.DistanceSquared(position, player.GetPosition().Center.ToVector2());
 
-            playerInRange = distance < 100f; // pas afstand aan
+            playerInRange = distance < 10000f;
 
             KeyboardState keyboard = Keyboard.GetState();
 

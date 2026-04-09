@@ -115,12 +115,11 @@ namespace SpellFall
             npc.Initialize(questManager);
             npc.SetPlayerHealthBar(player.HealthBar);
 
-            // Voeg toe aan game
-            _gameManager.AddGameObject(npc);
 
             // Add the starting objects to the GameManager
             _gameManager.Initialize(Content, this, player);
             _gameManager.AddGameObject(new Map());
+            _gameManager.AddGameObject(npc);
             _gameManager.AddGameObject(player);
             _gameManager.AddGameObject(startingWeapon);
 

@@ -12,6 +12,7 @@ namespace SpellFall.Quests
         }
 
         public void AddProgress(string questName, int amount)
+        
         {
             foreach (var quest in ActiveQuests)
             {
