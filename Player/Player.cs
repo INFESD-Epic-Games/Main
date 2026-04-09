@@ -12,33 +12,26 @@ namespace SpellFall.Character
     public class Player : GameObject
     {
         private const float PlayerScale = 0.5f;
+        private const float ColliderWidthScale = 0.55f;
+        private const float ColliderHeightScale = 0.75f;
         public RectangleCollider rectangleCollider { get; private set; }
         private GameObject _equippedWeapon;
-        float speed = 5f;
         Vector2 lastDirection = Vector2.UnitY;
         private Vector2 _thrustInput = Vector2.Zero;
+        private Vector2 _previousPosition;
         private const int _dashDistance = 200;
         private float _dashCooldown = 5f; // seconds
         private float _dashTimer = 0f;
         private bool _canDash = true;
-
-        public HealthBar HealthBar { get; private set; }
-        private const int _maxHealth = 100;
+        private HealthBar _healthBar;
+        public HealthBar HealthBar => _healthBar;
+        public PlayerStats Stats { get; }
         // public int currentHealth = 100;
         Vector2 position;
         // private float luck {get; set;} = 1f;
         // private Loot loot = new Loot();
         // private KeyboardState previousKeyboardState;
 
-        enum Direction
-        {
-            Down,
-            Up,
-            Left,
-            Right
-        }
-
-        private Direction currentDirection = Direction.Down;
         private int currentFrame = 0;
         private float animationTimer = 0f;
         private float animationSpeed = 0.15f;
@@ -53,11 +46,12 @@ namespace SpellFall.Character
 
         public Player(Point Position)
         {
+            Stats = new PlayerStats();
             rectangleCollider = new RectangleCollider(new Rectangle(Position, Point.Zero));
             position = Position.ToVector2();
             SetCollider(rectangleCollider);
 
-            HealthBar = new HealthBar(_maxHealth);
+            _healthBar = new HealthBar(Stats);
         }
 
         public override void Load(ContentManager content)
@@ -65,15 +59,11 @@ namespace SpellFall.Character
             base.Load(content);
             walkNorth = content.Load<Texture2D>("Walk_north");
             walkSouth = content.Load<Texture2D>("Walk_south");
-            walkEast  = content.Load<Texture2D>("Walk_east");
-            walkWest  = content.Load<Texture2D>("Walk_west");
+            walkEast = content.Load<Texture2D>("Walk_east");
+            walkWest = content.Load<Texture2D>("Walk_west");
 
             currentTexture = walkSouth;
-
-            int colliderWidth = currentTexture.Width / 4;
-            int colliderHeight = currentTexture.Height;
-            rectangleCollider.shape.Size = new Point(colliderWidth, colliderHeight);
-            rectangleCollider.shape.Location -= new Point(colliderWidth / 2, colliderHeight / 2);
+            UpdateCollider();
         }
 
         public override void HandleInput(InputManager inputManager)
@@ -88,13 +78,13 @@ namespace SpellFall.Character
                 _thrustInput.X -= 1;
             if (inputManager.IsKeyDown(Keys.D))
                 _thrustInput.X += 1;
-            
+
             // Temporary damage input for testing health bar
             // TODO: Remove when implementing actual damage sources
             if (inputManager.IsKeyPress(Keys.Down))
-                HealthBar.TakeDamage(10);
-            
-            if(inputManager.IsKeyPress(Keys.Space))
+                _healthBar.TakeDamage(10);
+
+            if (inputManager.IsKeyPress(Keys.Space))
                 Dash();
 
             base.HandleInput(inputManager);
@@ -104,6 +94,7 @@ namespace SpellFall.Character
         public override void Update(GameTime gameTime)
         {
             float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            _previousPosition = position;
             // Update cooldown timer
             if (!_canDash)
             {
@@ -123,18 +114,16 @@ namespace SpellFall.Character
                 inputDirection.Normalize();
                 lastDirection = inputDirection;
 
-                position += inputDirection * speed;
+                position += inputDirection * Stats.Speed;
 
                 if (Math.Abs(inputDirection.X) > Math.Abs(inputDirection.Y))
                 {
                     if (inputDirection.X > 0)
                     {
-                        currentDirection = Direction.Right;
                         currentTexture = walkEast;
                     }
                     else
                     {
-                        currentDirection = Direction.Left;
                         currentTexture = walkWest;
                     }
                 }
@@ -142,12 +131,10 @@ namespace SpellFall.Character
                 {
                     if (inputDirection.Y > 0)
                     {
-                        currentDirection = Direction.Down;
                         currentTexture = walkSouth;
                     }
                     else
                     {
-                        currentDirection = Direction.Up;
                         currentTexture = walkNorth;
                     }
                 }
@@ -167,21 +154,28 @@ namespace SpellFall.Character
                 currentFrame = 0;
             }
 
-            int colliderWidth = currentTexture.Width / 4;
-            int colliderHeight = currentTexture.Height;
-            rectangleCollider.shape.Location = new Point(
-                (int)(position.X - colliderWidth / 2),
-                (int)(position.Y - colliderHeight / 2)
-            );
+            UpdateCollider();
 
-            HealthBar.SetPosition(rectangleCollider.shape);
-            HealthBar.Update(gameTime);
+            _healthBar.SetPosition(GetVisualBounds());
+            _healthBar.Update(gameTime);
             base.Update(gameTime);
+        }
+
+        public override void OnCollision(GameObject other)
+        {
+            if (other is Enemies.AlienSpawner)
+            {
+                position = _previousPosition;
+                UpdateCollider();
+                _healthBar.SetPosition(GetVisualBounds());
+            }
+
+            base.OnCollision(other);
         }
 
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            int frameWidth = currentTexture.Width / 4; 
+            int frameWidth = currentTexture.Width / 4;
             int frameHeight = currentTexture.Height;
 
             Rectangle sourceRect = new Rectangle(
@@ -202,7 +196,7 @@ namespace SpellFall.Character
                 SpriteEffects.None,
                 0f
             );
-            HealthBar.DrawHealthBar(spriteBatch);
+            _healthBar.DrawHealthBar(spriteBatch);
             base.Draw(gameTime, spriteBatch);
         }
 
@@ -212,12 +206,7 @@ namespace SpellFall.Character
         }
 
         // Gets the box the game uses to draw the player sprite on screen.
-        public Rectangle GetVisualBounds() => new Rectangle(
-            (int)(position.X - (currentTexture.Width / 8f) * PlayerScale),
-            (int)(position.Y - (currentTexture.Height / 2f) * PlayerScale),
-            (int)((currentTexture.Width / 4f) * PlayerScale),
-            (int)(currentTexture.Height * PlayerScale)
-        );
+        public Rectangle GetVisualBounds() => GetSpriteBounds();
 
         public void EquipWeapon(GameObject weapon)
         {
@@ -229,14 +218,41 @@ namespace SpellFall.Character
             if (!_canDash)
                 return;
 
-            Vector2 dashDirection = _thrustInput != Vector2.Zero 
-                ? Vector2.Normalize(_thrustInput) 
+            Vector2 dashDirection = _thrustInput != Vector2.Zero
+                ? Vector2.Normalize(_thrustInput)
                 : lastDirection;
 
             position += dashDirection * _dashDistance;
             // Start cooldown
             _canDash = false;
             _dashTimer = _dashCooldown;
+        }
+
+        private Rectangle GetSpriteBounds()
+        {
+            int frameWidth = currentTexture.Width / 4;
+            int frameHeight = currentTexture.Height;
+            int scaledWidth = (int)(frameWidth * PlayerScale);
+            int scaledHeight = (int)(frameHeight * PlayerScale);
+
+            return new Rectangle(
+                (int)(position.X - scaledWidth / 2f),
+                (int)(position.Y - scaledHeight / 2f),
+                scaledWidth,
+                scaledHeight);
+        }
+
+        private void UpdateCollider()
+        {
+            Rectangle spriteBounds = GetSpriteBounds();
+            int colliderWidth = (int)(spriteBounds.Width * ColliderWidthScale);
+            int colliderHeight = (int)(spriteBounds.Height * ColliderHeightScale);
+
+            rectangleCollider.shape = new Rectangle(
+                spriteBounds.Center.X - colliderWidth / 2,
+                spriteBounds.Center.Y - colliderHeight / 2,
+                colliderWidth,
+                colliderHeight);
         }
     }
 }

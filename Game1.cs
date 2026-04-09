@@ -9,11 +9,10 @@ using MonoGameGum;
 using SpellFall.Engine;
 using SpellFall.Character;
 using SpellFall.Weapons;
-using SpellFall.Enemies; 
+using SpellFall.Enemies;
 using SpellFall.UI;
 using SpellFall.Quests;
 using SpellFall.Npcs;
-using SpellFall.Character;
 using SpellFall.Background;
 
 namespace SpellFall
@@ -24,22 +23,22 @@ namespace SpellFall
         private static GraphicsDeviceManager _graphics;
         private static ContentManager _content;
         private GameManager _gameManager;
-        
+
         private readonly MainMenu _mainMenu = new MainMenu();
         private readonly Settings _settings = new Settings();
-        
+
         GumService GumUI => GumService.Default;
         private Npc npc;
 
         public Game1()
         {
             DisplayMode mode = Settings.Resolutions.Last();
-            
+
             _graphics = new GraphicsDeviceManager(this);
             _graphics.PreferredBackBufferWidth = mode.Width;
             _graphics.PreferredBackBufferHeight = mode.Height;
             _graphics.ApplyChanges();
-            
+
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
         }
@@ -48,11 +47,11 @@ namespace SpellFall
         {
             // Initialize the GameManager
             _gameManager = GameManager.GetGameManager();
-            
+
             // Initialize the UI
             GumUI.Initialize(this, DefaultVisualsVersion.Newest);
             InitializeInterface();
-            
+
             base.Initialize();
         }
 
@@ -99,7 +98,7 @@ namespace SpellFall
         protected void InitializeGame()
         {
             // Place the player at the center of the screen
-            Player player = new Player(new Point(GraphicsDevice.Viewport.Width/2 - 100, GraphicsDevice.Viewport.Height/2 - 100));
+            Player player = new Player(new Point(GraphicsDevice.Viewport.Width / 2 - 100, GraphicsDevice.Viewport.Height / 2 - 100));
             _gameManager.Initialize(Content, this, player);
             StartingWeapon startingWeapon = new StartingWeapon();
             player.EquipWeapon(startingWeapon);
@@ -120,26 +119,10 @@ namespace SpellFall
             _gameManager.AddGameObject(player);
             _gameManager.AddGameObject(startingWeapon);
 
-            // Dit is puur voor testen, en ben er niet trots op.
-            Vector2 playerCenter = player.GetPosition().Center.ToVector2();
-            for (int i = 0; i < 4; i++)
-            {
-                Vector2 offset;
-                float distance;
-
-                do
-                {
-                    float x = _gameManager.RNG.Next(-800, 800);
-                    float y = _gameManager.RNG.Next(-800, 800);
-                    offset = new Vector2(x, y);
-                    distance = offset.Length();
-                }
-                while (distance < 600f || distance > 800f);
-
-                Point spawnPoint = (playerCenter + offset).ToPoint();
-
-                _gameManager.AddGameObject(new Alien(spawnPoint));
-            }
+            Point spawnerPosition = new Point(
+                player.GetPosition().Center.X + 420,
+                player.GetPosition().Center.Y - 180);
+            _gameManager.AddGameObject(new AlienSpawner(spawnerPosition));
         }
 
         protected override void LoadContent()
@@ -150,10 +133,10 @@ namespace SpellFall
 
         protected override void Update(GameTime gameTime)
         {
-    
+
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
-            
+
             GumUI.Update(gameTime);
             _gameManager.Update(gameTime);
             base.Update(gameTime);

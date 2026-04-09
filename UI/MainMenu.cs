@@ -16,15 +16,15 @@ public class MainMenu
     public event Action NewGameClicked;
     public event Action SettingsClicked;
     public event Action QuitClicked;
-    
+
     public bool IsVisible
     {
         get => _panel.IsVisible;
         set => _panel.IsVisible = value;
     }
-    
+
     private Panel _panel;
-    
+
     private FluentButton _loadGameButton;
     private FluentButton _newGameButton;
     private FluentButton _settingsButton;
@@ -33,7 +33,7 @@ public class MainMenu
     public void CreatePanel(ContentManager content)
     {
         Texture2D buttonTexture = content.Load<Texture2D>("brown");
-        
+
         _panel = new Panel();
         _panel.Dock(Dock.Fill);
         _panel.AddToRoot();
