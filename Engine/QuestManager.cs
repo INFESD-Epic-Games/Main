@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace SpellFall.Quests
@@ -12,12 +13,14 @@ namespace SpellFall.Quests
         }
 
         public void AddProgress(string questName, int amount)
-        
         {
+            Console.WriteLine("Active quests count: " + ActiveQuests.Count);
             foreach (var quest in ActiveQuests)
             {
+                Console.WriteLine("Active quests count: " + ActiveQuests.Count);
                 if (quest.Name == questName && !quest.IsCompleted)
                 {
+                    System.Console.WriteLine("questmanager");
                     quest.AddProgress(amount);
                 }
             }

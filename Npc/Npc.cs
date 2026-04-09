@@ -25,6 +25,9 @@ namespace SpellFall.Npcs
         private Quest quest;
         private QuestManager questManager;
         private HealthBar playerHealthBar;
+        private KeyboardState previousKeyboard;
+
+
 
         public void SetPlayerHealthBar(HealthBar healthBar)
         {
@@ -71,12 +74,13 @@ namespace SpellFall.Npcs
 
             playerInRange = distance < 10000f;
 
-            KeyboardState keyboard = Keyboard.GetState();
+            KeyboardState currentKeyboard = Keyboard.GetState();
 
-            if (playerInRange && keyboard.IsKeyDown(Keys.E))
-            {
-                Interact();
-            }
+            if (playerInRange && currentKeyboard.IsKeyDown(Keys.E) && previousKeyboard.IsKeyUp(Keys.E))
+                {
+                    Interact();
+                }
+            previousKeyboard = currentKeyboard;
         }
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
@@ -110,10 +114,12 @@ namespace SpellFall.Npcs
             {
                 Console.WriteLine("NPC: Hallo! Kun je 3 aliens verslaan?");
                 questManager.AddQuest(quest);
+                System.Console.WriteLine(questManager.ActiveQuests);
                 hasGivenQuest = true;
             }
             else if (!quest.IsCompleted)
             {
+                System.Console.WriteLine(quest.Name);
                 Console.WriteLine("NPC: Je bent nog niet klaar...");
             }
             else if (!questCompletedRewardGiven)

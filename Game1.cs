@@ -30,7 +30,6 @@ namespace SpellFall
         
         GumService GumUI => GumService.Default;
         private Npc npc;
-        private QuestManager questManager;
 
         public Game1()
         {
@@ -101,10 +100,9 @@ namespace SpellFall
         {
             // Place the player at the center of the screen
             Player player = new Player(new Point(GraphicsDevice.Viewport.Width/2 - 100, GraphicsDevice.Viewport.Height/2 - 100));
+            _gameManager.Initialize(Content, this, player);
             StartingWeapon startingWeapon = new StartingWeapon();
             player.EquipWeapon(startingWeapon);
-
-            questManager = new QuestManager();
 
             Point npcPosition = new Point(
                 player.GetPosition().Center.X + 200,
@@ -112,12 +110,11 @@ namespace SpellFall
             );
 
             npc = new Npc(npcPosition);
-            npc.Initialize(questManager);
+            npc.Initialize(_gameManager.QuestManager);
             npc.SetPlayerHealthBar(player.HealthBar);
 
 
             // Add the starting objects to the GameManager
-            _gameManager.Initialize(Content, this, player);
             _gameManager.AddGameObject(new Map());
             _gameManager.AddGameObject(npc);
             _gameManager.AddGameObject(player);
