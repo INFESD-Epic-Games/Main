@@ -23,6 +23,7 @@ namespace SpellFall.Engine
         public InputManager InputManager { get; private set; }
         public Game Game { get; private set; }
         public QuestManager QuestManager { get; private set; }
+        public SoundManager SoundManager { get; private set; } = new SoundManager();
 
         public static GameManager GetGameManager()
         {
