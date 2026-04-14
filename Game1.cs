@@ -14,6 +14,7 @@ using SpellFall.UI;
 using SpellFall.Quests;
 using SpellFall.Npcs;
 using SpellFall.Background;
+using Microsoft.Xna.Framework.Media;
 
 namespace SpellFall
 {
@@ -23,6 +24,7 @@ namespace SpellFall
         private static GraphicsDeviceManager _graphics;
         private static ContentManager _content;
         private GameManager _gameManager;
+        private SoundManager _sound;
 
         private readonly MainMenu _mainMenu = new MainMenu();
         private readonly Settings _settings = new Settings();
@@ -62,6 +64,7 @@ namespace SpellFall
             {
                 GameState.InMainMenu = false;
                 _mainMenu.IsVisible = false;
+                MediaPlayer.Stop();
                 InitializeGame();
             };
             _mainMenu.QuitClicked += Exit;

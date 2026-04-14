@@ -172,5 +172,10 @@ namespace SpellFall.Enemies
 
             _rectangleCollider.shape = new Rectangle(colliderLocation, new Point(colliderWidth, colliderHeight));
         }
+
+        public Vector2 GetPosition()
+        {
+            return _position;
+        }
     }
 }
