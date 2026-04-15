@@ -12,13 +12,15 @@ namespace SpellFall.Character
         public float HealthRegenDelaySeconds { get; set; } = 3f;
 
         public int Damage { get; set; } = 5;
-        public float AttackSpeed { get; set; } = 1f;
+        public int WeaponDamageBonus { get; set; } = 0;
+        public int TotalDamage => Damage + WeaponDamageBonus;
+        public float FireRate { get; set; } = 1f;
+        public float WeaponFireRateBonus { get; set; } = 0f;
+        public float TotalFireRate => FireRate + WeaponFireRateBonus;
         public float Speed { get; set; } = 5f;
 
-        public PlayerStats()
-        {
-            CurrentHealth = MaxHealth;
-        }
+        public int AttackCdFrames { get; private set; } = 0;
+        public bool CanAttack => AttackCdFrames <= 0;
 
         public void IncreaseMaxHealth(int amount)
         {
@@ -34,5 +36,32 @@ namespace SpellFall.Character
                 CurrentHealth = MaxHealth;
             }
         }
+
+        public bool TryStartAttack(int baseCdFrames)
+        {
+            if (!CanAttack)
+            {
+                return false;
+            }
+
+            if (baseCdFrames <= 0)
+            {
+                AttackCdFrames = 0;
+                return true;
+            }
+
+            float rate = TotalFireRate <= 0f ? 0.01f : TotalFireRate;
+            AttackCdFrames = (int)System.MathF.Ceiling(baseCdFrames / rate);
+            return true;
+        }
+
+        public void DecreaseAttackCooldown()
+        {
+            if (AttackCdFrames > 0)
+            {
+                AttackCdFrames--;
+            }
+        }
+
     }
 }

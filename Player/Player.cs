@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework.Graphics;
 using SpellFall.Items;
 using Microsoft.Xna.Framework.Input;
 using System;
+using WeaponBase = SpellFall.Weapons.Weapons;
 
 namespace SpellFall.Character
 {
@@ -15,7 +16,7 @@ namespace SpellFall.Character
         private const float ColliderWidthScale = 0.55f;
         private const float ColliderHeightScale = 0.75f;
         public RectangleCollider rectangleCollider { get; private set; }
-        private GameObject _equippedWeapon;
+        private WeaponBase _equippedWeapon;
         Vector2 lastDirection = Vector2.UnitY;
         private Vector2 _thrustInput = Vector2.Zero;
         private Vector2 _previousPosition;
@@ -95,6 +96,7 @@ namespace SpellFall.Character
         {
             float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
             _previousPosition = position;
+            Stats.DecreaseAttackCooldown();
             // Update cooldown timer
             if (!_canDash)
             {
@@ -208,9 +210,11 @@ namespace SpellFall.Character
         // Gets the box the game uses to draw the player sprite on screen.
         public Rectangle GetVisualBounds() => GetSpriteBounds();
 
-        public void EquipWeapon(GameObject weapon)
+        public void EquipWeapon(WeaponBase weapon)
         {
+            _equippedWeapon?.OnUnequip();
             _equippedWeapon = weapon;
+            _equippedWeapon?.OnEquip(Stats);
         }
 
         private void Dash()

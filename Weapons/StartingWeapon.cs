@@ -7,22 +7,16 @@ using SpellFall.Weapons.Projectiles;
 
 namespace SpellFall.Weapons
 {
-	public class StartingWeapon : GameObject
+	public class StartingWeapon : Weapons
 	{
 		private const float BowScale = 0.45f;
-		private const int WeaponDamage = 5;
-		private readonly GameManager _gameManager;
 
 		private Texture2D _bowTexture;
 		private Point _target;
 		private Vector2 _bowCenter;
 
-		private readonly float _shotCooldownDuration = 0.6f;
-		private float _shotCooldownTimer;
-
-		public StartingWeapon()
+		public StartingWeapon() : base(damageBonus: 5, baseCdFrames: 36, fireRateBonus: 0.2f)
 		{
-			_gameManager = GameManager.GetGameManager();
 			_target = Point.Zero;
 			_bowCenter = Vector2.Zero;
 		}
@@ -38,28 +32,18 @@ namespace SpellFall.Weapons
 			Matrix inverseCamera = Matrix.Invert(_gameManager.Camera.Transform);
 			Vector2 worldMouse = Vector2.Transform(inputManager.CurrentMouseState.Position.ToVector2(), inverseCamera);
 			_target = worldMouse.ToPoint();
-			_bowCenter = GetBowCenter();
 
-			if (inputManager.LeftMousePress() && _shotCooldownTimer <= 0f)
+			Rectangle playerRect = _gameManager.Player.GetPosition();
+			Vector2 aimDirection = LinePieceCollider.GetDirection(playerRect.Center, _target);
+			_bowCenter = GetBowCenter(aimDirection);
+
+			if (inputManager.LeftMousePress() && TryStartPrimaryAttackCooldown())
 			{
-				Rectangle playerRect = _gameManager.Player.GetPosition();
-				Vector2 aimDirection = LinePieceCollider.GetDirection(playerRect.Center, _target);
-				int totalDamage = _gameManager.Player.Stats.Damage + WeaponDamage;
+				int totalDamage = _gameManager.Player.Stats.TotalDamage;
 				_gameManager.AddGameObject(new Arrow(_bowCenter, aimDirection, 350f, totalDamage));
-				_shotCooldownTimer = _shotCooldownDuration;
 			}
 
 			base.HandleInput(inputManager);
-		}
-
-		public override void Update(GameTime gameTime)
-		{
-			if (_shotCooldownTimer > 0f)
-			{
-				_shotCooldownTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
-			}
-
-			base.Update(gameTime);
 		}
 
 		public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
@@ -67,7 +51,7 @@ namespace SpellFall.Weapons
 			Rectangle playerRect = _gameManager.Player.GetPosition();
 			Vector2 aimDirection = LinePieceCollider.GetDirection(playerRect.Center, _target);
 			float aimAngle = LinePieceCollider.GetAngle(aimDirection);
-			_bowCenter = GetBowCenter();
+			_bowCenter = GetBowCenter(aimDirection);
 
 			Vector2 bowOrigin = new Vector2(_bowTexture.Width / 2f, _bowTexture.Height / 2f);
 
@@ -85,10 +69,9 @@ namespace SpellFall.Weapons
 			base.Draw(gameTime, spriteBatch);
 		}
 
-		private Vector2 GetBowCenter()
+		private Vector2 GetBowCenter(Vector2 aimDirection)
 		{
 			Rectangle playerRect = _gameManager.Player.GetVisualBounds();
-			Vector2 aimDirection = LinePieceCollider.GetDirection(playerRect.Center, _target);
 			float bowOffsetDistance = playerRect.Width / 2f;
 			return playerRect.Center.ToVector2() + aimDirection * bowOffsetDistance;
 		}
