@@ -22,13 +22,9 @@ namespace SpellFall
     {
         private SpriteBatch _spriteBatch;
         private static GraphicsDeviceManager _graphics;
-        private static ContentManager _content;
         private GameManager _gameManager;
-        private SoundManager _sound;
-
         private readonly MainMenu _mainMenu = new MainMenu();
         private readonly Settings _settings = new Settings();
-
         GumService GumUI => GumService.Default;
         private Npc npc;
 

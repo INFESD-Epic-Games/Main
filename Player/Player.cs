@@ -3,9 +3,10 @@ using SpellFall.Collision;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using SpellFall.Items;
 using Microsoft.Xna.Framework.Input;
+using SpellFall.Sounds;
 using System;
+using Microsoft.Xna.Framework.Audio;
 
 namespace SpellFall.Character
 {
@@ -20,29 +21,23 @@ namespace SpellFall.Character
         private Vector2 _thrustInput = Vector2.Zero;
         private Vector2 _previousPosition;
         private const int _dashDistance = 200;
-        private float _dashCooldown = 5f; // seconds
+        private float _dashCooldown = 5f;
         private float _dashTimer = 0f;
         private bool _canDash = true;
         private HealthBar _healthBar;
         public HealthBar HealthBar => _healthBar;
         public PlayerStats Stats { get; }
-        // public int currentHealth = 100;
         Vector2 position;
-        // private float luck {get; set;} = 1f;
-        // private Loot loot = new Loot();
-        // private KeyboardState previousKeyboardState;
-
         private int currentFrame = 0;
         private float animationTimer = 0f;
         private float animationSpeed = 0.15f;
         private bool isMoving = false;
-
         private Texture2D walkNorth;
         private Texture2D walkSouth;
         private Texture2D walkEast;
         private Texture2D walkWest;
-
         private Texture2D currentTexture;
+        private SoundEffect _dashSfx;
 
         public Player(Point Position)
         {
@@ -61,6 +56,7 @@ namespace SpellFall.Character
             walkSouth = content.Load<Texture2D>("Walk_south");
             walkEast = content.Load<Texture2D>("Walk_east");
             walkWest = content.Load<Texture2D>("Walk_west");
+            _dashSfx = content.Load<SoundEffect>("Dash");
 
             currentTexture = walkSouth;
             UpdateCollider();
@@ -218,11 +214,13 @@ namespace SpellFall.Character
             if (!_canDash)
                 return;
 
+            _dashSfx.Play();
             Vector2 dashDirection = _thrustInput != Vector2.Zero
                 ? Vector2.Normalize(_thrustInput)
                 : lastDirection;
 
             position += dashDirection * _dashDistance;
+          
             // Start cooldown
             _canDash = false;
             _dashTimer = _dashCooldown;

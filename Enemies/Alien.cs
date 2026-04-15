@@ -7,8 +7,7 @@ using SpellFall.Engine;
 using SpellFall.Weapons.Projectiles;
 using SpellFall.Items;
 using SpellFall.Character;
-using SpellFall.Quests;
-using Microsoft.Xna.Framework.Media;
+using Microsoft.Xna.Framework.Audio;
 
 namespace SpellFall.Enemies
 {
@@ -34,6 +33,7 @@ namespace SpellFall.Enemies
         private Loot loot = new Loot();
         private int _frameWidth;
         private int _frameHeight;
+        private SoundEffect _enemyDeathSFX;
 
         public Alien(Point startPosition)
         {
@@ -48,6 +48,7 @@ namespace SpellFall.Enemies
 
         public override void Load(ContentManager content)
         {
+            _enemyDeathSFX = content.Load<SoundEffect>("Enemy Death");
             _texture = content.Load<Texture2D>("alien");
             _frameWidth = _texture.Width / 4;
             _frameHeight = _texture.Height;
@@ -144,6 +145,10 @@ namespace SpellFall.Enemies
             }
 
             _isDead = true;
+            if (_isDead)
+            {
+                _enemyDeathSFX.Play();
+            }
             _gameManager.RemoveGameObject(this);
             _gameManager.QuestManager.AddProgress("KillAliens", 1);
             RandomDropchance();

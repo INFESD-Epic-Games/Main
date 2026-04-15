@@ -27,7 +27,10 @@ namespace SpellFall.Engine
         public QuestManager QuestManager { get; private set; }
         public SoundManager SoundManager { get; private set; } = new SoundManager();
         private Song _battleMusic;
+        private Song _overworldmusic;
         private bool _isBattleMusicPlaying = false;
+
+        private bool _isOverWorldMusicPlaying = false;
 
         public static GameManager GetGameManager()
         {
@@ -58,6 +61,7 @@ namespace SpellFall.Engine
         public void Load(ContentManager content)
         {
             _battleMusic = content.Load<Song>("Battle 1");
+            _overworldmusic = content.Load<Song>("overworld music");
 
             foreach (GameObject gameObject in _gameObjects)
             {
@@ -159,8 +163,16 @@ namespace SpellFall.Engine
                     }
                 }
             }
+
+            if (!enemyOnScreen && !_isOverWorldMusicPlaying)
+            {
+                MediaPlayer.Play(_overworldmusic);
+                MediaPlayer.IsRepeating = true;
+                _isOverWorldMusicPlaying = true;
+            }
             
-            if (enemyOnScreen && !_isBattleMusicPlaying)
+            
+            else if (enemyOnScreen && !_isBattleMusicPlaying)
             {
                 MediaPlayer.Play(_battleMusic);
                 MediaPlayer.IsRepeating = true;
@@ -171,6 +183,8 @@ namespace SpellFall.Engine
             {
                 MediaPlayer.Stop();
                 _isBattleMusicPlaying = false;
+                MediaPlayer.Play(_overworldmusic);
+                MediaPlayer.IsRepeating = true;
             }
         }
 
