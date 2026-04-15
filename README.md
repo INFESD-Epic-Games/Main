@@ -17,3 +17,6 @@ Arno Cyreus - (https://arnocyreus.itch.io/miniretro)
 
 Assets used for SFX from:
 Leohpaz - (https://leohpaz.itch.io/rpg-essentials-sfx-free)
+
+Assets used for UI from:
+Kenney Vleugels - (https://www.kenney.nl/assets/pixel-ui-pack)
