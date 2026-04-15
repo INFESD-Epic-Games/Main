@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using SpellFall.Character;
 using SpellFall.Quests;
+using SpellFall.UI;
 
 namespace SpellFall.Engine
 {
@@ -20,6 +21,7 @@ namespace SpellFall.Engine
         public Random RNG { get; private set; }
         public Camera Camera { get; private set; }
         public Player Player { get; private set; }
+        public TextBubble textBubble { get; private set; }
         public InputManager InputManager { get; private set; }
         public Game Game { get; private set; }
         public QuestManager QuestManager { get; private set; }
@@ -39,6 +41,10 @@ namespace SpellFall.Engine
             InputManager = new InputManager();
             Camera = new Camera();
             RNG = new Random();
+
+            textBubble = new TextBubble();
+            _toBeAdded.Add(textBubble);
+
         }
 
         public void Initialize(ContentManager content, Game game, Player player)
@@ -86,6 +92,7 @@ namespace SpellFall.Engine
         public void Update(GameTime gameTime)
         {
             if (GameState.InMainMenu) return;
+            if (GameState.IsPaused) return;
             
             InputManager.Update();
 
@@ -122,12 +129,30 @@ namespace SpellFall.Engine
 
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch) 
         {
-            // spriteBatch.Begin();
             spriteBatch.Begin(transformMatrix: Camera.Transform);
+
+            // Draw world objects first.
             foreach (GameObject gameObject in _gameObjects)
             {
+                if (gameObject is TextBubble)
+                {
+                    continue;
+                }
+
                 gameObject.Draw(gameTime, spriteBatch);
             }
+
+            // Draw UI dialogue on top so it is never hidden behind map/entities.
+            foreach (GameObject gameObject in _gameObjects)
+            {
+                if (gameObject is not TextBubble)
+                {
+                    continue;
+                }
+
+                gameObject.Draw(gameTime, spriteBatch);
+            }
+
             spriteBatch.End();
         }
 
