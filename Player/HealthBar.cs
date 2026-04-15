@@ -68,10 +68,10 @@ namespace SpellFall.Character
             }
             // Wait before regenerating (delay after taking damage)
             _regenTimer += deltaTime;
-            float regenDelay = _playerStats.HealthRegenDelaySeconds;
+            float regenDelay = _playerStats.TotalHealthRegenDelaySeconds;
             if (_regenTimer >= regenDelay)
             {
-                float regenRate = _playerStats.HealthRegenPerSecond;
+                float regenRate = _playerStats.TotalHealthRegenPerSecond;
                 _regenBuffer += regenRate * deltaTime;
                 int healthToAdd = (int)_regenBuffer;
                 if (healthToAdd > 0)

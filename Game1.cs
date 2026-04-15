@@ -21,7 +21,6 @@ namespace SpellFall
     {
         private SpriteBatch _spriteBatch;
         private static GraphicsDeviceManager _graphics;
-        private static ContentManager _content;
         private static RenderManager _renderManager;
         private GameManager _gameManager;
 

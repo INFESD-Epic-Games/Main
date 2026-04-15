@@ -29,8 +29,9 @@ namespace SpellFall.Weapons
 
 		public override void HandleInput(InputManager inputManager)
 		{
+			Vector2 gameMouse = Game1.ScreenToGameCoordinates(inputManager.CurrentMouseState.Position.ToVector2());
 			Matrix inverseCamera = Matrix.Invert(_gameManager.Camera.Transform);
-			Vector2 worldMouse = Vector2.Transform(inputManager.CurrentMouseState.Position.ToVector2(), inverseCamera);
+			Vector2 worldMouse = Vector2.Transform(gameMouse, inverseCamera);
 			_target = worldMouse.ToPoint();
 
 			Rectangle playerRect = _gameManager.Player.GetPosition();

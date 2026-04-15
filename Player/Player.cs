@@ -69,6 +69,7 @@ namespace SpellFall.Character
 
         public override void HandleInput(InputManager inputManager)
         {
+            _previousPosition = position;
             _thrustInput = Vector2.Zero;
 
             if (inputManager.IsKeyDown(Keys.W))
@@ -95,7 +96,6 @@ namespace SpellFall.Character
         public override void Update(GameTime gameTime)
         {
             float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
-            _previousPosition = position;
             Stats.DecreaseAttackCooldown();
             // Update cooldown timer
             if (!_canDash)
@@ -116,7 +116,7 @@ namespace SpellFall.Character
                 inputDirection.Normalize();
                 lastDirection = inputDirection;
 
-                position += inputDirection * Stats.Speed;
+                position += inputDirection * Stats.TotalSpeed;
 
                 if (Math.Abs(inputDirection.X) > Math.Abs(inputDirection.Y))
                 {
