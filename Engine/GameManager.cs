@@ -11,7 +11,7 @@ namespace SpellFall.Engine
     public class GameManager
     {
         private static GameManager gameManager;
-
+        
         private List<GameObject> _gameObjects;
         private List<GameObject> _toBeRemoved;
         private List<GameObject> _toBeAdded;
@@ -159,8 +159,8 @@ namespace SpellFall.Engine
         public Vector2 RandomScreenLocation()
         {
             return new Vector2(
-                RNG.Next(0, Game.GraphicsDevice.Viewport.Width),
-                RNG.Next(0, Game.GraphicsDevice.Viewport.Height));
+                RNG.Next(0, RenderManager.VirtualWidth),
+                RNG.Next(0, RenderManager.VirtualHeight));
         }
     }
 }

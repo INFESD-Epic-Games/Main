@@ -15,8 +15,8 @@ namespace SpellFall.Engine
                 0);
 
             var offset = Matrix.CreateTranslation(
-                Game1.GetGraphicsDeviceManager().GraphicsDevice.Viewport.Width / 2,
-                Game1.GetGraphicsDeviceManager().GraphicsDevice.Viewport.Height / 2,
+                RenderManager.VirtualWidth / 2f,
+                RenderManager.VirtualHeight / 2f,
                 0);
 
             Transform = position * offset;

@@ -1,5 +1,3 @@
-using System.Data;
-using System.Reflection.PortableExecutable;
 using Microsoft.Xna.Framework.Input;
 
 namespace SpellFall.Engine
