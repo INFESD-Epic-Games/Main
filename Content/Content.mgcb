@@ -37,6 +37,12 @@
 /processorParam:TextureFormat=Color
 /build:AlienSpawner.png
 
+#begin Battle 1.mp3
+/importer:Mp3Importer
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:Battle 1.mp3
+
 #begin BOOG.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -61,6 +67,30 @@
 /processorParam:TextureFormat=Color
 /build:brown.png
 
+#begin BubbleText.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Color
+/build:BubbleText.spritefont
+#begin Dash.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Dash.wav
+
+#begin Enemy Death.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Enemy Death.wav
+
+#begin Final Battle.mp3
+/importer:Mp3Importer
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:Final Battle.mp3
+
 #begin Npc Rombo.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -72,6 +102,12 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:Npc Rombo.png
+
+#begin overworld music.mp3
+/importer:Mp3Importer
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:overworld music.mp3
 
 #begin PIJL.png
 /importer:TextureImporter
@@ -85,11 +121,40 @@
 /processorParam:TextureFormat=Color
 /build:PIJL.png
 
+#begin SpawnIndicator.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:SpawnIndicator.png
+
 #begin Test.fnt
 /copy:Test.fnt
 
 #begin Test.png
 /copy:Test.png
+
+#begin TextBubble.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:TextBubble.png
+#begin Title Theme.mp3
+/importer:Mp3Importer
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:Title Theme.mp3
 
 #begin TX Tileset Grass.png
 /importer:TextureImporter

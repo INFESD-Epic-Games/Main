@@ -5,6 +5,7 @@ using Gum.Wireframe;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Media;
 using MonoGameGum;
 using SpellFall.UI.Fluent;
 
@@ -29,10 +30,14 @@ public class MainMenu
     private FluentButton _newGameButton;
     private FluentButton _settingsButton;
     private FluentButton _quitButton;
+    public Song _backgroundmusic;
 
     public void CreatePanel(ContentManager content)
     {
         Texture2D buttonTexture = content.Load<Texture2D>("brown");
+        _backgroundmusic = content.Load<Song>("Title Theme");
+
+        MediaPlayer.Play(_backgroundmusic);
 
         _panel = new Panel();
         _panel.Dock(Dock.Fill);

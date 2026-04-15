@@ -6,6 +6,7 @@ using SpellFall.Collision;
 using SpellFall.Engine;
 using SpellFall.Items;
 using SpellFall.Weapons.Projectiles;
+using Microsoft.Xna.Framework.Audio;
 
 namespace SpellFall.Enemies
 {
@@ -17,17 +18,16 @@ namespace SpellFall.Enemies
         private const float SpawnIntervalSeconds = 8f;
         private const int SpawnCountPerWave = 3;
         private const float SpawnIndicatorDurationSeconds = 2f;
-
         private readonly GameManager _gameManager;
         private readonly RectangleCollider _rectangleCollider;
         private readonly Random _rng;
-
         private Texture2D _texture;
         private Texture2D _healthBarTexture;
         private Vector2 _position;
         private int _currentHealth;
         private bool _isDead;
         private float _spawnTimer;
+        private SoundEffect _enemyDeathSFX;
 
         public AlienSpawner(Point startPosition)
         {
@@ -43,8 +43,8 @@ namespace SpellFall.Enemies
 
         public override void Load(ContentManager content)
         {
+            _enemyDeathSFX = content.Load<SoundEffect>("Enemy Death");
             _texture = content.Load<Texture2D>("AlienSpawner");
-
             UpdateCollider();
             base.Load(content);
         }
@@ -138,6 +138,10 @@ namespace SpellFall.Enemies
 
             _isDead = true;
             _gameManager.AddGameObject(new Loot(_position, _gameManager.Player.Stats.TotalLuck));
+            if (_isDead)
+            {
+                _enemyDeathSFX.Play();
+            }
             _gameManager.RemoveGameObject(this);
         }
 
@@ -173,6 +177,11 @@ namespace SpellFall.Enemies
             Point colliderLocation = (_position - new Vector2(colliderWidth / 2f, colliderHeight / 2f)).ToPoint();
 
             _rectangleCollider.shape = new Rectangle(colliderLocation, new Point(colliderWidth, colliderHeight));
+        }
+
+        public Vector2 GetPosition()
+        {
+            return _position;
         }
     }
 }
