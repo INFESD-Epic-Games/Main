@@ -17,3 +17,5 @@ Arno Cyreus - (https://arnocyreus.itch.io/miniretro)
 
 Assets used for SFX from:
 Leohpaz - (https://leohpaz.itch.io/rpg-essentials-sfx-free)
+
+Story image: Story.png was generated with AI and then edited/used by the developer.

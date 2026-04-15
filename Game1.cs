@@ -29,6 +29,7 @@ namespace SpellFall
 
         private readonly MainMenu _mainMenu = new MainMenu();
         private readonly Settings _settings = new Settings();
+        private readonly IntroScroll _introScroll = new IntroScroll();
         GumService GumUI => GumService.Default;
 
         public Game1()
@@ -62,10 +63,12 @@ namespace SpellFall
             _mainMenu.CreatePanel(Content);
             _mainMenu.NewGameClicked += () =>
             {
-                GameState.InMainMenu = false;
                 _mainMenu.IsVisible = false;
+                _settings.IsVisible = false;
                 MediaPlayer.Stop();
-                InitializeGame();
+                GameState.InIntro = true;
+                GameState.InMainMenu = true;
+                _introScroll.Reset();
             };
             _mainMenu.QuitClicked += Exit;
             _mainMenu.SettingsClicked += () =>
@@ -132,6 +135,7 @@ namespace SpellFall
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             _renderManager.Initialize(GraphicsDevice);
+            _introScroll.Load(Content);
             _gameManager.Load(Content);
         }
 
@@ -154,6 +158,22 @@ namespace SpellFall
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || currentKeyboard.IsKeyDown(Keys.Escape))
                 Exit();
 
+            if (GameState.InIntro)
+            {
+                _introScroll.Update(gameTime);
+
+                if (_introScroll.IsFinished)
+                {
+                    GameState.InIntro = false;
+                    GameState.InMainMenu = false;
+                    InitializeGame();
+                }
+
+                _previousKeyboardState = currentKeyboard;
+                base.Update(gameTime);
+                return;
+            }
+
             GumUI.Update(gameTime);
             _gameManager.Update(gameTime);
             _previousKeyboardState = currentKeyboard;
@@ -164,7 +184,16 @@ namespace SpellFall
         {
             _renderManager.UpdateDestinationRect(GraphicsDevice);
             _renderManager.BeginWorld(GraphicsDevice);
-            _gameManager.Draw(gameTime, _spriteBatch);
+
+            if (GameState.InIntro)
+            {
+                _introScroll.Draw(gameTime, _spriteBatch);
+            }
+            else
+            {
+                _gameManager.Draw(gameTime, _spriteBatch);
+            }
+
             _renderManager.PresentWorld(GraphicsDevice, _spriteBatch);
 
             GumUI.Draw();
