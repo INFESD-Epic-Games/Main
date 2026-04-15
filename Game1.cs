@@ -14,6 +14,7 @@ using SpellFall.UI;
 using SpellFall.Quests;
 using SpellFall.Npcs;
 using SpellFall.Background;
+using Microsoft.Xna.Framework.Media;
 
 namespace SpellFall
 {
@@ -21,13 +22,11 @@ namespace SpellFall
     {
         private SpriteBatch _spriteBatch;
         private static GraphicsDeviceManager _graphics;
-        private static ContentManager _content;
         private GameManager _gameManager;
         private KeyboardState _previousKeyboardState;
 
         private readonly MainMenu _mainMenu = new MainMenu();
         private readonly Settings _settings = new Settings();
-
         GumService GumUI => GumService.Default;
         private Npc npc;
 
@@ -63,6 +62,7 @@ namespace SpellFall
             {
                 GameState.InMainMenu = false;
                 _mainMenu.IsVisible = false;
+                MediaPlayer.Stop();
                 InitializeGame();
             };
             _mainMenu.QuitClicked += Exit;

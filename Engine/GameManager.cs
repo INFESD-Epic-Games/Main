@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework.Graphics;
 using SpellFall.Character;
 using SpellFall.Quests;
 using SpellFall.UI;
+using Microsoft.Xna.Framework.Media;
 
 namespace SpellFall.Engine
 {
@@ -18,6 +19,7 @@ namespace SpellFall.Engine
         private List<GameObject> _toBeAdded;
         private ContentManager _content;
 
+
         public Random RNG { get; private set; }
         public Camera Camera { get; private set; }
         public Player Player { get; private set; }
@@ -26,6 +28,11 @@ namespace SpellFall.Engine
         public Game Game { get; private set; }
         public QuestManager QuestManager { get; private set; }
         public SoundManager SoundManager { get; private set; } = new SoundManager();
+        private Song _battleMusic;
+        private Song _overworldmusic;
+        private bool _isBattleMusicPlaying = false;
+
+        private bool _isOverWorldMusicPlaying = false;
 
         public static GameManager GetGameManager()
         {
@@ -45,6 +52,7 @@ namespace SpellFall.Engine
             textBubble = new TextBubble();
             _toBeAdded.Add(textBubble);
 
+            SoundManager = new SoundManager();
         }
 
         public void Initialize(ContentManager content, Game game, Player player)
@@ -58,6 +66,9 @@ namespace SpellFall.Engine
 
         public void Load(ContentManager content)
         {
+            _battleMusic = content.Load<Song>("Battle 1");
+            _overworldmusic = content.Load<Song>("overworld music");
+
             foreach (GameObject gameObject in _gameObjects)
             {
                 gameObject.Load(content);
@@ -125,6 +136,63 @@ namespace SpellFall.Engine
                 _gameObjects.Remove(gameObject);
             }
             _toBeRemoved.Clear();
+
+            bool enemyOnScreen = false;
+
+            foreach(GameObject obj in _gameObjects)
+            {
+                if (obj is SpellFall.Enemies.Alien alien)
+                {
+                    Vector2 screenPos = Vector2.Transform(
+                        alien.GetPosition(),
+                        Camera.Transform
+                    );
+
+                    if (screenPos.X >= 0 && screenPos.X <= Game.GraphicsDevice.Viewport.Width &&
+                        screenPos.Y >= 0 && screenPos.Y <= Game.GraphicsDevice.Viewport.Height)
+                    {
+                        enemyOnScreen = true;
+                        break;
+                    }
+                }
+                if (obj is SpellFall.Enemies.AlienSpawner alienSpawner)
+                {
+                    Vector2 screenPos = Vector2.Transform(
+                        alienSpawner.GetPosition(),
+                        Camera.Transform
+                    );
+
+                    if (screenPos.X >= 0 && screenPos.X <= Game.GraphicsDevice.Viewport.Width &&
+                        screenPos.Y >= 0 && screenPos.Y <= Game.GraphicsDevice.Viewport.Height)
+                    {
+                        enemyOnScreen = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!enemyOnScreen && !_isOverWorldMusicPlaying)
+            {
+                MediaPlayer.Play(_overworldmusic);
+                MediaPlayer.IsRepeating = true;
+                _isOverWorldMusicPlaying = true;
+            }
+            
+            
+            else if (enemyOnScreen && !_isBattleMusicPlaying)
+            {
+                MediaPlayer.Play(_battleMusic);
+                MediaPlayer.IsRepeating = true;
+                _isBattleMusicPlaying = true;
+            }
+            
+            else if (!enemyOnScreen && _isBattleMusicPlaying)
+            {
+                MediaPlayer.Stop();
+                _isBattleMusicPlaying = false;
+                MediaPlayer.Play(_overworldmusic);
+                MediaPlayer.IsRepeating = true;
+            }
         }
 
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch) 
