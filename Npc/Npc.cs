@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using SpellFall.Items;
 using SpellFall.Quests;
+using SpellFall.UI;
 using Microsoft.Xna.Framework.Input;
 using System;
 using SpellFall.Character;
@@ -26,6 +27,7 @@ namespace SpellFall.Npcs
         private QuestManager questManager;
         private HealthBar playerHealthBar;
         private KeyboardState previousKeyboard;
+        private TextBubble textBubble;
 
 
 
@@ -39,6 +41,7 @@ namespace SpellFall.Npcs
             rectangleCollider = new RectangleCollider(new Rectangle(Position, Point.Zero));
             position = Position.ToVector2();
             SetCollider(rectangleCollider);
+            textBubble = GameManager.GetGameManager().textBubble;
         }
 
         public void Initialize(QuestManager questManager)
@@ -77,9 +80,9 @@ namespace SpellFall.Npcs
             KeyboardState currentKeyboard = Keyboard.GetState();
 
             if (playerInRange && currentKeyboard.IsKeyDown(Keys.E) && previousKeyboard.IsKeyUp(Keys.E))
-                {
-                    Interact();
-                }
+            {
+                Interact();
+            }
             previousKeyboard = currentKeyboard;
         }
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
@@ -110,9 +113,17 @@ namespace SpellFall.Npcs
         }
         private void Interact()
         {
+            // if (textBubble == null)
+            // {
+            //     return;
+            // }
+
+            GameState.IsPaused = true;
+
             if (!hasGivenQuest)
             {
-                Console.WriteLine("NPC: Hallo! Kun je 3 aliens verslaan?");
+                textBubble.SetText("Hallo! Kun je 3 aliens verslaan?");
+                textBubble.Show();
                 questManager.AddQuest(quest);
                 System.Console.WriteLine(questManager.ActiveQuests);
                 hasGivenQuest = true;
@@ -120,11 +131,13 @@ namespace SpellFall.Npcs
             else if (!quest.IsCompleted)
             {
                 System.Console.WriteLine(quest.Name);
-                Console.WriteLine("NPC: Je bent nog niet klaar...");
+                textBubble.SetText("Je bent nog niet klaar...");
+                textBubble.Show();
             }
             else if (!questCompletedRewardGiven)
             {
-                Console.WriteLine("NPC: Goed gedaan! Hier is je beloning!");
+                textBubble.SetText("Goed gedaan! Hier is je beloning! +10 max health!");
+                textBubble.Show();
 
                 GiveReward();
 
@@ -132,8 +145,24 @@ namespace SpellFall.Npcs
             }
             else
             {
-                Console.WriteLine("NPC: Bedankt voor je hulp!");
+                textBubble.SetText("Bedankt voor je hulp!");
+                textBubble.Show();
             }
+        }
+
+        public void ContinueDialogue()
+        {
+            if (textBubble != null)
+            {
+                textBubble.Hide();
+            }
+
+            GameState.IsPaused = false;
+        }
+
+        public void SetTextBubble(TextBubble bubble)
+        {
+            textBubble = bubble;
         }
 
         private void GiveReward()

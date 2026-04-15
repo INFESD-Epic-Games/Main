@@ -23,6 +23,7 @@ namespace SpellFall
         private static GraphicsDeviceManager _graphics;
         private static ContentManager _content;
         private GameManager _gameManager;
+        private KeyboardState _previousKeyboardState;
 
         private readonly MainMenu _mainMenu = new MainMenu();
         private readonly Settings _settings = new Settings();
@@ -133,12 +134,26 @@ namespace SpellFall
 
         protected override void Update(GameTime gameTime)
         {
+            KeyboardState currentKeyboard = Keyboard.GetState();
 
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+            if (GameState.IsPaused)
+            {
+                if (currentKeyboard.GetPressedKeyCount() > 0 && _previousKeyboardState.GetPressedKeyCount() == 0)
+                {
+                    npc?.ContinueDialogue();
+                }
+
+                _previousKeyboardState = currentKeyboard;
+                base.Update(gameTime);
+                return;
+            }
+
+            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || currentKeyboard.IsKeyDown(Keys.Escape))
                 Exit();
 
             GumUI.Update(gameTime);
             _gameManager.Update(gameTime);
+            _previousKeyboardState = currentKeyboard;
             base.Update(gameTime);
         }
 

@@ -61,6 +61,13 @@
 /processorParam:TextureFormat=Color
 /build:brown.png
 
+#begin BubbleText.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Color
+/build:BubbleText.spritefont
+
 #begin Npc Rombo.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -85,11 +92,35 @@
 /processorParam:TextureFormat=Color
 /build:PIJL.png
 
+#begin SpawnIndicator.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:SpawnIndicator.png
+
 #begin Test.fnt
 /copy:Test.fnt
 
 #begin Test.png
 /copy:Test.png
+
+#begin TextBubble.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:TextBubble.png
 
 #begin TX Tileset Grass.png
 /importer:TextureImporter
@@ -102,18 +133,6 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:TX Tileset Grass.png
-
-#begin SpawnIndicator.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:SpawnIndicator.png
 
 #begin Walk_east.png
 /importer:TextureImporter
