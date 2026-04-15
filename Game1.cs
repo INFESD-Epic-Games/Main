@@ -72,7 +72,7 @@ namespace SpellFall
                 _settings.IsVisible = true;
             };
 
-            _settings.CreatePanel();
+            _settings.CreatePanel(Content);
             _settings.IsVisible = false;
             _settings.ResolutionChanged += (res) =>
             {
@@ -88,6 +88,10 @@ namespace SpellFall
                 GraphicalUiElement.CanvasWidth = _graphics.PreferredBackBufferWidth;
                 GraphicalUiElement.CanvasHeight = _graphics.PreferredBackBufferHeight;
                 _graphics.ApplyChanges();
+            };
+            _settings.VolumeChanged += (volume) =>
+            {
+                MediaPlayer.Volume = (float)volume;
             };
             _settings.ReturnClicked += () =>
             {
