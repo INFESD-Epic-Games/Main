@@ -25,6 +25,7 @@ namespace SpellFall
         private static RenderManager _renderManager;
         private GameManager _gameManager;
         private KeyboardState _previousKeyboardState;
+        private Npc _npc;
 
         private readonly MainMenu _mainMenu = new MainMenu();
         private readonly Settings _settings = new Settings();
@@ -110,14 +111,14 @@ namespace SpellFall
                 player.GetPosition().Center.Y
             );
 
-            Npc npc = new Npc(npcPosition);
-            npc.Initialize(_gameManager.QuestManager);
-            npc.SetPlayerHealthBar(player.HealthBar);
+            _npc = new Npc(npcPosition);
+            _npc.Initialize(_gameManager.QuestManager);
+            _npc.SetPlayerHealthBar(player.HealthBar);
 
 
             // Add the starting objects to the GameManager
             _gameManager.AddGameObject(new Map());
-            _gameManager.AddGameObject(npc);
+            _gameManager.AddGameObject(_npc);
             _gameManager.AddGameObject(player);
             _gameManager.AddGameObject(startingWeapon);
 
@@ -142,7 +143,7 @@ namespace SpellFall
             {
                 if (currentKeyboard.GetPressedKeyCount() > 0 && _previousKeyboardState.GetPressedKeyCount() == 0)
                 {
-                    npc?.ContinueDialogue();
+                    _npc?.ContinueDialogue();
                 }
 
                 _previousKeyboardState = currentKeyboard;
