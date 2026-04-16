@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using Gum.Forms.Controls;
 using Gum.Wireframe;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGameGum;
+using SpellFall.UI.Fluent;
 
 namespace SpellFall.UI;
 
@@ -12,6 +14,7 @@ public class Settings
 {
     public event Action<DisplayMode> ResolutionChanged;
     public event Action<bool> FullscreenChanged;
+    public event Action<double> VolumeChanged;
     public event Action ReturnClicked;
     
     public bool IsVisible
@@ -24,8 +27,9 @@ public class Settings
 
     private ComboBox _resolutionSelect;
     private CheckBox _fullscreenToggle;
+    private Slider _volumeSlider;
     
-    private Button _returnButton;
+    private FluentButton _returnButton;
 
     public static readonly List<DisplayMode> Resolutions = GraphicsAdapter.DefaultAdapter.SupportedDisplayModes
         .Distinct()
@@ -33,14 +37,16 @@ public class Settings
         .OrderByDescending(m => m.Width)
         .ToList();
 
-    public void CreatePanel()
+    public void CreatePanel(ContentManager content)
     {
+        Texture2D buttonTexture = content.Load<Texture2D>("brown");
+        
         _panel = new Panel();
         _panel.Dock(Gum.Wireframe.Dock.Fill);
         _panel.AddToRoot();
         
         _resolutionSelect = new ComboBox();
-        _resolutionSelect.Anchor(Gum.Wireframe.Anchor.Center);
+        _resolutionSelect.Anchor(Anchor.Center);
         _resolutionSelect.X = 0;
         _resolutionSelect.Y = 0;
         _resolutionSelect.Width = 128;
@@ -52,7 +58,7 @@ public class Settings
         _panel.AddChild(_resolutionSelect);
         
         _fullscreenToggle = new CheckBox();
-        _fullscreenToggle.Anchor(Gum.Wireframe.Anchor.Center);
+        _fullscreenToggle.Anchor(Anchor.Center);
         _fullscreenToggle.X = 0;
         _fullscreenToggle.Y = 16 +16;
         _fullscreenToggle.Width = 128;
@@ -60,14 +66,26 @@ public class Settings
         _fullscreenToggle.Click += OnFullscreenChanged;
         _panel.AddChild(_fullscreenToggle);
         
-        _returnButton = new Button();
-        _returnButton.Anchor(Gum.Wireframe.Anchor.Bottom);
-        _returnButton.X = 0;
-        _returnButton.Y = -16;
-        _returnButton.Width = 128;
-        _returnButton.Text = "Return";
-        _returnButton.Click += OnReturnClicked;
-        _panel.AddChild(_returnButton);
+        _volumeSlider = new Slider();
+        _volumeSlider.Anchor(Anchor.Center);
+        _volumeSlider.X = 0;
+        _volumeSlider.Y = 16 + 64;
+        _volumeSlider.Width = 128;
+        _volumeSlider.Value = 100;
+        _volumeSlider.Minimum = 0;
+        _volumeSlider.Maximum = 100;
+        _volumeSlider.IsSnapToTickEnabled = true;
+        _volumeSlider.TicksFrequency = 1;
+        _volumeSlider.ValueChanged += OnVolumeChanged;
+        _panel.AddChild(_volumeSlider);
+        
+        _returnButton = new FluentButton(buttonTexture)
+            .WithText("Return")
+            .WithFont("Test.fnt")
+            .Anchored(Anchor.Bottom)
+            .At(0, -16)
+            .OnClick(() => ReturnClicked?.Invoke())
+            .AddTo(_panel);
     }
     
     private void OnResolutionChanged(object sender, SelectionChangedEventArgs e)
@@ -80,9 +98,8 @@ public class Settings
         FullscreenChanged?.Invoke(_fullscreenToggle.IsChecked ?? false);
     }
 
-    private void OnReturnClicked(object sender, EventArgs e)
+    private void OnVolumeChanged(object sender, EventArgs e)
     {
-        ReturnClicked?.Invoke();
+        VolumeChanged?.Invoke(_volumeSlider.Value / 100f);
     }
-
 }
