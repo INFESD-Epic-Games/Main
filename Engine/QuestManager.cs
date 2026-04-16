@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace SpellFall.Quests
 {
@@ -9,18 +10,35 @@ namespace SpellFall.Quests
 
         public void AddQuest(Quest quest)
         {
+            if (quest == null)
+            {
+                return;
+            }
+
+            if (ActiveQuests.Any(q => q.Name == quest.Name))
+            {
+                return;
+            }
+
             ActiveQuests.Add(quest);
+        }
+
+        public bool HasActiveQuest(string questName)
+        {
+            return ActiveQuests.Any(q => q.Name == questName && !q.IsCompleted);
         }
 
         public void AddProgress(string questName, int amount)
         {
-            Console.WriteLine("Active quests count: " + ActiveQuests.Count);
+            if (amount <= 0)
+            {
+                return;
+            }
+
             foreach (var quest in ActiveQuests)
             {
-                Console.WriteLine("Active quests count: " + ActiveQuests.Count);
                 if (quest.Name == questName && !quest.IsCompleted)
                 {
-                    System.Console.WriteLine("questmanager");
                     quest.AddProgress(amount);
                 }
             }

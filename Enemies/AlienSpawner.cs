@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using SpellFall.Collision;
 using SpellFall.Engine;
+using SpellFall.Items;
 using SpellFall.Weapons.Projectiles;
 using Microsoft.Xna.Framework.Audio;
 
@@ -12,10 +13,10 @@ namespace SpellFall.Enemies
     public class AlienSpawner : GameObject
     {
         private const float SpawnerScale = 0.75f;
-        private const float HitboxScale = 0.65f;
-        private const int MaxHealth = 75;
-        private const float SpawnIntervalSeconds = 10f;
-        private const int SpawnCountPerWave = 2;
+        private const float HitboxScale = 0.5f;
+        private const int MaxHealth = 100;
+        private const float SpawnIntervalSeconds = 8f;
+        private const int SpawnCountPerWave = 3;
         private const float SpawnIndicatorDurationSeconds = 2f;
         private readonly GameManager _gameManager;
         private readonly RectangleCollider _rectangleCollider;
@@ -136,6 +137,7 @@ namespace SpellFall.Enemies
             }
 
             _isDead = true;
+            _gameManager.AddGameObject(new Loot(_position, _gameManager.Player.Stats.TotalLuck));
             if (_isDead)
             {
                 _enemyDeathSFX.Play();
@@ -170,8 +172,8 @@ namespace SpellFall.Enemies
 
         private void UpdateCollider()
         {
-            int colliderWidth = Math.Max(32, (int)(_texture.Width * SpawnerScale * HitboxScale));
-            int colliderHeight = Math.Max(32, (int)(_texture.Height * SpawnerScale * HitboxScale));
+            int colliderWidth = Math.Max(24, (int)(_texture.Width * SpawnerScale * HitboxScale));
+            int colliderHeight = Math.Max(24, (int)(_texture.Height * SpawnerScale * HitboxScale));
             Point colliderLocation = (_position - new Vector2(colliderWidth / 2f, colliderHeight / 2f)).ToPoint();
 
             _rectangleCollider.shape = new Rectangle(colliderLocation, new Point(colliderWidth, colliderHeight));

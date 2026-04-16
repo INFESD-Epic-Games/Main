@@ -13,7 +13,7 @@ namespace SpellFall.Engine
     public class GameManager
     {
         private static GameManager gameManager;
-
+        
         private List<GameObject> _gameObjects;
         private List<GameObject> _toBeRemoved;
         private List<GameObject> _toBeAdded;
@@ -138,6 +138,8 @@ namespace SpellFall.Engine
             _toBeRemoved.Clear();
 
             bool enemyOnScreen = false;
+            int viewWidth = RenderManager.VirtualWidth;
+            int viewHeight = RenderManager.VirtualHeight;
 
             foreach(GameObject obj in _gameObjects)
             {
@@ -148,8 +150,8 @@ namespace SpellFall.Engine
                         Camera.Transform
                     );
 
-                    if (screenPos.X >= 0 && screenPos.X <= Game.GraphicsDevice.Viewport.Width &&
-                        screenPos.Y >= 0 && screenPos.Y <= Game.GraphicsDevice.Viewport.Height)
+                    if (screenPos.X >= 0 && screenPos.X <= viewWidth &&
+                        screenPos.Y >= 0 && screenPos.Y <= viewHeight)
                     {
                         enemyOnScreen = true;
                         break;
@@ -162,8 +164,8 @@ namespace SpellFall.Engine
                         Camera.Transform
                     );
 
-                    if (screenPos.X >= 0 && screenPos.X <= Game.GraphicsDevice.Viewport.Width &&
-                        screenPos.Y >= 0 && screenPos.Y <= Game.GraphicsDevice.Viewport.Height)
+                    if (screenPos.X >= 0 && screenPos.X <= viewWidth &&
+                        screenPos.Y >= 0 && screenPos.Y <= viewHeight)
                     {
                         enemyOnScreen = true;
                         break;
@@ -252,8 +254,8 @@ namespace SpellFall.Engine
         public Vector2 RandomScreenLocation()
         {
             return new Vector2(
-                RNG.Next(0, Game.GraphicsDevice.Viewport.Width),
-                RNG.Next(0, Game.GraphicsDevice.Viewport.Height));
+                RNG.Next(0, RenderManager.VirtualWidth),
+                RNG.Next(0, RenderManager.VirtualHeight));
         }
     }
 }

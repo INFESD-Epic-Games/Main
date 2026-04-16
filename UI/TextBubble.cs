@@ -1,5 +1,4 @@
 using System;
-using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -50,9 +49,8 @@ namespace SpellFall.UI
 
         private void UpdateScale()
         {
-            var viewport = GameManager.GetGameManager().Game.GraphicsDevice.Viewport;
-            _scaleX = (float)viewport.Width / _initialViewportWidth;
-            _scaleY = (float)viewport.Height / _initialViewportHeight;
+            _scaleX = (float)RenderManager.VirtualWidth / _initialViewportWidth;
+            _scaleY = (float)RenderManager.VirtualHeight / _initialViewportHeight;
         }
 
         public override void Update(GameTime gameTime)
@@ -75,8 +73,9 @@ namespace SpellFall.UI
             }
 
             Func<Vector2, Vector2> worldPos = x => Vector2.Transform(x, Matrix.Invert(GameManager.GetGameManager().Camera.Transform));
-            
-            Vector2 scaledPosition = worldPos(Position * new Vector2(_scaleX, _scaleY));
+
+            Vector2 targetScreenPosition = Position * new Vector2(_scaleX, _scaleY);
+            Vector2 scaledPosition = worldPos(targetScreenPosition);
             Vector2 textPosition = scaledPosition + new Vector2(_paddingX * _scaleX, _paddingY * _scaleY);
             
             spriteBatch.Draw(_texture, scaledPosition, null, Color.White, 0f, Vector2.Zero, new Vector2(_scaleX, _scaleY) * 1.25f, SpriteEffects.None, 0f);

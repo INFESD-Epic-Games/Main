@@ -22,19 +22,22 @@ namespace SpellFall
     {
         private SpriteBatch _spriteBatch;
         private static GraphicsDeviceManager _graphics;
+        private static RenderManager _renderManager;
         private GameManager _gameManager;
         private KeyboardState _previousKeyboardState;
+        private Npc _npc;
 
         private readonly MainMenu _mainMenu = new MainMenu();
         private readonly Settings _settings = new Settings();
+        private readonly IntroScroll _introScroll = new IntroScroll();
         GumService GumUI => GumService.Default;
-        private Npc npc;
 
         public Game1()
         {
             DisplayMode mode = Settings.Resolutions.Last();
 
             _graphics = new GraphicsDeviceManager(this);
+            _renderManager = new RenderManager();
             _graphics.PreferredBackBufferWidth = mode.Width;
             _graphics.PreferredBackBufferHeight = mode.Height;
             _graphics.ApplyChanges();
@@ -60,10 +63,12 @@ namespace SpellFall
             _mainMenu.CreatePanel(Content);
             _mainMenu.NewGameClicked += () =>
             {
-                GameState.InMainMenu = false;
                 _mainMenu.IsVisible = false;
+                _settings.IsVisible = false;
                 MediaPlayer.Stop();
-                InitializeGame();
+                GameState.InIntro = true;
+                GameState.InMainMenu = true;
+                _introScroll.Reset();
             };
             _mainMenu.QuitClicked += Exit;
             _mainMenu.SettingsClicked += () =>
@@ -103,7 +108,7 @@ namespace SpellFall
         protected void InitializeGame()
         {
             // Place the player at the center of the screen
-            Player player = new Player(new Point(GraphicsDevice.Viewport.Width / 2 - 100, GraphicsDevice.Viewport.Height / 2 - 100));
+            Player player = new Player(new Point(RenderManager.VirtualWidth / 2 - 100, RenderManager.VirtualHeight / 2 - 100));
             _gameManager.Initialize(Content, this, player);
             StartingWeapon startingWeapon = new StartingWeapon();
             player.EquipWeapon(startingWeapon);
@@ -113,14 +118,14 @@ namespace SpellFall
                 player.GetPosition().Center.Y
             );
 
-            npc = new Npc(npcPosition);
-            npc.Initialize(_gameManager.QuestManager);
-            npc.SetPlayerHealthBar(player.HealthBar);
+            _npc = new Npc(npcPosition);
+            _npc.Initialize(_gameManager.QuestManager);
+            _npc.SetPlayerHealthBar(player.HealthBar);
 
 
             // Add the starting objects to the GameManager
             _gameManager.AddGameObject(new Map());
-            _gameManager.AddGameObject(npc);
+            _gameManager.AddGameObject(_npc);
             _gameManager.AddGameObject(player);
             _gameManager.AddGameObject(startingWeapon);
 
@@ -133,6 +138,8 @@ namespace SpellFall
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
+            _renderManager.Initialize(GraphicsDevice);
+            _introScroll.Load(Content);
             _gameManager.Load(Content);
         }
 
@@ -144,7 +151,7 @@ namespace SpellFall
             {
                 if (currentKeyboard.GetPressedKeyCount() > 0 && _previousKeyboardState.GetPressedKeyCount() == 0)
                 {
-                    npc?.ContinueDialogue();
+                    _npc?.ContinueDialogue();
                 }
 
                 _previousKeyboardState = currentKeyboard;
@@ -155,6 +162,22 @@ namespace SpellFall
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || currentKeyboard.IsKeyDown(Keys.Escape))
                 Exit();
 
+            if (GameState.InIntro)
+            {
+                _introScroll.Update(gameTime);
+
+                if (_introScroll.IsFinished)
+                {
+                    GameState.InIntro = false;
+                    GameState.InMainMenu = false;
+                    InitializeGame();
+                }
+
+                _previousKeyboardState = currentKeyboard;
+                base.Update(gameTime);
+                return;
+            }
+
             GumUI.Update(gameTime);
             _gameManager.Update(gameTime);
             _previousKeyboardState = currentKeyboard;
@@ -163,10 +186,27 @@ namespace SpellFall
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.Black);
+            _renderManager.UpdateDestinationRect(GraphicsDevice);
+            _renderManager.BeginWorld(GraphicsDevice);
+
+            if (GameState.InIntro)
+            {
+                _introScroll.Draw(gameTime, _spriteBatch);
+            }
+            else
+            {
+                _gameManager.Draw(gameTime, _spriteBatch);
+            }
+
+            _renderManager.PresentWorld(GraphicsDevice, _spriteBatch);
+
             GumUI.Draw();
-            _gameManager.Draw(gameTime, _spriteBatch);
             base.Draw(gameTime);
+        }
+
+        public static Vector2 ScreenToGameCoordinates(Vector2 screenPosition)
+        {
+            return _renderManager.ScreenToGameCoordinates(screenPosition);
         }
 
         public static GraphicsDeviceManager GetGraphicsDeviceManager()

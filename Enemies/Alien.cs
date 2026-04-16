@@ -5,7 +5,6 @@ using Microsoft.Xna.Framework.Graphics;
 using SpellFall.Collision;
 using SpellFall.Engine;
 using SpellFall.Weapons.Projectiles;
-using SpellFall.Items;
 using SpellFall.Character;
 using Microsoft.Xna.Framework.Audio;
 
@@ -29,8 +28,6 @@ namespace SpellFall.Enemies
         private int _currentHealth;
         private bool _isDead;
         private float _contactCooldownTimer;
-        private Random Randomnum = new Random();
-        private Loot loot = new Loot();
         private int _frameWidth;
         private int _frameHeight;
         private SoundEffect _enemyDeathSFX;
@@ -82,15 +79,6 @@ namespace SpellFall.Enemies
 
             UpdateCollider();
             base.Update(gameTime);
-        }
-
-        public void RandomDropchance()
-        {
-            int rng = Randomnum.Next(0, 100);
-            if (rng >= 90)
-            {
-                loot.GetRandomRarity(_gameManager.Player.Stats.Luck);
-            }
         }
 
         public override void OnCollision(GameObject other)
@@ -150,8 +138,11 @@ namespace SpellFall.Enemies
                 _enemyDeathSFX.Play();
             }
             _gameManager.RemoveGameObject(this);
-            _gameManager.QuestManager.AddProgress("KillAliens", 1);
-            RandomDropchance();
+
+            if (_gameManager.QuestManager.HasActiveQuest("KillAliens"))
+            {
+                _gameManager.QuestManager.AddProgress("KillAliens", 1);
+            }
         }
 
         private void DrawHealthBar(SpriteBatch spriteBatch)
