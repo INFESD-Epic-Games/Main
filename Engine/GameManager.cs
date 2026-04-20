@@ -257,5 +257,39 @@ namespace SpellFall.Engine
                 RNG.Next(0, RenderManager.VirtualWidth),
                 RNG.Next(0, RenderManager.VirtualHeight));
         }
+
+        public int GetAlienCount(bool includePendingChanges = true)
+        {
+            int alienCount = 0;
+
+            foreach (GameObject gameObject in _gameObjects)
+            {
+                if (gameObject is SpellFall.Enemies.Alien)
+                {
+                    alienCount++;
+                }
+            }
+
+            if (includePendingChanges)
+            {
+                foreach (GameObject gameObject in _toBeAdded)
+                {
+                    if (gameObject is SpellFall.Enemies.Alien)
+                    {
+                        alienCount++;
+                    }
+                }
+
+                foreach (GameObject gameObject in _toBeRemoved)
+                {
+                    if (gameObject is SpellFall.Enemies.Alien)
+                    {
+                        alienCount--;
+                    }
+                }
+            }
+
+            return Math.Max(0, alienCount);
+        }
     }
 }
