@@ -24,8 +24,8 @@ namespace SpellFall
         private static GraphicsDeviceManager _graphics;
         private static RenderManager _renderManager;
         private GameManager _gameManager;
-        private KeyboardState _previousKeyboardState;
         private Npc _npc;
+        private KeyboardState _previousKeyboardState;
 
         private readonly MainMenu _mainMenu = new MainMenu();
         private readonly Settings _settings = new Settings();
@@ -149,7 +149,9 @@ namespace SpellFall
 
             if (GameState.IsPaused)
             {
-                if (currentKeyboard.GetPressedKeyCount() > 0 && _previousKeyboardState.GetPressedKeyCount() == 0)
+                bool enterPressed = currentKeyboard.IsKeyDown(Keys.Enter) && !_previousKeyboardState.IsKeyDown(Keys.Enter);
+
+                if (enterPressed)
                 {
                     _npc?.ContinueDialogue();
                 }
