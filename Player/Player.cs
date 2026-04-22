@@ -8,6 +8,7 @@ using SpellFall.Sounds;
 using System;
 using WeaponBase = SpellFall.Weapons.Weapons;
 using Microsoft.Xna.Framework.Audio;
+using SpellFall.UI;
 
 namespace SpellFall.Character
 {
@@ -39,6 +40,8 @@ namespace SpellFall.Character
         private Texture2D walkWest;
         private Texture2D currentTexture;
         private SoundEffect _dashSfx;
+        private Texture2D inventoryTexture;
+        private Inventory _inventory;
 
         public Player(Point Position)
         {
@@ -59,31 +62,40 @@ namespace SpellFall.Character
             walkWest = content.Load<Texture2D>("Walk_west");
             _dashSfx = content.Load<SoundEffect>("Dash");
 
+            inventoryTexture = content.Load<Texture2D>("brown");
+            _inventory = new Inventory(inventoryTexture);
+
             currentTexture = walkSouth;
             UpdateCollider();
         }
 
         public override void HandleInput(InputManager inputManager)
         {
-            _previousPosition = position;
-            _thrustInput = Vector2.Zero;
+            if (!GameState.IsInventoryOpen)
+            {
+                _previousPosition = position;
+                _thrustInput = Vector2.Zero;
 
-            if (inputManager.IsKeyDown(Keys.W))
-                _thrustInput.Y -= 1;
-            if (inputManager.IsKeyDown(Keys.S))
-                _thrustInput.Y += 1;
-            if (inputManager.IsKeyDown(Keys.A))
-                _thrustInput.X -= 1;
-            if (inputManager.IsKeyDown(Keys.D))
-                _thrustInput.X += 1;
+                if (inputManager.IsKeyDown(Keys.W))
+                    _thrustInput.Y -= 1;
+                if (inputManager.IsKeyDown(Keys.S))
+                    _thrustInput.Y += 1;
+                if (inputManager.IsKeyDown(Keys.A))
+                    _thrustInput.X -= 1;
+                if (inputManager.IsKeyDown(Keys.D))
+                    _thrustInput.X += 1;
 
-            // Temporary damage input for testing health bar
-            // TODO: Remove when implementing actual damage sources
-            if (inputManager.IsKeyPress(Keys.Down))
-                _healthBar.TakeDamage(10);
+                // Temporary damage input for testing health bar
+                // TODO: Remove when implementing actual damage sources
+                if (inputManager.IsKeyPress(Keys.Down))
+                    _healthBar.TakeDamage(10);
 
-            if (inputManager.IsKeyPress(Keys.Space))
-                Dash();
+                if (inputManager.IsKeyPress(Keys.Space))
+                    Dash();
+            }
+
+            if (inputManager.IsKeyPress(Keys.Tab))
+                ToggleInventory();
 
             base.HandleInput(inputManager);
         }
@@ -224,10 +236,16 @@ namespace SpellFall.Character
                 : lastDirection;
 
             position += dashDirection * _dashDistance;
-          
+
             // Start cooldown
             _canDash = false;
             _dashTimer = _dashCooldown;
+        }
+
+        private void ToggleInventory()
+        {
+            GameState.IsInventoryOpen = !GameState.IsInventoryOpen;
+            _inventory.Show(GameState.IsInventoryOpen);
         }
 
         private Rectangle GetSpriteBounds()
