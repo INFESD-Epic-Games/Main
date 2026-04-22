@@ -31,6 +31,8 @@ namespace SpellFall.Engine
         private Song _battleMusic;
         private Song _overworldmusic;
         private bool _isBattleMusicPlaying = false;
+        private TimeSpan _battleMusicTimer = TimeSpan.Zero;
+        private TimeSpan _battleMusicBufferTime = TimeSpan.FromSeconds(1);
 
         private bool _isOverWorldMusicPlaying = false;
 
@@ -186,14 +188,23 @@ namespace SpellFall.Engine
                 MediaPlayer.Play(_battleMusic);
                 MediaPlayer.IsRepeating = true;
                 _isBattleMusicPlaying = true;
+                _battleMusicTimer = TimeSpan.Zero;
             }
             
             else if (!enemyOnScreen && _isBattleMusicPlaying)
             {
-                MediaPlayer.Stop();
-                _isBattleMusicPlaying = false;
-                MediaPlayer.Play(_overworldmusic);
-                MediaPlayer.IsRepeating = true;
+                if (_battleMusicTimer > _battleMusicBufferTime)
+                {
+                    MediaPlayer.Stop();
+                    _isBattleMusicPlaying = false;
+                    _battleMusicTimer = TimeSpan.Zero;
+                    MediaPlayer.Play(_overworldmusic);
+                    MediaPlayer.IsRepeating = true;
+                }
+                else
+                {
+                    _battleMusicTimer += gameTime.ElapsedGameTime;
+                }
             }
         }
 
