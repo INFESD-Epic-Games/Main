@@ -50,7 +50,7 @@ namespace SpellFall.Npcs
 
             quest = new Quest(
                 "KillAliens",
-                "Versla 3 aliens",
+                "Defeat 3 aliens",
                 3,
                 () => Console.WriteLine("Quest completed!")
             );
@@ -122,7 +122,7 @@ namespace SpellFall.Npcs
 
             if (!hasGivenQuest)
             {
-                textBubble.SetText("Hallo! Kun je 3 aliens verslaan?");
+                textBubble.SetText("Hello! Can you defeat 3 aliens?");
                 textBubble.Show();
                 questManager.AddQuest(quest);
                 System.Console.WriteLine(questManager.ActiveQuests);
@@ -131,12 +131,12 @@ namespace SpellFall.Npcs
             else if (!quest.IsCompleted)
             {
                 System.Console.WriteLine(quest.Name);
-                textBubble.SetText("Je bent nog niet klaar...");
+                textBubble.SetText("You haven't completed the quest yet...");
                 textBubble.Show();
             }
             else if (!questCompletedRewardGiven)
             {
-                textBubble.SetText("Goed gedaan! Hier is je beloning! +10 max health!");
+                textBubble.SetText("Good job! Here's your reward! +10 max health!");
                 textBubble.Show();
 
                 GiveReward();
@@ -145,7 +145,7 @@ namespace SpellFall.Npcs
             }
             else
             {
-                textBubble.SetText("Bedankt voor je hulp!");
+                textBubble.SetText("Thank you for your help!");
                 textBubble.Show();
             }
         }
@@ -167,7 +167,7 @@ namespace SpellFall.Npcs
 
         private void GiveReward()
         {
-            Console.WriteLine("Player krijgt +10 maxhealth!");
+            Console.WriteLine("Player gets +10 max health!");
 
             // voorbeeld:
             playerHealthBar.IncreaseMaxHealth(10);

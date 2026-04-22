@@ -17,6 +17,7 @@ namespace SpellFall.Enemies
         private const int MaxHealth = 100;
         private const float SpawnIntervalSeconds = 8f;
         private const int SpawnCountPerWave = 3;
+        private const int MaxAliensInGame = 20;
         private const float SpawnIndicatorDurationSeconds = 2f;
         private readonly GameManager _gameManager;
         private readonly RectangleCollider _rectangleCollider;
@@ -104,7 +105,14 @@ namespace SpellFall.Enemies
 
         private void QueueSpawnWave()
         {
-            for (int i = 0; i < SpawnCountPerWave; i++)
+            int availableSlots = MaxAliensInGame - _gameManager.GetAlienCount();
+            if (availableSlots <= 0)
+            {
+                return;
+            }
+
+            int spawnCount = Math.Min(SpawnCountPerWave, availableSlots);
+            for (int i = 0; i < spawnCount; i++)
             {
                 Vector2 spawnPosition = GetSpawnPosition();
                 Point alienPoint = spawnPosition.ToPoint();
@@ -112,8 +120,18 @@ namespace SpellFall.Enemies
                 _gameManager.AddGameObject(new SpawnIndicator(
                     spawnPosition,
                     SpawnIndicatorDurationSeconds,
-                    () => _gameManager.AddGameObject(new Alien(alienPoint))));
+                    () => TrySpawnAlien(alienPoint)));
             }
+        }
+
+        private void TrySpawnAlien(Point spawnPoint)
+        {
+            if (_gameManager.GetAlienCount() >= MaxAliensInGame)
+            {
+                return;
+            }
+
+            _gameManager.AddGameObject(new Alien(spawnPoint));
         }
 
         private Vector2 GetSpawnPosition()
