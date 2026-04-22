@@ -30,6 +30,7 @@ namespace SpellFall
         private readonly MainMenu _mainMenu = new MainMenu();
         private readonly Settings _settings = new Settings();
         private readonly IntroScroll _introScroll = new IntroScroll();
+        private readonly GameOverScreen _gameOverScreen = new GameOverScreen();
         GumService GumUI => GumService.Default;
 
         public Game1()
@@ -103,6 +104,29 @@ namespace SpellFall
                 _settings.IsVisible = false;
                 _mainMenu.IsVisible = true;
             };
+
+            _gameOverScreen.RestartRequested += () =>
+            {
+                GameState.InGameOver = false;
+                GameState.IsPaused = false;
+                GameState.InMainMenu = false;
+                GameState.InIntro = false;
+                _mainMenu.IsVisible = false;
+                _settings.IsVisible = false;
+                InitializeGame();
+            };
+
+            _gameOverScreen.ReturnToMenuRequested += () =>
+            {
+                GameState.InGameOver = false;
+                GameState.IsPaused = false;
+                GameState.InMainMenu = true;
+                GameState.InIntro = false;
+                MediaPlayer.Stop();
+                _gameManager.ClearWorldState();
+                _settings.IsVisible = false;
+                _mainMenu.IsVisible = true;
+            };
         }
 
         protected void InitializeGame()
@@ -140,6 +164,7 @@ namespace SpellFall
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             _renderManager.Initialize(GraphicsDevice);
             _introScroll.Load(Content);
+            _gameOverScreen.Load(Content);
             _gameManager.Load(Content);
         }
 
@@ -180,8 +205,28 @@ namespace SpellFall
                 return;
             }
 
+            if (GameState.InGameOver)
+            {
+                _gameOverScreen.Update(gameTime);
+                _previousKeyboardState = currentKeyboard;
+                base.Update(gameTime);
+                return;
+            }
+
             GumUI.Update(gameTime);
             _gameManager.Update(gameTime);
+
+            if (_gameManager.Player?.HealthBar.currentHealth <= 0 && !GameState.InMainMenu)
+            {
+                GameState.InGameOver = true;
+                GameState.IsPaused = false;
+                MediaPlayer.Stop();
+                _gameOverScreen.ResetInputState();
+                _previousKeyboardState = currentKeyboard;
+                base.Update(gameTime);
+                return;
+            }
+
             _previousKeyboardState = currentKeyboard;
             base.Update(gameTime);
         }
@@ -195,9 +240,18 @@ namespace SpellFall
             {
                 _introScroll.Draw(gameTime, _spriteBatch);
             }
+            else if (GameState.InMainMenu)
+            {
+                // Keep the world hidden while menu UI is active.
+            }
             else
             {
                 _gameManager.Draw(gameTime, _spriteBatch);
+
+                if (GameState.InGameOver)
+                {
+                    _gameOverScreen.Draw(gameTime, _spriteBatch);
+                }
             }
 
             _renderManager.PresentWorld(GraphicsDevice, _spriteBatch);

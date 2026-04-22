@@ -59,6 +59,7 @@ namespace SpellFall.Engine
 
         public void Initialize(ContentManager content, Game game, Player player)
         {
+            ResetWorldState();
             Game = game;
             _content = content;
             Player = player;
@@ -106,6 +107,7 @@ namespace SpellFall.Engine
         {
             if (GameState.InMainMenu) return;
             if (GameState.IsPaused) return;
+            if (GameState.InGameOver) return;
             
             InputManager.Update();
 
@@ -257,6 +259,24 @@ namespace SpellFall.Engine
         public void RemoveGameObject(GameObject gameObject)
         {
             _toBeRemoved.Add(gameObject);
+        }
+
+        private void ResetWorldState()
+        {
+            _gameObjects.Clear();
+            _toBeRemoved.Clear();
+            _toBeAdded.Clear();
+            _toBeAdded.Add(textBubble);
+            Player = null;
+
+            _isBattleMusicPlaying = false;
+            _isOverWorldMusicPlaying = false;
+            _battleMusicTimer = TimeSpan.Zero;
+        }
+
+        public void ClearWorldState()
+        {
+            ResetWorldState();
         }
 
         /// <summary>
