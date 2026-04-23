@@ -154,8 +154,8 @@ namespace SpellFall
             _gameManager.AddGameObject(startingWeapon);
 
             Point spawnerPosition = new Point(
-                player.GetPosition().Center.X + 420,
-                player.GetPosition().Center.Y - 180);
+                player.GetPosition().Center.X + 600,
+                player.GetPosition().Center.Y + 360);
             _gameManager.AddGameObject(new AlienSpawner(spawnerPosition));
         }
 
