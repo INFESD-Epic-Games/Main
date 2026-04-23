@@ -9,12 +9,6 @@ namespace SpellFall.UI;
 
 public class IntroScroll
 {
-    private enum StoryRevealMode
-    {
-        PanelByPanel,
-        LeftToRight
-    }
-
     private enum IntroPhase
     {
         Scrolling,
@@ -23,15 +17,15 @@ public class IntroScroll
 
     private readonly string[] _lines =
     {
-        "The world is wrong.",
+        "Something is wrong with this world.",
         "It wasn't destroyed.",
         "It was rewritten.",
-        "The world doesn't follow its rules anymore.",
+        "Its old rules no longer hold.",
         "Neither do its people.",
-        "You wake up after years of nothing.",
+        "You wake after years of silence.",
         "",
         "",
-        "Your journey begins now."
+        "Your journey starts now."
     };
 
     private readonly Vector2[] _stars;
@@ -49,12 +43,12 @@ public class IntroScroll
     private const float StoryTextScale = 5f;
     private const float StoryLineSpacingOffset = 10f;
     private const float HintTextScale = 2.6f;
-    private readonly StoryRevealMode _revealMode = StoryRevealMode.PanelByPanel;
     private const int StoryPanelCount = 3;
     private const float PanelRevealSeconds = 1.8f;
-    private const float SmoothRevealSeconds = 4.8f;
+    private const float RevealDuration = PanelRevealSeconds * StoryPanelCount;
     private const float RevealHoldSeconds = 1.5f;
     private const float ScrollSpeedReferenceHeight = 1080f;
+    private const float EarlyImageRevealScreenFraction = 0.22f;
 
     public bool IsFinished { get; private set; }
 
@@ -107,17 +101,12 @@ public class IntroScroll
 
             float lineStep = GetStoryLineStep();
             float totalTextHeight = _lines.Length * lineStep;
-            if (_scrollY + totalTextHeight < 0f)
+            float earlyRevealThresholdY = RenderManager.VirtualHeight * EarlyImageRevealScreenFraction;
+            if (_scrollY + totalTextHeight < earlyRevealThresholdY)
             {
-                // Scroll complete; if we have an image, transition to reveal phase
-                if (_storyTexture != null)
+                StartImageRevealOrFinish();
+                if (IsFinished)
                 {
-                    _phase = IntroPhase.ImageRevealing;
-                    _storyRevealTimer = 0f;
-                }
-                else
-                {
-                    IsFinished = true;
                     return;
                 }
             }
@@ -126,12 +115,7 @@ public class IntroScroll
         if (_phase == IntroPhase.ImageRevealing)
         {
             _storyRevealTimer += deltaSeconds;
-
-            float revealDuration = _revealMode == StoryRevealMode.PanelByPanel
-                ? PanelRevealSeconds * StoryPanelCount
-                : SmoothRevealSeconds;
-
-            _storyRevealTimer = Math.Min(_storyRevealTimer, revealDuration + RevealHoldSeconds);
+            _storyRevealTimer = Math.Min(_storyRevealTimer, RevealDuration + RevealHoldSeconds);
         }
 
         for (int i = 0; i < _stars.Length; i++)
@@ -149,13 +133,19 @@ public class IntroScroll
 
         KeyboardState currentKeyboardState = Keyboard.GetState();
 
-        bool continuePressed =
-            (currentKeyboardState.IsKeyDown(Keys.Enter) && !_previousKeyboardState.IsKeyDown(Keys.Enter)) ||
-            (currentKeyboardState.IsKeyDown(Keys.Space) && !_previousKeyboardState.IsKeyDown(Keys.Space));
+        bool enterPressed =
+            currentKeyboardState.IsKeyDown(Keys.Enter) && !_previousKeyboardState.IsKeyDown(Keys.Enter);
+        bool spacePressed =
+            currentKeyboardState.IsKeyDown(Keys.Space) && !_previousKeyboardState.IsKeyDown(Keys.Space);
 
-        if (continuePressed)
+        if (spacePressed)
         {
-            IsFinished = true;
+            HandleContinuePressed(isSpace: true);
+        }
+
+        else if (enterPressed)
+        {
+            HandleContinuePressed(isSpace: false);
         }
 
         _previousKeyboardState = currentKeyboardState;
@@ -211,7 +201,7 @@ public class IntroScroll
 
         float pulse = 0.55f + 0.45f * (float)Math.Sin(gameTime.TotalGameTime.TotalSeconds * 3.2f);
         Color hintColor = Color.White * pulse;
-        string hint = "Press ENTER or SPACE to continue";
+        string hint = GetHintText();
         Vector2 hintSize = _font.MeasureString(hint) * HintTextScale;
         Vector2 hintPosition = new Vector2(
             (RenderManager.VirtualWidth - hintSize.X) * 0.5f,
@@ -235,18 +225,6 @@ public class IntroScroll
         int targetWidth = RenderManager.VirtualWidth;
         int targetHeight = RenderManager.VirtualHeight;
         Rectangle source = CalculateCoverSourceRect(_storyTexture.Width, _storyTexture.Height, targetWidth, targetHeight);
-
-        if (_revealMode == StoryRevealMode.LeftToRight)
-        {
-            float progress = MathHelper.Clamp(_storyRevealTimer / SmoothRevealSeconds, 0f, 1f);
-            int sourceWidth = Math.Max(1, (int)(source.Width * progress));
-            int destinationWidth = Math.Max(1, (int)(targetWidth * progress));
-
-            Rectangle partialSource = new Rectangle(source.X, source.Y, sourceWidth, source.Height);
-            Rectangle partialDestination = new Rectangle(0, 0, destinationWidth, targetHeight);
-            spriteBatch.Draw(_storyTexture, partialDestination, partialSource, Color.White);
-            return;
-        }
 
         int panelWidth = source.Width / StoryPanelCount;
         for (int panelIndex = 0; panelIndex < StoryPanelCount; panelIndex++)
@@ -284,6 +262,69 @@ public class IntroScroll
         int croppedHeight = Math.Max(1, (int)(sourceWidth / targetAspect));
         int offsetY = (sourceHeight - croppedHeight) / 2;
         return new Rectangle(0, offsetY, sourceWidth, croppedHeight);
+    }
+
+    private void StartImageRevealOrFinish()
+    {
+        if (_storyTexture != null)
+        {
+            _phase = IntroPhase.ImageRevealing;
+            _storyRevealTimer = 0f;
+            return;
+        }
+
+        IsFinished = true;
+    }
+
+    private void RevealNextPanelInstantlyOrFinish()
+    {
+        float nextPanelRevealTime = (MathF.Floor(_storyRevealTimer / PanelRevealSeconds) + 1f) * PanelRevealSeconds;
+
+        if (nextPanelRevealTime <= RevealDuration)
+        {
+            _storyRevealTimer = nextPanelRevealTime;
+            return;
+        }
+
+        if (_storyRevealTimer < RevealDuration + RevealHoldSeconds)
+        {
+            _storyRevealTimer = RevealDuration + RevealHoldSeconds;
+            return;
+        }
+
+        IsFinished = true;
+    }
+
+    private string GetHintText()
+    {
+        if (_phase == IntroPhase.ImageRevealing)
+        {
+            if (_storyRevealTimer >= RevealDuration)
+            {
+                return "Press ENTER or SPACE to begin game";
+            }
+
+            return "SPACE = next panel";
+        }
+
+        return "Press ENTER or SPACE to continue";
+    }
+
+    private void HandleContinuePressed(bool isSpace)
+    {
+        if (_phase == IntroPhase.Scrolling)
+        {
+            StartImageRevealOrFinish();
+            return;
+        }
+
+        if (isSpace && _phase == IntroPhase.ImageRevealing)
+        {
+            RevealNextPanelInstantlyOrFinish();
+            return;
+        }
+
+        IsFinished = true;
     }
 
     private float GetStoryLineStep()

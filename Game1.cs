@@ -143,7 +143,10 @@ namespace SpellFall
             );
 
             _npc = new Npc(npcPosition);
-            _npc.Initialize(_gameManager.QuestManager);
+            _npc.Initialize(_gameManager.QuestManager, () =>
+            {
+                _gameManager.AddGameObject(AlienSpawner.CreateQuestSpawner());
+            });
             _npc.SetPlayerHealthBar(player.HealthBar);
 
 

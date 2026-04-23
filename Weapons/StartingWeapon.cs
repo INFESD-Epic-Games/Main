@@ -41,7 +41,7 @@ namespace SpellFall.Weapons
 			if (inputManager.LeftMousePress() && TryStartPrimaryAttackCooldown())
 			{
 				int totalDamage = _gameManager.Player.Stats.TotalDamage;
-				_gameManager.AddGameObject(new Arrow(_bowCenter, aimDirection, 350f, totalDamage));
+				_gameManager.AddGameObject(new Arrow(_bowCenter, aimDirection, 300f, totalDamage));
 			}
 
 			base.HandleInput(inputManager);
