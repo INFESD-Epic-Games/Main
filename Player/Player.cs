@@ -6,8 +6,10 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using SpellFall.Sounds;
 using System;
+using System.Collections.Generic;
 using WeaponBase = SpellFall.Weapons.Weapons;
 using Microsoft.Xna.Framework.Audio;
+using SpellFall.Items;
 using SpellFall.UI;
 
 namespace SpellFall.Character
@@ -40,8 +42,9 @@ namespace SpellFall.Character
         private Texture2D walkWest;
         private Texture2D currentTexture;
         private SoundEffect _dashSfx;
-        private Texture2D inventoryTexture;
-        private Inventory _inventory;
+        private Inventory _inventoryScreen;
+
+        public List<Item> Inventory { get; private set; } = [];
 
         public Player(Point Position)
         {
@@ -62,8 +65,7 @@ namespace SpellFall.Character
             walkWest = content.Load<Texture2D>("Walk_west");
             _dashSfx = content.Load<SoundEffect>("Dash");
 
-            inventoryTexture = content.Load<Texture2D>("brown");
-            _inventory = new Inventory(inventoryTexture);
+            _inventoryScreen = new Inventory(this, content);
 
             currentTexture = walkSouth;
             UpdateCollider();
@@ -245,7 +247,7 @@ namespace SpellFall.Character
         private void ToggleInventory()
         {
             GameState.IsInventoryOpen = !GameState.IsInventoryOpen;
-            _inventory.Show(GameState.IsInventoryOpen);
+            _inventoryScreen.Show(GameState.IsInventoryOpen);
         }
 
         private Rectangle GetSpriteBounds()
