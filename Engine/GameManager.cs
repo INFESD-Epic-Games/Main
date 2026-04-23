@@ -192,6 +192,11 @@ namespace SpellFall.Engine
                 _isBattleMusicPlaying = true;
                 _battleMusicTimer = TimeSpan.Zero;
             }
+
+            else if (enemyOnScreen && _isBattleMusicPlaying)
+            {
+                _battleMusicTimer = TimeSpan.Zero;
+            }
             
             else if (!enemyOnScreen && _isBattleMusicPlaying)
             {
