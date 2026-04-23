@@ -143,7 +143,10 @@ namespace SpellFall
             );
 
             _npc = new Npc(npcPosition);
-            _npc.Initialize(_gameManager.QuestManager);
+            _npc.Initialize(_gameManager.QuestManager, () =>
+            {
+                _gameManager.AddGameObject(AlienSpawner.CreateQuestSpawner());
+            });
             _npc.SetPlayerHealthBar(player.HealthBar);
 
 
@@ -152,11 +155,6 @@ namespace SpellFall
             _gameManager.AddGameObject(_npc);
             _gameManager.AddGameObject(player);
             _gameManager.AddGameObject(startingWeapon);
-
-            Point spawnerPosition = new Point(
-                player.GetPosition().Center.X + 420,
-                player.GetPosition().Center.Y - 180);
-            _gameManager.AddGameObject(new AlienSpawner(spawnerPosition));
         }
 
         protected override void LoadContent()

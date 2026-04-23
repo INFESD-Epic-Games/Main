@@ -2,7 +2,6 @@ using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using SpellFall.Collision;
 using SpellFall.Engine;
 using SpellFall.Weapons.Projectiles;
 using SpellFall.Character;
@@ -10,7 +9,7 @@ using Microsoft.Xna.Framework.Audio;
 
 namespace SpellFall.Enemies
 {
-    public class Alien : GameObject
+    public class Alien : Enemy
     {
         private const float MoveSpeed = 70f;
         private const float AlienScale = 0.5f;
@@ -19,12 +18,8 @@ namespace SpellFall.Enemies
         private const int ContactDamage = 5;
         private const float ContactCooldownSeconds = 3f;
 
-        private readonly GameManager _gameManager;
-        private readonly RectangleCollider _rectangleCollider;
-
         private Texture2D _texture;
         private Texture2D _healthBarTexture;
-        private Vector2 _position;
         private int _currentHealth;
         private bool _isDead;
         private float _contactCooldownTimer;
@@ -33,14 +28,11 @@ namespace SpellFall.Enemies
         private SoundEffect _enemyDeathSFX;
 
         public Alien(Point startPosition)
+            : base(startPosition)
         {
-            _gameManager = GameManager.GetGameManager();
-            _position = startPosition.ToVector2();
-            _rectangleCollider = new RectangleCollider(new Rectangle(startPosition, Point.Zero));
             _currentHealth = MaxHealth;
             _isDead = false;
             _contactCooldownTimer = 0f;
-            SetCollider(_rectangleCollider);
         }
 
         public override void Load(ContentManager content)
@@ -114,7 +106,14 @@ namespace SpellFall.Enemies
                 SpriteEffects.None,
                 0f);
 
-            DrawHealthBar(spriteBatch);
+            DrawHealthBar(
+                spriteBatch,
+                ref _healthBarTexture,
+                _frameHeight * AlienScale,
+                _currentHealth,
+                MaxHealth,
+                40,
+                6);
 
             base.Draw(gameTime, spriteBatch);
         }
@@ -133,41 +132,13 @@ namespace SpellFall.Enemies
             }
 
             _isDead = true;
-            if (_isDead)
+            KillEnemy(_enemyDeathSFX, () =>
             {
-                _enemyDeathSFX.Play();
-            }
-            _gameManager.RemoveGameObject(this);
-
-            if (_gameManager.QuestManager.HasActiveQuest("KillAliens"))
-            {
-                _gameManager.QuestManager.AddProgress("KillAliens", 1);
-            }
-        }
-
-        private void DrawHealthBar(SpriteBatch spriteBatch)
-        {
-            if (_healthBarTexture == null)
-            {
-                _healthBarTexture = new Texture2D(spriteBatch.GraphicsDevice, 1, 1);
-                _healthBarTexture.SetData(new[] { Color.White });
-            }
-
-            int barWidth = 40;
-            int barHeight = 6;
-            float healthPercentage = (float)_currentHealth / MaxHealth;
-            int barX = (int)(_position.X - barWidth / 2f);
-            int barY = (int)(_position.Y - (_frameHeight * AlienScale / 2f) - 16);
-
-            spriteBatch.Draw(
-                _healthBarTexture,
-                new Rectangle(barX, barY, barWidth, barHeight),
-                Color.DarkRed);
-
-            spriteBatch.Draw(
-                _healthBarTexture,
-                new Rectangle(barX, barY, (int)(barWidth * healthPercentage), barHeight),
-                Color.LimeGreen);
+                if (_gameManager.QuestManager.HasActiveQuest("KillAliens"))
+                {
+                    _gameManager.QuestManager.AddProgress("KillAliens", 1);
+                }
+            });
         }
 
         private int GetFrameIndex(Vector2 playerPosition)
@@ -193,18 +164,11 @@ namespace SpellFall.Enemies
             return 3;
         }
 
-        private void UpdateCollider()
+        protected override void UpdateCollider()
         {
             int colliderWidth = (int)(_frameWidth * AlienScale * HitboxScale);
             int colliderHeight = (int)(_frameHeight * AlienScale * HitboxScale);
-            Point colliderLocation = (_position - new Vector2(colliderWidth / 2f, colliderHeight / 2f)).ToPoint();
-
-            _rectangleCollider.shape = new Rectangle(colliderLocation, new Point(colliderWidth, colliderHeight));
-        }
-
-        public Vector2 GetPosition()
-        {
-            return _position;
+            UpdateCenteredCollider(colliderWidth, colliderHeight);
         }
     }
 }

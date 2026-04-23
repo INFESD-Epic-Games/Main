@@ -11,7 +11,7 @@ namespace SpellFall.Weapons.Projectiles
         private const float ArrowHitboxRatio = 0.2f;
         public int Damage { get; }
 
-        public Arrow(Vector2 location, Vector2 direction, float speed, int damage, float maxLifetime = 10f)
+        public Arrow(Vector2 location, Vector2 direction, float speed, int damage, float maxLifetime = 5f)
             : base(
                 location,
                 direction,

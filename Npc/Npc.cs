@@ -25,6 +25,7 @@ namespace SpellFall.Npcs
 
         private Quest quest;
         private QuestManager questManager;
+        private Action onQuestAccepted;
         private HealthBar playerHealthBar;
         private KeyboardState previousKeyboard;
         private TextBubble textBubble;
@@ -44,9 +45,10 @@ namespace SpellFall.Npcs
             textBubble = GameManager.GetGameManager().textBubble;
         }
 
-        public void Initialize(QuestManager questManager)
+        public void Initialize(QuestManager questManager, Action onQuestAccepted = null)
         {
             this.questManager = questManager;
+            this.onQuestAccepted = onQuestAccepted;
 
             quest = new Quest(
                 "KillAliens",
@@ -125,6 +127,8 @@ namespace SpellFall.Npcs
                 textBubble.SetText("Hello! Can you defeat 3 aliens?");
                 textBubble.Show();
                 questManager.AddQuest(quest);
+                onQuestAccepted?.Invoke();
+                onQuestAccepted = null;
                 System.Console.WriteLine(questManager.ActiveQuests);
                 hasGivenQuest = true;
             }
