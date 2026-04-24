@@ -46,11 +46,11 @@ namespace SpellFall.Character
         public Player(Point Position)
         {
             _gameManager = GameManager.GetGameManager();
+            _map = _gameManager.map();
             Stats = new PlayerStats();
             rectangleCollider = new RectangleCollider(new Rectangle(Position, Point.Zero));
             position = Position.ToVector2();
             SetCollider(rectangleCollider);
-            _map = _gameManager.map();
             _healthBar = new HealthBar(Stats);
         }
 
@@ -64,6 +64,13 @@ namespace SpellFall.Character
             _dashSfx = content.Load<SoundEffect>("Dash");
 
             currentTexture = walkSouth;
+            int frameWidth = walkSouth.Width / 4;
+            int frameHeight = walkSouth.Height;
+
+            int colliderWidth = (int)(frameWidth * PlayerScale * ColliderWidthScale);
+            int colliderHeight = (int)(frameHeight * PlayerScale * ColliderHeightScale);
+
+            rectangleCollider.shape = new Rectangle(0, 0, colliderWidth, colliderHeight);
             UpdateCollider();
         }
 
@@ -116,7 +123,8 @@ namespace SpellFall.Character
                 inputDirection.Normalize();
                 lastDirection = inputDirection;
 
-                position += inputDirection * Stats.TotalSpeed;
+                Vector2 velocity = inputDirection * Stats.TotalSpeed;
+                TryMove(velocity);
 
                 if (Math.Abs(inputDirection.X) > Math.Abs(inputDirection.Y))
                 {
@@ -167,8 +175,6 @@ namespace SpellFall.Character
         {
             if (other is Enemies.AlienSpawner)
             {
-                position = _previousPosition;
-                UpdateCollider();
                 _healthBar.SetPosition(GetVisualBounds());
             }
 
@@ -227,7 +233,12 @@ namespace SpellFall.Character
                 ? Vector2.Normalize(_thrustInput)
                 : lastDirection;
 
-            position += dashDirection * _dashDistance;
+            Vector2 dashStep = dashDirection * (_dashDistance / 10f);
+
+            for (int i = 0; i < 10; i++)
+            {
+                TryMove(dashStep);
+            }
           
             // Start cooldown
             _canDash = false;
@@ -250,15 +261,51 @@ namespace SpellFall.Character
 
         private void UpdateCollider()
         {
-            Rectangle spriteBounds = GetSpriteBounds();
-            int colliderWidth = (int)(spriteBounds.Width * ColliderWidthScale);
-            int colliderHeight = (int)(spriteBounds.Height * ColliderHeightScale);
+            int colliderWidth = (int)(rectangleCollider.shape.Width == 0
+                ? (currentTexture.Width / 4) * PlayerScale * ColliderWidthScale
+                : rectangleCollider.shape.Width);
+
+            int colliderHeight = (int)(rectangleCollider.shape.Height == 0
+                ? currentTexture.Height * PlayerScale * ColliderHeightScale
+                : rectangleCollider.shape.Height);
+
+            Point colliderLocation = (position - new Vector2(colliderWidth / 2f, colliderHeight / 2f)).ToPoint();
 
             rectangleCollider.shape = new Rectangle(
-                spriteBounds.Center.X - colliderWidth / 2,
-                spriteBounds.Center.Y - colliderHeight / 2,
-                colliderWidth,
-                colliderHeight);
+                colliderLocation,
+                new Point(colliderWidth, colliderHeight)
+            );
+        }
+
+        private void TryMove(Vector2 velocity)
+        {
+            var _map = _gameManager.map();
+            if (_map == null)
+            {
+                position += velocity;
+                return;
+            }
+
+            int width = rectangleCollider.shape.Width;
+            int height = rectangleCollider.shape.Height;
+
+        
+            Vector2 newPosX = new Vector2(position.X + velocity.X, position.Y);
+            if (!_map.IsColliding(newPosX - new Vector2(width / 2f, height / 2f), width, height))
+            {
+                position.X += velocity.X;
+            }
+
+            Vector2 newPosY = new Vector2(position.X, position.Y + velocity.Y);
+            if (!_map.IsColliding(newPosY - new Vector2(width / 2f, height / 2f), width, height))
+            {
+                position.Y += velocity.Y;
+            }
+           
+        }
+        public void SetMap(Map map)
+        {
+            _map = map;
         }
     }
 }

@@ -17,8 +17,7 @@ namespace SpellFall.Background
         private const int _mapHeight = 16;
         private int[,] _map = new int[_mapWidth, _mapHeight];
         private int _tilesPerRow;
-        private Random _random = new Random();  
-        private GameManager _gameManager;
+        private Random _random = new Random();
         private Texture2D _textureBoundaries;
         private Texture2D _textureStoneWall;
         private Texture2D _texturePlantShadows;
