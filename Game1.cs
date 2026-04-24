@@ -149,9 +149,10 @@ namespace SpellFall
             });
             _npc.SetPlayerHealthBar(player.HealthBar);
 
-
+            Map map = new Map();
+            _gameManager.Map = map;       
+            _gameManager.AddGameObject(map);
             // Add the starting objects to the GameManager
-            _gameManager.AddGameObject(new Map());
             _gameManager.AddGameObject(_npc);
             _gameManager.AddGameObject(player);
             _gameManager.AddGameObject(startingWeapon);

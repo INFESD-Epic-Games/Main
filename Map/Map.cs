@@ -17,13 +17,20 @@ namespace SpellFall.Background
         private const int _mapHeight = 16;
         private int[,] _map = new int[_mapWidth, _mapHeight];
         private int _tilesPerRow;
-        private Random _random = new Random();
-
+        private Random _random = new Random();  
+        private GameManager _gameManager;
+        private Texture2D _textureBoundaries;
+        private Texture2D _textureStoneWall;
+        private Texture2D _texturePlantShadows;
+        private Texture2D _propsShadows;
         public override void Load(ContentManager content)
         {
             _texture = content.Load<Texture2D>("TX Tileset Grass");
-            _tilesPerRow = Math.Max(1, _texture.Width / _tileSize);
-
+            _textureBoundaries = content.Load<Texture2D>("TX Tileset Wall");
+            _textureStoneWall = content.Load<Texture2D>("TX Tileset Stone Ground");
+            _texturePlantShadows = content.Load<Texture2D>("TX Plant with Shadow");
+            _propsShadows = content.Load<Texture2D>("TX Props with Shadow");
+            _tilesPerRow = Math.Max(1, _texture.Width / _tileSize); 
             GenerateMap();
             AddDetails();
             base.Load(content);
@@ -80,7 +87,38 @@ namespace SpellFall.Background
                 }
             }
         }
+        
+       public bool IsBlocked(int x, int y)
+        {
+            // Outside map = always blocked
+            if (x < 0 || y < 0 || x >= _mapWidth || y >= _mapHeight)
+                return true;
 
+            return _map[x, y] == 40;
+        }
+
+        // Convert world position (pixels) → tile position
+        public Point WorldToTile(Vector2 position)
+        {
+            return new Point(
+                (int)(position.X / _screenTileSize),
+                (int)(position.Y / _screenTileSize)
+            );
+        }
+
+        // Check full rectangle collision (for player/enemy size)
+        public bool IsColliding(Vector2 position, int width, int height)
+        {
+            Point topLeft = WorldToTile(position);
+            Point topRight = WorldToTile(new Vector2(position.X + width, position.Y));
+            Point bottomLeft = WorldToTile(new Vector2(position.X, position.Y + height));
+            Point bottomRight = WorldToTile(new Vector2(position.X + width, position.Y + height));
+
+            return IsBlocked(topLeft.X, topLeft.Y) ||
+                   IsBlocked(topRight.X, topRight.Y) ||
+                   IsBlocked(bottomLeft.X, bottomLeft.Y) ||
+                   IsBlocked(bottomRight.X, bottomRight.Y);
+        }
         public void AddDetails()
         {
             for (int x = 1; x < _mapWidth - 1; x++)

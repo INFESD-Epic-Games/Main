@@ -8,6 +8,7 @@ using SpellFall.Sounds;
 using System;
 using WeaponBase = SpellFall.Weapons.Weapons;
 using Microsoft.Xna.Framework.Audio;
+using SpellFall.Background;
 
 namespace SpellFall.Character
 {
@@ -39,14 +40,17 @@ namespace SpellFall.Character
         private Texture2D walkWest;
         private Texture2D currentTexture;
         private SoundEffect _dashSfx;
+        protected Map _map;
+        protected readonly GameManager _gameManager;
 
         public Player(Point Position)
         {
+            _gameManager = GameManager.GetGameManager();
             Stats = new PlayerStats();
             rectangleCollider = new RectangleCollider(new Rectangle(Position, Point.Zero));
             position = Position.ToVector2();
             SetCollider(rectangleCollider);
-
+            _map = _gameManager.map();
             _healthBar = new HealthBar(Stats);
         }
 
