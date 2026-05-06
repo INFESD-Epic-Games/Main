@@ -29,6 +29,8 @@ namespace SpellFall.Npcs
         private HealthBar playerHealthBar;
         private KeyboardState previousKeyboard;
         private TextBubble textBubble;
+        private Texture2D _indicatorTexture;
+        private Vector2 _indicatorPosition;
 
 
 
@@ -62,6 +64,7 @@ namespace SpellFall.Npcs
         {
             base.Load(content);
             walkSouth = content.Load<Texture2D>("Npc Rombo");
+            _indicatorTexture = content.Load<Texture2D>("NPC indicator");
             
             currentTexture = walkSouth;
 
@@ -87,6 +90,7 @@ namespace SpellFall.Npcs
             }
             previousKeyboard = currentKeyboard;
         }
+
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
             int frameHeight = currentTexture.Height / 4;
@@ -112,6 +116,27 @@ namespace SpellFall.Npcs
                 SpriteEffects.None,
                 0f
             );
+
+            if (!hasGivenQuest || (!questCompletedRewardGiven && quest.IsCompleted))
+            {
+                _indicatorPosition = position + new Vector2(0, -150);
+
+                spriteBatch.Draw(
+                    _indicatorTexture,
+                    _indicatorPosition,
+                    null,
+                    Color.White,
+                    0f,
+                    new Vector2(_indicatorTexture.Width / 2f, _indicatorTexture.Height / 2f),
+                    4f,
+                    SpriteEffects.None,
+                    0f
+                );
+            }
+            else
+            {
+                return;
+            }
         }
         private void Interact()
         {
