@@ -40,12 +40,13 @@ namespace SpellFall.Character
         private Texture2D walkWest;
         private Texture2D currentTexture;
         private SoundEffect _dashSfx;
-        protected Room _room;
+        protected Map _map;
         protected readonly GameManager _gameManager;
 
         public Player(Point Position)
         {
             _gameManager = GameManager.GetGameManager();
+            _map = _gameManager.map();
             Stats = new PlayerStats();
             rectangleCollider = new RectangleCollider(new Rectangle(Position, Point.Zero));
             position = Position.ToVector2();
@@ -278,8 +279,8 @@ namespace SpellFall.Character
 
         private void TryMove(Vector2 velocity)
         {
-            // var _room = _gameManager.Room();
-            if (_room == null)
+            var _map = _gameManager.map();
+            if (_map == null)
             {
                 position += velocity;
                 return;
@@ -290,21 +291,21 @@ namespace SpellFall.Character
 
         
             Vector2 newPosX = new Vector2(position.X + velocity.X, position.Y);
-            if (!_room.IsColliding(newPosX - new Vector2(width / 2f, height / 2f), width, height))
+            if (!_map.IsColliding(newPosX - new Vector2(width / 2f, height / 2f), width, height))
             {
                 position.X += velocity.X;
             }
 
             Vector2 newPosY = new Vector2(position.X, position.Y + velocity.Y);
-            if (!_room.IsColliding(newPosY - new Vector2(width / 2f, height / 2f), width, height))
+            if (!_map.IsColliding(newPosY - new Vector2(width / 2f, height / 2f), width, height))
             {
                 position.Y += velocity.Y;
             }
            
         }
-        public void SetMap(Room room)
+        public void SetMap(Map map)
         {
-            _room = room;
+            _map = map;
         }
     }
 }

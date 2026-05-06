@@ -8,7 +8,6 @@ using SpellFall.Quests;
 using SpellFall.UI;
 using SpellFall.Background;
 using Microsoft.Xna.Framework.Media;
-using SpellFall.Engine;
 
 namespace SpellFall.Engine
 {
@@ -35,12 +34,8 @@ namespace SpellFall.Engine
         private bool _isBattleMusicPlaying = false;
         private TimeSpan _battleMusicTimer = TimeSpan.Zero;
         private TimeSpan _battleMusicBufferTime = TimeSpan.FromSeconds(1);
-        public World World { get; set; }
-        public Point CurrentRoomPos = Point.Zero;
-        public bool ShowMap = false;
-        private Texture2D _pixel;
+        public Map Map { get; set; }
         private bool _isOverWorldMusicPlaying = false;
-    
 
         public static GameManager GetGameManager()
         {
@@ -83,8 +78,6 @@ namespace SpellFall.Engine
             {
                 gameObject.Load(content);
             }
-            _pixel = new Texture2D(Game.GraphicsDevice, 1, 1);
-            _pixel.SetData(new[] { Color.White });
         }
 
         public void HandleInput(InputManager inputManager)
@@ -117,13 +110,12 @@ namespace SpellFall.Engine
             if (GameState.InMainMenu) return;
             if (GameState.IsPaused) return;
             if (GameState.InGameOver) return;
-
-
+            
             InputManager.Update();
 
             // Handle input
             HandleInput(InputManager);
-        
+
 
             // Update
             foreach (GameObject gameObject in _gameObjects)
@@ -338,9 +330,9 @@ namespace SpellFall.Engine
             return Math.Max(0, alienCount);
         }
 
-        // public Room Room()
-        // {
-        //     return room;
-        // }
+        public Map map()
+        {
+            return Map;
+        }
     }
 }

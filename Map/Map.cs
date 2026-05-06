@@ -7,25 +7,21 @@ using SpellFall.Engine;
 
 namespace SpellFall.Background
 {
-    public class Room : GameObject
+    public class Map : GameObject
     {
         private Texture2D _texture;
         private const int _tileSize = 32;
         private const int _renderScale = 4;
         private const int _screenTileSize = _tileSize * _renderScale;
-        private const int _roomWidth = 16;
-        private const int _roomHeight = 16;
-        private int[,] _room = new int[_roomWidth, _roomHeight];
+        private const int _mapWidth = 16;
+        private const int _mapHeight = 16;
+        private int[,] _map = new int[_mapWidth, _mapHeight];
         private int _tilesPerRow;
         private Random _random = new Random();
         private Texture2D _textureBoundaries;
         private Texture2D _textureStoneWall;
         private Texture2D _texturePlantShadows;
         private Texture2D _propsShadows;
-        public bool DoorNorth;
-        public bool DoorSouth;
-        public bool DoorEast;
-        public bool DoorWest;
         public override void Load(ContentManager content)
         {
             _texture = content.Load<Texture2D>("TX Tileset Grass");
@@ -34,6 +30,7 @@ namespace SpellFall.Background
             _texturePlantShadows = content.Load<Texture2D>("TX Plant with Shadow");
             _propsShadows = content.Load<Texture2D>("TX Props with Shadow");
             _tilesPerRow = Math.Max(1, _texture.Width / _tileSize); 
+            GenerateMap();
             AddDetails();
             base.Load(content);
         }
@@ -48,11 +45,11 @@ namespace SpellFall.Background
 
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            for (int x = 0; x < _roomWidth; x++)
+            for (int x = 0; x < _mapWidth; x++)
             {
-                for (int y = 0; y < _roomHeight; y++)
+                for (int y = 0; y < _mapHeight; y++)
                 {
-                    int tileIndex = _room[x, y];
+                    int tileIndex = _map[x, y];
                     Rectangle source = GetTileRectangle(tileIndex, _tilesPerRow);
 
                     spriteBatch.Draw(
@@ -72,56 +69,31 @@ namespace SpellFall.Background
             base.Draw(gameTime, spriteBatch);
         }
 
-        public void GenerateRoom()
+        public void GenerateMap()
         {
-            for (int x = 0; x < _roomWidth; x++)
+            for (int x = 0; x < _mapWidth; x++)
             {
-                for (int y = 0; y < _roomHeight; y++)
+                for (int y = 0; y < _mapHeight; y++)
                 {
-                    bool isWall = x == 0 || y == 0 || x == _roomWidth - 1 || y == _roomHeight - 1;
-
-                    if (isWall)
-                        _room[x, y] = 40;
+                    if (x == 0 || y == 0 || x == _mapWidth - 1 || y == _mapHeight - 1)
+                    {
+                        _map[x, y] = 40; // Wall tile
+                    }
                     else
-                        _room[x, y] = 0;
+                    {
+                        _map[x, y] = 0; // Floor tile
+                    }
                 }
             }
-
-            ApplyDoors();
         }
         
-        private void ApplyDoors()
-        {
-            int midX = _roomWidth / 2;
-            int midY = _roomHeight / 2;
-
-            int doorHalf = 1;
-
-            if (DoorNorth)
-                for (int x = midX - doorHalf; x <= midX + doorHalf; x++)
-                    _room[x, 0] = 0;
-
-            if (DoorSouth)
-                for (int x = midX - doorHalf; x <= midX + doorHalf; x++)
-                    _room[x, _roomHeight - 1] = 0;
-
-            if (DoorWest)
-                for (int y = midY - doorHalf; y <= midY + doorHalf; y++)
-                    _room[0, y] = 0;
-
-            if (DoorEast)
-                for (int y = midY - doorHalf; y <= midY + doorHalf; y++)
-                    _room[_roomWidth - 1, y] = 0;
-        }
-
-
        public bool IsBlocked(int x, int y)
         {
             // Outside map = always blocked
-            if (x < 0 || y < 0 || x >= _roomWidth || y >= _roomHeight)
+            if (x < 0 || y < 0 || x >= _mapWidth || y >= _mapHeight)
                 return true;
 
-            return _room[x, y] == 40;
+            return _map[x, y] == 40;
         }
 
         // Convert world position (pixels) → tile position
@@ -148,18 +120,16 @@ namespace SpellFall.Background
         }
         public void AddDetails()
         {
-            for (int x = 1; x < _roomWidth - 1; x++)
+            for (int x = 1; x < _mapWidth - 1; x++)
             {
-                for (int y = 1; y < _roomHeight - 1; y++)
+                for (int y = 1; y < _mapHeight - 1; y++)
                 {
-                    if (_room[x, y] == 0 && _random.NextDouble() < 0.3)
+                    if (_map[x, y] == 0 && _random.NextDouble() < 0.3)
                     {
-                        _room[x, y] = _random.Next(3, 61); // Detail tile
+                        _map[x, y] = _random.Next(3, 61); // Detail tile
                     }
                 }
             }
         }
-
-        
     }
 }

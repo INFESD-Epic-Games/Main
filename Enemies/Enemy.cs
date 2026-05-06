@@ -16,7 +16,7 @@ namespace SpellFall.Enemies
         protected readonly RectangleCollider _rectangleCollider;
         protected readonly int _enemyId;
         protected Vector2 _position;
-        protected Room _room;
+        protected Map _map;
 
         protected Enemy(Point startPosition)
         {
@@ -29,12 +29,12 @@ namespace SpellFall.Enemies
 
             _rectangleCollider = new RectangleCollider(new Rectangle(startPosition, Point.Zero));
             SetCollider(_rectangleCollider);
-            _room = _gameManager.Room();
+            _map = _gameManager.map();
         }
 
         protected void TryMove(Vector2 velocity, int width, int height)
         {
-            if (_room == null)
+            if (_map == null)
             {
                 _position += velocity;
                 return;
@@ -42,14 +42,14 @@ namespace SpellFall.Enemies
 
             // Move X
             Vector2 newPosX = new Vector2(_position.X + velocity.X, _position.Y);
-            if (!_room.IsColliding(newPosX, width, height))
+            if (!_map.IsColliding(newPosX, width, height))
             {
                 _position = newPosX;
             }
 
             // Move Y
             Vector2 newPosY = new Vector2(_position.X, _position.Y + velocity.Y);
-            if (!_room.IsColliding(newPosY, width, height))
+            if (!_map.IsColliding(newPosY, width, height))
             {
                 _position = newPosY;
             }
