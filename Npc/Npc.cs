@@ -154,12 +154,10 @@ namespace SpellFall.Npcs
                 questManager.AddQuest(quest);
                 onQuestAccepted?.Invoke();
                 onQuestAccepted = null;
-                System.Console.WriteLine(questManager.ActiveQuests);
                 hasGivenQuest = true;
             }
             else if (!quest.IsCompleted)
             {
-                System.Console.WriteLine(quest.Name);
                 textBubble.SetText("You haven't completed the quest yet...");
                 textBubble.Show();
             }
@@ -196,9 +194,6 @@ namespace SpellFall.Npcs
 
         private void GiveReward()
         {
-            Console.WriteLine("Player gets +10 max health!");
-
-            // voorbeeld:
             playerHealthBar.IncreaseMaxHealth(10);
         }
     }
