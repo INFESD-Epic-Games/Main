@@ -77,11 +77,11 @@ namespace SpellFall.Background
                 {
                     if (x == 0 || y == 0 || x == _mapWidth - 1 || y == _mapHeight - 1)
                     {
-                        _map[x, y] = 40; // Wall tile
+                        _map[x, y] = 40; 
                     }
                     else
                     {
-                        _map[x, y] = 0; // Floor tile
+                        _map[x, y] = 0; 
                     }
                 }
             }
@@ -89,14 +89,13 @@ namespace SpellFall.Background
         
        public bool IsBlocked(int x, int y)
         {
-            // Outside map = always blocked
             if (x < 0 || y < 0 || x >= _mapWidth || y >= _mapHeight)
                 return true;
 
             return _map[x, y] == 40;
         }
 
-        // Convert world position (pixels) → tile position
+        
         public Point WorldToTile(Vector2 position)
         {
             return new Point(
@@ -105,7 +104,7 @@ namespace SpellFall.Background
             );
         }
 
-        // Check full rectangle collision (for player/enemy size)
+    
         public bool IsColliding(Vector2 position, int width, int height)
         {
             Point topLeft = WorldToTile(position);
@@ -126,7 +125,7 @@ namespace SpellFall.Background
                 {
                     if (_map[x, y] == 0 && _random.NextDouble() < 0.3)
                     {
-                        _map[x, y] = _random.Next(3, 61); // Detail tile
+                        _map[x, y] = _random.Next(3, 61);
                     }
                 }
             }
