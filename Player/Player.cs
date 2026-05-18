@@ -49,7 +49,7 @@ namespace SpellFall.Character
         private SoundEffect _dashSfx;
         private Inventory _inventoryScreen;
 
-        public List<Item> Inventory { get; private set; } = [];
+        public List<IItem> Inventory { get; private set; } = [];
 
         public Player(Point Position)
         {

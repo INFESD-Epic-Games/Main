@@ -2,16 +2,11 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace SpellFall.Items;
 
-public abstract class Item
+public interface IItem
 {
-    public string Name;
-    public string Description;
-    public LootTier Tier;
-    public Texture2D Icon;
-    public bool IsUnique;
-}
-
-public class WeaponItem : Item
-{
-    public int Damage;
+    public string Name { get; }
+    public string Description { get; }
+    public string Rarity { get; }
+    public Texture2D Icon { get; }
+    public bool IsUnique { get; }
 }

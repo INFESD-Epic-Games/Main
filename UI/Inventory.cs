@@ -1,8 +1,10 @@
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using Gum.Converters;
 using Gum.DataTypes;
 using Gum.Forms.Controls;
+using Gum.Managers;
 using Gum.Wireframe;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -16,7 +18,7 @@ namespace SpellFall.UI;
 
 public class Inventory
 {
-    public List<Item> Items => _player.Inventory;
+    public List<IItem> Items => _player.Inventory;
     
     private readonly Player _player;
     
@@ -63,6 +65,8 @@ public class Inventory
         InitItems(inlayTexture);
         InitCharacter(inlayTexture);
         InitUnique(inlayTexture);
+        
+        LoadItems();
     }
 
     private void InitBackground(Texture2D texture)
@@ -131,6 +135,25 @@ public class Inventory
         
         _itemsPanel.AddChild(_itemsBackground);
     }
+
+    private void LoadItems()
+    {
+        ContainerRuntime container = new ContainerRuntime()
+        {
+            ChildrenLayout = ChildrenLayout.AutoGridHorizontal,
+            Width = 0,
+            WidthUnits = DimensionUnitType.RelativeToParent, 
+            Height = 0,
+            HeightUnits = DimensionUnitType.RelativeToParent,
+        };
+        
+        foreach (Panel p in Items.Select(ItemSquare))
+        {
+            container.AddChild(p);
+        }
+        
+        _itemsPanel.AddChild(container);
+    }    
     
     private void InitCharacter(Texture2D texture)
     {
@@ -239,5 +262,31 @@ public class Inventory
     public void Show(bool visible = true)
     {
         _panel.IsVisible = visible;
+    }
+
+    private Panel ItemSquare(IItem item)
+    {
+        Panel panel = new Panel()
+        {
+            Width = 64,
+            Height = 64,
+        };
+
+        SpriteRuntime spriteRuntime = new SpriteRuntime()
+        {
+            Texture = item.Icon,
+            Width = 48,
+            Height = 48,
+            XOrigin = HorizontalAlignment.Center,
+            YOrigin = VerticalAlignment.Center,
+            XUnits = GeneralUnitType.PixelsFromMiddle,
+            YUnits = GeneralUnitType.PixelsFromMiddle,
+            X = 0,
+            Y = 0
+        };
+        
+        panel.AddChild(spriteRuntime);
+        
+        return panel;
     }
 }

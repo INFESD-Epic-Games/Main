@@ -135,6 +135,7 @@ namespace SpellFall
             Player player = new Player(new Point(RenderManager.VirtualWidth / 2 - 100, RenderManager.VirtualHeight / 2 - 100));
             _gameManager.Initialize(Content, this, player);
             StartingWeapon startingWeapon = new StartingWeapon();
+            player.Inventory.Add(startingWeapon);
             player.EquipWeapon(startingWeapon);
 
             Point npcPosition = new Point(

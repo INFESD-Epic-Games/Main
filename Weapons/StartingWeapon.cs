@@ -3,12 +3,20 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using SpellFall.Collision;
 using SpellFall.Engine;
+using SpellFall.Items;
 using SpellFall.Weapons.Projectiles;
 
 namespace SpellFall.Weapons
 {
-	public class StartingWeapon : Weapons
+	public class StartingWeapon : Weapons, IItem
 	{
+		public string Name => "Starting Bow";
+		public string Description => "A weak bow.";
+
+		public string Rarity => "Common";
+		public Texture2D Icon => _bowTexture;
+		public bool IsUnique => false;
+		
 		private const float BowScale = 0.45f;
 
 		private Texture2D _bowTexture;
