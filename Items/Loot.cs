@@ -104,6 +104,8 @@ namespace SpellFall.Items
             {
                 _isOpening = true;
                 RollLootIfNeeded();
+                
+                // Add loot to inventory
             }
 
             base.OnCollision(other);
