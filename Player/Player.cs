@@ -32,6 +32,7 @@ namespace SpellFall.Character
         private Vector2 _dashEndPosition;
         private HealthBar _healthBar;
         public HealthBar HealthBar => _healthBar;
+        private DashBar _dashBar;
         public PlayerStats Stats { get; }
         Vector2 position;
         private int currentFrame = 0;
@@ -45,6 +46,8 @@ namespace SpellFall.Character
         private Texture2D currentTexture;
         private SoundEffect _dashSfx;
 
+        public float DashCooldownPercentage => _dashTimer / _dashCooldown;
+
         public Player(Point Position)
         {
             Stats = new PlayerStats();
@@ -53,6 +56,7 @@ namespace SpellFall.Character
             SetCollider(rectangleCollider);
 
             _healthBar = new HealthBar(Stats);
+            _dashBar = new DashBar(this);
         }
 
         public override void Load(ContentManager content)
@@ -181,6 +185,9 @@ namespace SpellFall.Character
 
             _healthBar.SetPosition(GetVisualBounds());
             _healthBar.Update(gameTime);
+
+            _dashBar.SetPosition(GetVisualBounds());
+            
             base.Update(gameTime);
         }
 
@@ -220,6 +227,7 @@ namespace SpellFall.Character
                 0f
             );
             _healthBar.DrawHealthBar(spriteBatch);
+            _dashBar.DrawDashBar(spriteBatch);
             base.Draw(gameTime, spriteBatch);
         }
 
