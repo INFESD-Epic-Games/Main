@@ -31,6 +31,8 @@ namespace SpellFall.Engine
         private Song _battleMusic;
         private Song _overworldmusic;
         private bool _isBattleMusicPlaying = false;
+        private TimeSpan _battleMusicTimer = TimeSpan.Zero;
+        private TimeSpan _battleMusicBufferTime = TimeSpan.FromSeconds(1);
 
         private bool _isOverWorldMusicPlaying = false;
 
@@ -57,6 +59,7 @@ namespace SpellFall.Engine
 
         public void Initialize(ContentManager content, Game game, Player player)
         {
+            ResetWorldState();
             Game = game;
             _content = content;
             Player = player;
@@ -104,6 +107,7 @@ namespace SpellFall.Engine
         {
             if (GameState.InMainMenu) return;
             if (GameState.IsPaused) return;
+            if (GameState.InGameOver) return;
             
             InputManager.Update();
 
@@ -186,14 +190,28 @@ namespace SpellFall.Engine
                 MediaPlayer.Play(_battleMusic);
                 MediaPlayer.IsRepeating = true;
                 _isBattleMusicPlaying = true;
+                _battleMusicTimer = TimeSpan.Zero;
+            }
+
+            else if (enemyOnScreen && _isBattleMusicPlaying)
+            {
+                _battleMusicTimer = TimeSpan.Zero;
             }
             
             else if (!enemyOnScreen && _isBattleMusicPlaying)
             {
-                MediaPlayer.Stop();
-                _isBattleMusicPlaying = false;
-                MediaPlayer.Play(_overworldmusic);
-                MediaPlayer.IsRepeating = true;
+                if (_battleMusicTimer > _battleMusicBufferTime)
+                {
+                    MediaPlayer.Stop();
+                    _isBattleMusicPlaying = false;
+                    _battleMusicTimer = TimeSpan.Zero;
+                    MediaPlayer.Play(_overworldmusic);
+                    MediaPlayer.IsRepeating = true;
+                }
+                else
+                {
+                    _battleMusicTimer += gameTime.ElapsedGameTime;
+                }
             }
         }
 
@@ -248,6 +266,24 @@ namespace SpellFall.Engine
             _toBeRemoved.Add(gameObject);
         }
 
+        private void ResetWorldState()
+        {
+            _gameObjects.Clear();
+            _toBeRemoved.Clear();
+            _toBeAdded.Clear();
+            _toBeAdded.Add(textBubble);
+            Player = null;
+
+            _isBattleMusicPlaying = false;
+            _isOverWorldMusicPlaying = false;
+            _battleMusicTimer = TimeSpan.Zero;
+        }
+
+        public void ClearWorldState()
+        {
+            ResetWorldState();
+        }
+
         /// <summary>
         /// Get a random location on the screen.
         /// </summary>
@@ -256,6 +292,40 @@ namespace SpellFall.Engine
             return new Vector2(
                 RNG.Next(0, RenderManager.VirtualWidth),
                 RNG.Next(0, RenderManager.VirtualHeight));
+        }
+
+        public int GetAlienCount(bool includePendingChanges = true)
+        {
+            int alienCount = 0;
+
+            foreach (GameObject gameObject in _gameObjects)
+            {
+                if (gameObject is SpellFall.Enemies.Alien)
+                {
+                    alienCount++;
+                }
+            }
+
+            if (includePendingChanges)
+            {
+                foreach (GameObject gameObject in _toBeAdded)
+                {
+                    if (gameObject is SpellFall.Enemies.Alien)
+                    {
+                        alienCount++;
+                    }
+                }
+
+                foreach (GameObject gameObject in _toBeRemoved)
+                {
+                    if (gameObject is SpellFall.Enemies.Alien)
+                    {
+                        alienCount--;
+                    }
+                }
+            }
+
+            return Math.Max(0, alienCount);
         }
     }
 }

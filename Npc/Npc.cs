@@ -25,9 +25,12 @@ namespace SpellFall.Npcs
 
         private Quest quest;
         private QuestManager questManager;
+        private Action onQuestAccepted;
         private HealthBar playerHealthBar;
         private KeyboardState previousKeyboard;
         private TextBubble textBubble;
+        private Texture2D _indicatorTexture;
+        private Vector2 _indicatorPosition;
 
 
 
@@ -44,13 +47,14 @@ namespace SpellFall.Npcs
             textBubble = GameManager.GetGameManager().textBubble;
         }
 
-        public void Initialize(QuestManager questManager)
+        public void Initialize(QuestManager questManager, Action onQuestAccepted = null)
         {
             this.questManager = questManager;
+            this.onQuestAccepted = onQuestAccepted;
 
             quest = new Quest(
                 "KillAliens",
-                "Versla 3 aliens",
+                "Defeat 3 aliens",
                 3,
                 () => Console.WriteLine("Quest completed!")
             );
@@ -60,6 +64,7 @@ namespace SpellFall.Npcs
         {
             base.Load(content);
             walkSouth = content.Load<Texture2D>("Npc Rombo");
+            _indicatorTexture = content.Load<Texture2D>("NPC indicator");
             
             currentTexture = walkSouth;
 
@@ -85,6 +90,7 @@ namespace SpellFall.Npcs
             }
             previousKeyboard = currentKeyboard;
         }
+
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
             int frameHeight = currentTexture.Height / 4;
@@ -110,6 +116,27 @@ namespace SpellFall.Npcs
                 SpriteEffects.None,
                 0f
             );
+
+            if (!hasGivenQuest || (!questCompletedRewardGiven && quest.IsCompleted))
+            {
+                _indicatorPosition = position + new Vector2(0, -150);
+
+                spriteBatch.Draw(
+                    _indicatorTexture,
+                    _indicatorPosition,
+                    null,
+                    Color.White,
+                    0f,
+                    new Vector2(_indicatorTexture.Width / 2f, _indicatorTexture.Height / 2f),
+                    4f,
+                    SpriteEffects.None,
+                    0f
+                );
+            }
+            else
+            {
+                return;
+            }
         }
         private void Interact()
         {
@@ -122,21 +149,21 @@ namespace SpellFall.Npcs
 
             if (!hasGivenQuest)
             {
-                textBubble.SetText("Hallo! Kun je 3 aliens verslaan?");
+                textBubble.SetText("Hello! Can you defeat 3 aliens?");
                 textBubble.Show();
                 questManager.AddQuest(quest);
-                System.Console.WriteLine(questManager.ActiveQuests);
+                onQuestAccepted?.Invoke();
+                onQuestAccepted = null;
                 hasGivenQuest = true;
             }
             else if (!quest.IsCompleted)
             {
-                System.Console.WriteLine(quest.Name);
-                textBubble.SetText("Je bent nog niet klaar...");
+                textBubble.SetText("You haven't completed the quest yet...");
                 textBubble.Show();
             }
             else if (!questCompletedRewardGiven)
             {
-                textBubble.SetText("Goed gedaan! Hier is je beloning! +10 max health!");
+                textBubble.SetText("Good job! Here's your reward! +10 max health!");
                 textBubble.Show();
 
                 GiveReward();
@@ -145,7 +172,7 @@ namespace SpellFall.Npcs
             }
             else
             {
-                textBubble.SetText("Bedankt voor je hulp!");
+                textBubble.SetText("Thank you for your help!");
                 textBubble.Show();
             }
         }
@@ -167,9 +194,6 @@ namespace SpellFall.Npcs
 
         private void GiveReward()
         {
-            Console.WriteLine("Player krijgt +10 maxhealth!");
-
-            // voorbeeld:
             playerHealthBar.IncreaseMaxHealth(10);
         }
     }
