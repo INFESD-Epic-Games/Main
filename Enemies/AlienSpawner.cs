@@ -32,7 +32,7 @@ namespace SpellFall.Enemies
             _rng = new Random();
             _currentHealth = MaxHealth;
             _isDead = false;
-            _spawnTimer = 0f;
+            _spawnTimer = SpawnIntervalSeconds;
         }
 
         public static AlienSpawner CreateQuestSpawner()
