@@ -8,13 +8,13 @@ using SpellFall.Weapons.Projectiles;
 
 namespace SpellFall.Enemies
 {
-    public class ProjectileEnemy : Enemy
+    public class Goblin : Enemy
     {
         private const float MoveSpeed = 50f;
-        private const float EnemyScale = 0.5f;
+        private const float EnemyScale = 0.35f;
         private const float HitboxScale = 0.4f;
-        private const int MaxHealth = 10;
-        private const int Damage = 5;
+        private const int MaxHealth = 15;
+        private const int Damage = 10;
         private const float FireCooldownSeconds = 2f;
         private const float StopDistance = 400f;
 
@@ -27,7 +27,7 @@ namespace SpellFall.Enemies
         private int _frameHeight;
         private bool _isDead;
 
-        public ProjectileEnemy(Point startPosition) : base(startPosition)
+        public Goblin(Point startPosition) : base(startPosition)
         {
             _fireCooldownTimer = 0f;
             _currentHealth = MaxHealth;
@@ -37,7 +37,7 @@ namespace SpellFall.Enemies
         public override void Load(ContentManager content)
         {
             _enemyDeathSFX = content.Load<SoundEffect>("Enemy Death");
-            _texture = content.Load<Texture2D>("alien");
+            _texture = content.Load<Texture2D>("Goblin");
             _frameWidth = _texture.Width / 4;
             _frameHeight = _texture.Height;
             UpdateCollider();

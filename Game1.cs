@@ -160,7 +160,7 @@ namespace SpellFall
                 player.GetPosition().Center.X + 300,
                 player.GetPosition().Center.Y - 100
             );
-            _gameManager.AddGameObject(new ProjectileEnemy(projectileEnemyPosition));
+            _gameManager.AddGameObject(new Goblin(projectileEnemyPosition));
         }
 
         protected override void LoadContent()
