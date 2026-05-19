@@ -155,6 +155,12 @@ namespace SpellFall
             _gameManager.AddGameObject(_npc);
             _gameManager.AddGameObject(player);
             _gameManager.AddGameObject(startingWeapon);
+            // Spawn the projectile enemy near the player so it stays on the playable area.
+            Point projectileEnemyPosition = new Point(
+                player.GetPosition().Center.X + 300,
+                player.GetPosition().Center.Y - 100
+            );
+            _gameManager.AddGameObject(new ProjectileEnemy(projectileEnemyPosition));
         }
 
         protected override void LoadContent()
