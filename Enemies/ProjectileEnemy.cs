@@ -19,6 +19,7 @@ namespace SpellFall.Enemies
         private const float StopDistance = 400f;
 
         private Texture2D _texture;
+        private SoundEffect _enemyDeathSFX;
         private Texture2D _healthBarTexture;
         private float _fireCooldownTimer;
         private int _currentHealth;
@@ -29,10 +30,13 @@ namespace SpellFall.Enemies
         public ProjectileEnemy(Point startPosition) : base(startPosition)
         {
             _fireCooldownTimer = 0f;
+            _currentHealth = MaxHealth;
+            _isDead = false;
         }
 
         public override void Load(ContentManager content)
         {
+            _enemyDeathSFX = content.Load<SoundEffect>("Enemy Death");
             _texture = content.Load<Texture2D>("alien");
             _frameWidth = _texture.Width / 4;
             _frameHeight = _texture.Height;
@@ -126,6 +130,7 @@ namespace SpellFall.Enemies
             }
 
             _isDead = true;
+            KillEnemy(_enemyDeathSFX);
         }
 
         private int GetFrameIndex(Vector2 playerPosition)
