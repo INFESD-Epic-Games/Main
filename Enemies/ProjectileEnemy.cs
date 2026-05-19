@@ -156,7 +156,7 @@ namespace SpellFall.Enemies
             Vector2 direction = _gameManager.Player.GetPosition().Center.ToVector2() - _position;
             direction.Normalize();  
 
-            GameManager.GetGameManager().AddGameObject(new Arrow(_position, direction, 400f, Damage));      
+            GameManager.GetGameManager().AddGameObject(new Stone(_position, direction, 400f, Damage));      
         }
     }
 }
