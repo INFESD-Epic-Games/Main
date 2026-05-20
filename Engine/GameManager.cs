@@ -147,10 +147,10 @@ namespace SpellFall.Engine
 
             foreach(GameObject obj in _gameObjects)
             {
-                if (obj is SpellFall.Enemies.Alien alien)
+                if (obj is SpellFall.Enemies.Enemy enemy)
                 {
                     Vector2 screenPos = Vector2.Transform(
-                        alien.GetPosition(),
+                        enemy.GetPosition(),
                         Camera.Transform
                     );
 
