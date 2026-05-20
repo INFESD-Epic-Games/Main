@@ -161,6 +161,12 @@ namespace SpellFall
                 player.GetPosition().Center.Y - 100
             );
             _gameManager.AddGameObject(new Goblin(projectileEnemyPosition));
+
+            Point bishopPosition = new Point(
+                player.GetPosition().Center.X + 500,
+                player.GetPosition().Center.Y + 100
+            );
+            _gameManager.AddGameObject(new Bishop(bishopPosition));
         }
 
         protected override void LoadContent()

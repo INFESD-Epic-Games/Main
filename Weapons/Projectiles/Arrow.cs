@@ -11,6 +11,8 @@ namespace SpellFall.Weapons.Projectiles
         private const float ArrowHitboxRatio = 0.2f;
         public int Damage { get; }
 
+        protected override bool CanDamageEnemies => true;
+
         public Arrow(Vector2 location, Vector2 direction, float speed, int damage, float maxLifetime = 5f)
             : base(
                 location,
@@ -45,6 +47,11 @@ namespace SpellFall.Weapons.Projectiles
                 0f);
 
             base.Draw(gameTime, spriteBatch);
+        }
+
+        protected override int GetEnemyDamage()
+        {
+            return Damage;
         }
     }
 }

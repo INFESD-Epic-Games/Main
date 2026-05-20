@@ -70,16 +70,6 @@ namespace SpellFall.Enemies
             base.Update(gameTime);
         }
 
-        public override void OnCollision(GameObject other)
-        {
-            if (other is Arrow arrow)
-            {
-                _gameManager.RemoveGameObject(other);
-                TakeDamage(arrow.Damage);
-            }
-            base.OnCollision(other);
-        }
-
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
             int frameIndex = GetFrameIndex(_gameManager.Player.GetPosition().Center.ToVector2());

@@ -1,7 +1,9 @@
 using System;
+using System.Reflection;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SpellFall.Collision;
+using SpellFall.Enemies;
 using SpellFall.Engine;
 
 namespace SpellFall.Weapons.Projectiles
@@ -28,6 +30,13 @@ namespace SpellFall.Weapons.Projectiles
         public int BounceCount { get; }
         public float ExplosionRadius { get; }
         public int LightningChains { get; }
+
+        protected virtual bool CanDamageEnemies => false;
+
+        protected virtual int GetEnemyDamage()
+        {
+            return 0;
+        }
 
         protected Ammo(
             Vector2 location,
@@ -93,6 +102,30 @@ namespace SpellFall.Weapons.Projectiles
             }
 
             base.Update(gameTime);
+        }
+
+        public override void OnCollision(GameObject other)
+        {
+            if (other is Enemy enemy && CanDamageEnemies)
+            {
+                if (!Bishop.TryProtectEnemy(enemy))
+                {
+                    ApplyEnemyDamage(enemy, GetEnemyDamage());
+                }
+
+                _gameManager.RemoveGameObject(this);
+            }
+
+            base.OnCollision(other);
+        }
+
+        private static void ApplyEnemyDamage(Enemy enemy, int damage)
+        {
+            MethodInfo takeDamageMethod = enemy.GetType().GetMethod(
+                "TakeDamage",
+                BindingFlags.Instance | BindingFlags.NonPublic);
+
+            takeDamageMethod?.Invoke(enemy, new object[] { damage });
         }
     }
 }
