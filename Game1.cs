@@ -148,13 +148,14 @@ namespace SpellFall
                 _gameManager.AddGameObject(AlienSpawner.CreateQuestSpawner());
             });
             _npc.SetPlayerHealthBar(player.HealthBar);
-
-
+            
             // Add the starting objects to the GameManager
             _gameManager.AddGameObject(new Map());
             _gameManager.AddGameObject(_npc);
             _gameManager.AddGameObject(player);
             _gameManager.AddGameObject(startingWeapon);
+            
+            _gameManager.AddGameObject(new WeepingAngel(new Point(0, 0)));
         }
 
         protected override void LoadContent()
