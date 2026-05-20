@@ -15,8 +15,8 @@ namespace SpellFall.Character
     public class Player : GameObject
     {
         private const float PlayerScale = 0.5f;
-        private const float ColliderWidthScale = 0.55f;
-        private const float ColliderHeightScale = 0.75f;
+        private const float ColliderWidthScale = 0.25f;
+        private const float ColliderHeightScale = 0.45f;
         public RectangleCollider rectangleCollider { get; private set; }
         private WeaponBase _equippedWeapon;
         Vector2 lastDirection = Vector2.UnitY;

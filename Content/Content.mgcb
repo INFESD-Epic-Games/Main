@@ -92,7 +92,7 @@
 /processorParam:Quality=Best
 /build:Final Battle.mp3
 
-#begin Level-1.png
+#begin map (1).png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -102,9 +102,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Level-1.png
+/build:map (1).png
 
-#begin Level-2.png
+#begin map (2).png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -114,9 +114,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Level-2.png
+/build:map (2).png
 
-#begin Level-3.png
+#begin map.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -126,7 +126,7 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Level-3.png
+/build:map.png
 
 #begin Npc Rombo.png
 /importer:TextureImporter
