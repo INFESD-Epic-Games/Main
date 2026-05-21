@@ -27,9 +27,9 @@ namespace SpellFall.Enemies
         private int _frameWidth;
         private int _frameHeight;
         private SoundEffect _enemyDeathSFX;
-        
+
         public bool IsWatched { get; set; }
-        
+
         public WeepingAngel(Point startPosition)
             : base(startPosition)
         {
@@ -77,12 +77,7 @@ namespace SpellFall.Enemies
 
         public override void OnCollision(GameObject other)
         {
-            if (other is Arrow arrow)
-            {
-                _gameManager.RemoveGameObject(other);
-                TakeDamage(arrow.Damage);
-            }
-            else if (other is Player && _contactCooldownTimer <= 0f)
+            if (other is Player && _contactCooldownTimer <= 0f)
             {
                 _gameManager.Player.HealthBar.TakeDamage(ContactDamage);
                 _contactCooldownTimer = ContactCooldownSeconds;
@@ -136,7 +131,7 @@ namespace SpellFall.Enemies
             _isDead = true;
             KillEnemy(_enemyDeathSFX, () =>
             {
-                
+
             });
         }
 
