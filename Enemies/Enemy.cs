@@ -21,15 +21,13 @@ namespace SpellFall.Enemies
         protected Enemy(Point startPosition)
         {
             _gameManager = GameManager.GetGameManager();
-
-            // Get map from GameManager
-
+            
             _enemyId = _nextEnemyId++;
             _position = startPosition.ToVector2();
 
             _rectangleCollider = new RectangleCollider(new Rectangle(startPosition, Point.Zero));
             SetCollider(_rectangleCollider);
-            _map = _gameManager.map();
+            _map = _gameManager.Map;
         }
 
         protected void TryMove(Vector2 velocity, int width, int height)

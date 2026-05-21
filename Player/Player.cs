@@ -322,7 +322,6 @@ namespace SpellFall.Character
 
         private void TryMove(Vector2 velocity)
         {
-            var _map = _gameManager.map();
             if (_map == null)
             {
                 position += velocity;
