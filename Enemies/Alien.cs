@@ -79,12 +79,7 @@ namespace SpellFall.Enemies
 
         public override void OnCollision(GameObject other)
         {
-            if (other is Arrow arrow)
-            {
-                _gameManager.RemoveGameObject(other);
-                TakeDamage(arrow.Damage);
-            }
-            else if (other is Player && _contactCooldownTimer <= 0f)
+            if (other is Player && _contactCooldownTimer <= 0f)
             {
                 _gameManager.Player.HealthBar.TakeDamage(ContactDamage);
                 _contactCooldownTimer = ContactCooldownSeconds;
