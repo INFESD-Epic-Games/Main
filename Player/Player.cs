@@ -48,7 +48,7 @@ namespace SpellFall.Character
         private Texture2D walkWest;
         private Texture2D currentTexture;
         private SoundEffect _dashSfx;
-        protected Map _map;
+        public Map Map { get; set; }
         protected readonly GameManager _gameManager;
 
         public float DashCooldownPercentage => _dashTimer / _dashCooldown;
@@ -56,7 +56,7 @@ namespace SpellFall.Character
         public Player(Point Position)
         {
             _gameManager = GameManager.GetGameManager();
-            _map = _gameManager.Map;
+            Map = _gameManager.Map;
             Stats = new PlayerStats();
             rectangleCollider = new RectangleCollider(new Rectangle(Position, Point.Zero));
             position = Position.ToVector2();
@@ -322,7 +322,7 @@ namespace SpellFall.Character
 
         private void TryMove(Vector2 velocity)
         {
-            if (_map == null)
+            if (Map == null)
             {
                 position += velocity;
                 return;
@@ -333,21 +333,17 @@ namespace SpellFall.Character
 
         
             Vector2 newPosX = new Vector2(position.X + velocity.X, position.Y);
-            if (!_map.IsColliding(newPosX - new Vector2(width / 2f, height / 2f), width, height))
+            if (!Map.IsColliding(newPosX - new Vector2(width / 2f, height / 2f), width, height))
             {
                 position.X += velocity.X;
             }
 
             Vector2 newPosY = new Vector2(position.X, position.Y + velocity.Y);
-            if (!_map.IsColliding(newPosY - new Vector2(width / 2f, height / 2f), width, height))
+            if (!Map.IsColliding(newPosY - new Vector2(width / 2f, height / 2f), width, height))
             {
                 position.Y += velocity.Y;
             }
            
-        }
-        public void SetMap(Map map)
-        {
-            _map = map;
         }
 
         private void CheckFieldOfView()

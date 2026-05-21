@@ -160,7 +160,8 @@ namespace SpellFall
             _npc.SetPlayerHealthBar(player.HealthBar);
 
             Map map = new Map();
-            _gameManager.Map = map;       
+            _gameManager.Map = map;
+            player.Map = map;
             _gameManager.AddGameObject(map);
             
             // Add the starting objects to the GameManager
