@@ -128,11 +128,8 @@
 /processorParam:Quality=Best
 /build:Final Battle.mp3
 
-<<<<<<< HEAD
 #begin Fireball.png
-=======
 #begin Goblin.png
->>>>>>> 9d3a5353fb061773a54f13536438efd98471d57b
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -142,15 +139,12 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-<<<<<<< HEAD
 /build:Fireball.png
 
 #begin Ghost.png
-=======
 /build:Goblin.png
 
 #begin Lbow.png
->>>>>>> 9d3a5353fb061773a54f13536438efd98471d57b
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -160,9 +154,7 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-<<<<<<< HEAD
 /build:Ghost.png
-=======
 /build:Lbow.png
 
 #begin lightning.png
@@ -212,7 +204,6 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:map.png
->>>>>>> 9d3a5353fb061773a54f13536438efd98471d57b
 
 #begin NPC indicator.png
 /importer:TextureImporter
