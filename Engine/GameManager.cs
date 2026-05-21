@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework.Graphics;
 using SpellFall.Character;
 using SpellFall.Quests;
 using SpellFall.UI;
+using SpellFall.Background;
 using Microsoft.Xna.Framework.Media;
 
 namespace SpellFall.Engine
@@ -34,7 +35,7 @@ namespace SpellFall.Engine
         private bool _isBattleMusicPlaying = false;
         private TimeSpan _battleMusicTimer = TimeSpan.Zero;
         private TimeSpan _battleMusicBufferTime = TimeSpan.FromSeconds(1);
-
+        public Map Map { get; set; }
         private bool _isOverWorldMusicPlaying = false;
 
         public static GameManager GetGameManager()
@@ -51,6 +52,7 @@ namespace SpellFall.Engine
             InputManager = new InputManager();
             Camera = new Camera();
             RNG = new Random();
+
 
             textBubble = new TextBubble();
             _toBeAdded.Add(textBubble);

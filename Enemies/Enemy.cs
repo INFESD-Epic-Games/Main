@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using SpellFall.Collision;
 using SpellFall.Engine;
+using SpellFall.Background;
 
 namespace SpellFall.Enemies
 {
@@ -18,14 +19,18 @@ namespace SpellFall.Enemies
         protected readonly int _enemyId;
         protected Vector2 _position;
         public bool IsAlive { get; private set; } = true;
+        protected Map _map;
 
         protected Enemy(Point startPosition)
         {
             _gameManager = GameManager.GetGameManager();
+            
             _enemyId = _nextEnemyId++;
             _position = startPosition.ToVector2();
+
             _rectangleCollider = new RectangleCollider(new Rectangle(startPosition, Point.Zero));
             SetCollider(_rectangleCollider);
+            _map = _gameManager.Map;
             _activeEnemies.Add(this);
         }
 
@@ -62,6 +67,30 @@ namespace SpellFall.Enemies
             return closestEnemy;
         }
 
+        protected void TryMove(Vector2 velocity, int width, int height)
+        {
+            if (_map == null)
+            {
+                _position += velocity;
+                return;
+            }
+
+            // Move X
+            Vector2 newPosX = new Vector2(_position.X + velocity.X, _position.Y);
+            if (!_map.IsColliding(newPosX, width, height))
+            {
+                _position = newPosX;
+            }
+
+            // Move Y
+            Vector2 newPosY = new Vector2(_position.X, _position.Y + velocity.Y);
+            if (!_map.IsColliding(newPosY, width, height))
+            {
+                _position = newPosY;
+            }
+
+            UpdateCollider();
+        }
         public override void OnCollision(GameObject other)
         {
             if (other is Enemy otherEnemy)

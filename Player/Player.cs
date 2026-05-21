@@ -10,14 +10,15 @@ using System.Collections.Generic;
 using WeaponBase = SpellFall.Weapons.Weapons;
 using Microsoft.Xna.Framework.Audio;
 using SpellFall.Enemies;
+using SpellFall.Background;
 
 namespace SpellFall.Character
 {
     public class Player : GameObject
     {
         private const float PlayerScale = 0.5f;
-        private const float ColliderWidthScale = 0.55f;
-        private const float ColliderHeightScale = 0.75f;
+        private const float ColliderWidthScale = 0.25f;
+        private const float ColliderHeightScale = 0.45f;
         public RectangleCollider rectangleCollider { get; private set; }
         private WeaponBase _equippedWeapon;
         Vector2 lastDirection = Vector2.UnitY;
@@ -47,16 +48,19 @@ namespace SpellFall.Character
         private Texture2D walkWest;
         private Texture2D currentTexture;
         private SoundEffect _dashSfx;
+        public Map Map { get; set; }
+        protected readonly GameManager _gameManager;
 
         public float DashCooldownPercentage => _dashTimer / _dashCooldown;
 
         public Player(Point Position)
         {
+            _gameManager = GameManager.GetGameManager();
+            Map = _gameManager.Map;
             Stats = new PlayerStats();
             rectangleCollider = new RectangleCollider(new Rectangle(Position, Point.Zero));
             position = Position.ToVector2();
             SetCollider(rectangleCollider);
-
             _healthBar = new HealthBar(Stats);
             _dashBar = new DashBar(this);
         }
@@ -71,6 +75,13 @@ namespace SpellFall.Character
             _dashSfx = content.Load<SoundEffect>("Dash");
 
             currentTexture = walkSouth;
+            int frameWidth = walkSouth.Width / 4;
+            int frameHeight = walkSouth.Height;
+
+            int colliderWidth = (int)(frameWidth * PlayerScale * ColliderWidthScale);
+            int colliderHeight = (int)(frameHeight * PlayerScale * ColliderHeightScale);
+
+            rectangleCollider.shape = new Rectangle(0, 0, colliderWidth, colliderHeight);
             UpdateCollider();
         }
 
@@ -143,7 +154,8 @@ namespace SpellFall.Character
                 inputDirection.Normalize();
                 lastDirection = inputDirection;
 
-                position += inputDirection * Stats.TotalSpeed;
+                Vector2 velocity = inputDirection * Stats.TotalSpeed;
+                TryMove(velocity);
 
                 if (Math.Abs(inputDirection.X) > Math.Abs(inputDirection.Y))
                 {
@@ -199,8 +211,6 @@ namespace SpellFall.Character
         {
             if (other is Enemies.AlienSpawner)
             {
-                position = _previousPosition;
-                UpdateCollider();
                 _healthBar.SetPosition(GetVisualBounds());
             }
 
@@ -260,6 +270,13 @@ namespace SpellFall.Character
                 ? Vector2.Normalize(_thrustInput)
                 : lastDirection;
 
+            Vector2 dashStep = dashDirection * (_dashDistance / 10f);
+
+            for (int i = 0; i < 10; i++)
+            {
+                TryMove(dashStep);
+            }
+          
             // Setup dash animation
             _dashStartPosition = position;
             _dashEndPosition = position + (dashDirection * _dashDistance);
@@ -287,15 +304,46 @@ namespace SpellFall.Character
 
         private void UpdateCollider()
         {
-            Rectangle spriteBounds = GetSpriteBounds();
-            int colliderWidth = (int)(spriteBounds.Width * ColliderWidthScale);
-            int colliderHeight = (int)(spriteBounds.Height * ColliderHeightScale);
+            int colliderWidth = (int)(rectangleCollider.shape.Width == 0
+                ? (currentTexture.Width / 4) * PlayerScale * ColliderWidthScale
+                : rectangleCollider.shape.Width);
+
+            int colliderHeight = (int)(rectangleCollider.shape.Height == 0
+                ? currentTexture.Height * PlayerScale * ColliderHeightScale
+                : rectangleCollider.shape.Height);
+
+            Point colliderLocation = (position - new Vector2(colliderWidth / 2f, colliderHeight / 2f)).ToPoint();
 
             rectangleCollider.shape = new Rectangle(
-                spriteBounds.Center.X - colliderWidth / 2,
-                spriteBounds.Center.Y - colliderHeight / 2,
-                colliderWidth,
-                colliderHeight);
+                colliderLocation,
+                new Point(colliderWidth, colliderHeight)
+            );
+        }
+
+        private void TryMove(Vector2 velocity)
+        {
+            if (Map == null)
+            {
+                position += velocity;
+                return;
+            }
+
+            int width = rectangleCollider.shape.Width;
+            int height = rectangleCollider.shape.Height;
+
+        
+            Vector2 newPosX = new Vector2(position.X + velocity.X, position.Y);
+            if (!Map.IsColliding(newPosX - new Vector2(width / 2f, height / 2f), width, height))
+            {
+                position.X += velocity.X;
+            }
+
+            Vector2 newPosY = new Vector2(position.X, position.Y + velocity.Y);
+            if (!Map.IsColliding(newPosY - new Vector2(width / 2f, height / 2f), width, height))
+            {
+                position.Y += velocity.Y;
+            }
+           
         }
 
         private void CheckFieldOfView()
