@@ -191,7 +191,14 @@ namespace SpellFall
             );
             _gameManager.AddGameObject(new Bishop(bishopPosition));
 
-            _gameManager.AddGameObject(new WeepingAngel(new Point(0, 0)));
+            _gameManager.AddGameObject(new WeepingAngel(new Point(
+                _player.GetPosition().Center.X + 200,
+                _player.GetPosition().Center.Y + 100
+            )));
+            _gameManager.AddGameObject(new Eye(new Point(
+                _player.GetPosition().Center.X + 200,
+                _player.GetPosition().Center.Y + 150
+            )));
         }
 
         protected override void LoadContent()
