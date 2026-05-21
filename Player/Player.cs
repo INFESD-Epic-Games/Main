@@ -6,8 +6,10 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using SpellFall.Sounds;
 using System;
+using System.Collections.Generic;
 using WeaponBase = SpellFall.Weapons.Weapons;
 using Microsoft.Xna.Framework.Audio;
+using SpellFall.Enemies;
 using SpellFall.Background;
 
 namespace SpellFall.Character
@@ -54,7 +56,7 @@ namespace SpellFall.Character
         public Player(Point Position)
         {
             _gameManager = GameManager.GetGameManager();
-            _map = _gameManager.map();
+            _map = _gameManager.Map;
             Stats = new PlayerStats();
             rectangleCollider = new RectangleCollider(new Rectangle(Position, Point.Zero));
             position = Position.ToVector2();
@@ -199,6 +201,8 @@ namespace SpellFall.Character
             _healthBar.Update(gameTime);
 
             _dashBar.SetPosition(GetVisualBounds());
+            
+            CheckFieldOfView();
             
             base.Update(gameTime);
         }
@@ -345,6 +349,53 @@ namespace SpellFall.Character
         public void SetMap(Map map)
         {
             _map = map;
+        }
+
+        private void CheckFieldOfView()
+        {
+            List<IWatchable> watchables = GameManager.GetGameManager().GetObjectsOfType<IWatchable>();
+    
+            float halfAngleCos = (float)Math.Cos(MathHelper.ToRadians(90f) / 2f);
+            float maxRadiusSquared = 750f * 750f;
+
+            Vector2 forwardDir = lastDirection;
+            if (forwardDir != Vector2.Zero) forwardDir.Normalize();
+
+            foreach (IWatchable watchable in watchables)
+            {
+                if (watchable is not Enemy enemy)
+                {
+                    watchable.IsWatched = false;
+                    continue;
+                }
+
+                Vector2 toTarget = enemy.GetPosition() - position;
+                float distanceSquared = toTarget.LengthSquared();
+
+                if (distanceSquared > maxRadiusSquared)
+                {
+                    watchable.IsWatched = false;
+                    continue;
+                }
+        
+                if (distanceSquared == 0)
+                {
+                    watchable.IsWatched = true;
+                    continue;
+                }
+
+                Vector2 toTargetNormalized = toTarget / (float)Math.Sqrt(distanceSquared);
+    
+                float dotProduct = Vector2.Dot(forwardDir, toTargetNormalized);
+
+                if (dotProduct >= halfAngleCos)
+                {
+                    watchable.IsWatched = true;
+                    continue;
+                }
+        
+                watchable.IsWatched = false;
+            }
         }
     }
 }

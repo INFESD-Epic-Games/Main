@@ -162,6 +162,7 @@ namespace SpellFall
             Map map = new Map();
             _gameManager.Map = map;       
             _gameManager.AddGameObject(map);
+            
             // Add the starting objects to the GameManager
             _gameManager.AddGameObject(_npc);
             _gameManager.AddGameObject(player);
@@ -172,6 +173,8 @@ namespace SpellFall
                 player.GetPosition().Center.Y - 100
             );
             _gameManager.AddGameObject(new Goblin(projectileEnemyPosition));
+            
+            _gameManager.AddGameObject(new WeepingAngel(new Point(0, 0)));
         }
 
         protected override void LoadContent()
