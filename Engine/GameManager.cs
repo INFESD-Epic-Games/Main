@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -161,20 +162,6 @@ namespace SpellFall.Engine
                         break;
                     }
                 }
-                if (obj is SpellFall.Enemies.AlienSpawner alienSpawner)
-                {
-                    Vector2 screenPos = Vector2.Transform(
-                        alienSpawner.GetPosition(),
-                        Camera.Transform
-                    );
-
-                    if (screenPos.X >= 0 && screenPos.X <= viewWidth &&
-                        screenPos.Y >= 0 && screenPos.Y <= viewHeight)
-                    {
-                        enemyOnScreen = true;
-                        break;
-                    }
-                }
             }
 
             if (!enemyOnScreen && !_isOverWorldMusicPlaying)
@@ -326,6 +313,21 @@ namespace SpellFall.Engine
             }
 
             return Math.Max(0, alienCount);
+        }
+
+        public List<T> GetObjectsOfType<T>() where T : class
+        {
+            List<T> result = new List<T>();
+    
+            foreach (var o in _gameObjects)
+            {
+                if (o is T matchedObject)
+                {
+                    result.Add(matchedObject);
+                }
+            }
+    
+            return result;
         }
     }
 }
