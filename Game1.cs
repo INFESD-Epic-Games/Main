@@ -155,6 +155,12 @@ namespace SpellFall
             _gameManager.AddGameObject(_npc);
             _gameManager.AddGameObject(player);
             _gameManager.AddGameObject(startingWeapon);
+
+            Point enemyPosition = new Point(
+                player.GetPosition().Center.X + 300,
+                player.GetPosition().Center.Y - 100
+            );
+            _gameManager.AddGameObject(new Teleporter(enemyPosition));
         }
 
         protected override void LoadContent()
