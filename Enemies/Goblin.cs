@@ -2,43 +2,42 @@ using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Audio;
 using SpellFall.Engine;
 using SpellFall.Weapons.Projectiles;
-using SpellFall.Character;
-using Microsoft.Xna.Framework.Audio;
 
 namespace SpellFall.Enemies
 {
-    public class Alien : Enemy
+    public class Goblin : Enemy
     {
-        private const float MoveSpeed = 70f;
-        private const float AlienScale = 0.5f;
+        private const float MoveSpeed = 50f;
+        private const float EnemyScale = 0.35f;
         private const float HitboxScale = 0.4f;
-        private const int MaxHealth = 20;
-        private const int ContactDamage = 5;
-        private const float ContactCooldownSeconds = 3f;
+        private const int MaxHealth = 15;
+        private const int Damage = 10;
+        private const float FireCooldownSeconds = 2f;
+        private const float StopDistance = 400f;
 
         private Texture2D _texture;
+        private SoundEffect _enemyDeathSFX;
         private Texture2D _healthBarTexture;
+        private float _fireCooldownTimer;
         private int _currentHealth;
-        private bool _isDead;
-        private float _contactCooldownTimer;
         private int _frameWidth;
         private int _frameHeight;
-        private SoundEffect _enemyDeathSFX;
+        private bool _isDead;
 
-        public Alien(Point startPosition)
-            : base(startPosition)
+        public Goblin(Point startPosition) : base(startPosition)
         {
+            _fireCooldownTimer = 0f;
             _currentHealth = MaxHealth;
             _isDead = false;
-            _contactCooldownTimer = 0f;
         }
 
         public override void Load(ContentManager content)
         {
             _enemyDeathSFX = content.Load<SoundEffect>("Enemy Death");
-            _texture = content.Load<Texture2D>("alien");
+            _texture = content.Load<Texture2D>("Goblin");
             _frameWidth = _texture.Width / 4;
             _frameHeight = _texture.Height;
             UpdateCollider();
@@ -47,45 +46,28 @@ namespace SpellFall.Enemies
 
         public override void Update(GameTime gameTime)
         {
-            if (_contactCooldownTimer > 0f)
+            _fireCooldownTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
+            if (_fireCooldownTimer >= FireCooldownSeconds)
             {
-                _contactCooldownTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
-                if (_contactCooldownTimer < 0f)
-                {
-                    _contactCooldownTimer = 0f;
-                }
-
-                UpdateCollider();
-                base.Update(gameTime);
-                return;
+                _fireCooldownTimer = 0f;
+                
+                // Fire a projectile towards the player
+                FireProjectile();
             }
+            
 
             Vector2 playerPosition = _gameManager.Player.GetPosition().Center.ToVector2();
             Vector2 directionToPlayer = playerPosition - _position;
+            float distanceToPlayer = directionToPlayer.Length();
 
-            if (directionToPlayer != Vector2.Zero)
+            if (distanceToPlayer > StopDistance && directionToPlayer != Vector2.Zero)
             {
                 directionToPlayer.Normalize();
-                Vector2 velocity = directionToPlayer * MoveSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
-
-                int colliderWidth = (int)(_frameWidth * AlienScale * HitboxScale);
-                int colliderHeight = (int)(_frameHeight * AlienScale * HitboxScale);
-                TryMove(velocity, colliderWidth, colliderHeight);
+                _position += directionToPlayer * MoveSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
             }
 
-            UpdateCollider();   
+            UpdateCollider();
             base.Update(gameTime);
-        }
-
-        public override void OnCollision(GameObject other)
-        {
-            if (other is Player && _contactCooldownTimer <= 0f)
-            {
-                _gameManager.Player.HealthBar.TakeDamage(ContactDamage);
-                _contactCooldownTimer = ContactCooldownSeconds;
-            }
-
-            base.OnCollision(other);
         }
 
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
@@ -101,20 +83,27 @@ namespace SpellFall.Enemies
                 Color.White,
                 0f,
                 origin,
-                AlienScale,
+                EnemyScale,
                 SpriteEffects.None,
                 0f);
 
             DrawHealthBar(
                 spriteBatch,
                 ref _healthBarTexture,
-                _frameHeight * AlienScale,
+                _frameHeight * EnemyScale,
                 _currentHealth,
                 MaxHealth,
                 40,
                 6);
 
             base.Draw(gameTime, spriteBatch);
+        }
+
+        protected override void UpdateCollider()
+        {
+            int colliderWidth = (int)(_frameWidth * EnemyScale * HitboxScale);
+            int colliderHeight = (int)(_frameHeight * EnemyScale * HitboxScale);
+            UpdateCenteredCollider(colliderWidth, colliderHeight);
         }
 
         private void TakeDamage(int damage)
@@ -131,13 +120,7 @@ namespace SpellFall.Enemies
             }
 
             _isDead = true;
-            KillEnemy(_enemyDeathSFX, () =>
-            {
-                if (_gameManager.QuestManager.HasActiveQuest("KillAliens"))
-                {
-                    _gameManager.QuestManager.AddProgress("KillAliens", 1);
-                }
-            });
+            KillEnemy(_enemyDeathSFX);
         }
 
         private int GetFrameIndex(Vector2 playerPosition)
@@ -163,11 +146,12 @@ namespace SpellFall.Enemies
             return 3;
         }
 
-        protected override void UpdateCollider()
+        private void FireProjectile()
         {
-            int colliderWidth = (int)(_frameWidth * AlienScale * HitboxScale);
-            int colliderHeight = (int)(_frameHeight * AlienScale * HitboxScale);
-            UpdateCenteredCollider(colliderWidth, colliderHeight);
+            Vector2 direction = _gameManager.Player.GetPosition().Center.ToVector2() - _position;
+            direction.Normalize();  
+
+            GameManager.GetGameManager().AddGameObject(new Stone(_position, direction, 400f, Damage));      
         }
     }
 }

@@ -6,17 +6,18 @@ using SpellFall.Engine;
 using SpellFall.Weapons.Projectiles;
 using SpellFall.Character;
 using Microsoft.Xna.Framework.Audio;
+using SpellFall.Collision;
 
 namespace SpellFall.Enemies
 {
-    public class Alien : Enemy
+    public class WeepingAngel : Enemy, IWatchable
     {
-        private const float MoveSpeed = 70f;
-        private const float AlienScale = 0.5f;
+        private const float MoveSpeed = 100f;
+        private const float AlienScale = 1.25f;
         private const float HitboxScale = 0.4f;
-        private const int MaxHealth = 20;
-        private const int ContactDamage = 5;
-        private const float ContactCooldownSeconds = 3f;
+        private const int MaxHealth = 50;
+        private const int ContactDamage = 10;
+        private const float ContactCooldownSeconds = 2f;
 
         private Texture2D _texture;
         private Texture2D _healthBarTexture;
@@ -27,7 +28,9 @@ namespace SpellFall.Enemies
         private int _frameHeight;
         private SoundEffect _enemyDeathSFX;
 
-        public Alien(Point startPosition)
+        public bool IsWatched { get; set; }
+
+        public WeepingAngel(Point startPosition)
             : base(startPosition)
         {
             _currentHealth = MaxHealth;
@@ -38,8 +41,8 @@ namespace SpellFall.Enemies
         public override void Load(ContentManager content)
         {
             _enemyDeathSFX = content.Load<SoundEffect>("Enemy Death");
-            _texture = content.Load<Texture2D>("alien");
-            _frameWidth = _texture.Width / 4;
+            _texture = content.Load<Texture2D>("weeping-angel");
+            _frameWidth = _texture.Width / 3;
             _frameHeight = _texture.Height;
             UpdateCollider();
             base.Load(content);
@@ -54,7 +57,6 @@ namespace SpellFall.Enemies
                 {
                     _contactCooldownTimer = 0f;
                 }
-
                 UpdateCollider();
                 base.Update(gameTime);
                 return;
@@ -63,17 +65,13 @@ namespace SpellFall.Enemies
             Vector2 playerPosition = _gameManager.Player.GetPosition().Center.ToVector2();
             Vector2 directionToPlayer = playerPosition - _position;
 
-            if (directionToPlayer != Vector2.Zero)
+            if (directionToPlayer != Vector2.Zero && !IsWatched)
             {
                 directionToPlayer.Normalize();
-                Vector2 velocity = directionToPlayer * MoveSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
-
-                int colliderWidth = (int)(_frameWidth * AlienScale * HitboxScale);
-                int colliderHeight = (int)(_frameHeight * AlienScale * HitboxScale);
-                TryMove(velocity, colliderWidth, colliderHeight);
+                _position += directionToPlayer * MoveSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
             }
 
-            UpdateCollider();   
+            UpdateCollider();
             base.Update(gameTime);
         }
 
@@ -90,7 +88,7 @@ namespace SpellFall.Enemies
 
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            int frameIndex = GetFrameIndex(_gameManager.Player.GetPosition().Center.ToVector2());
+            int frameIndex = GetFrameIndex(_gameManager.Player.GetPosition().Center.ToVector2(), IsWatched);
             Rectangle sourceRectangle = new Rectangle(frameIndex * _frameWidth, 0, _frameWidth, _frameHeight);
             Vector2 origin = new Vector2(_frameWidth / 2f, _frameHeight / 2f);
 
@@ -133,34 +131,25 @@ namespace SpellFall.Enemies
             _isDead = true;
             KillEnemy(_enemyDeathSFX, () =>
             {
-                if (_gameManager.QuestManager.HasActiveQuest("KillAliens"))
-                {
-                    _gameManager.QuestManager.AddProgress("KillAliens", 1);
-                }
+
             });
         }
 
-        private int GetFrameIndex(Vector2 playerPosition)
+        private int GetFrameIndex(Vector2 playerPosition, bool isWatched)
         {
-            bool isRightOfPlayer = _position.X >= playerPosition.X;
             bool isAbovePlayer = _position.Y < playerPosition.Y;
 
-            if (isRightOfPlayer && isAbovePlayer)
-            {
-                return 0;
-            }
-
-            if (!isRightOfPlayer && isAbovePlayer)
-            {
-                return 1;
-            }
-
-            if (!isRightOfPlayer && !isAbovePlayer)
+            if (!isAbovePlayer)
             {
                 return 2;
             }
 
-            return 3;
+            if (isWatched)
+            {
+                return 1;
+            }
+
+            return 0;
         }
 
         protected override void UpdateCollider()

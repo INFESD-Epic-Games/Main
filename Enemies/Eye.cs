@@ -9,14 +9,14 @@ using Microsoft.Xna.Framework.Audio;
 
 namespace SpellFall.Enemies
 {
-    public class Alien : Enemy
+    public class Eye : Enemy
     {
-        private const float MoveSpeed = 70f;
+        private const float MoveSpeed = 100f;
         private const float AlienScale = 0.5f;
         private const float HitboxScale = 0.4f;
-        private const int MaxHealth = 20;
+        private const int MaxHealth = 50;
         private const int ContactDamage = 5;
-        private const float ContactCooldownSeconds = 3f;
+        private const float ContactCooldownSeconds = 1f;
 
         private Texture2D _texture;
         private Texture2D _healthBarTexture;
@@ -26,8 +26,10 @@ namespace SpellFall.Enemies
         private int _frameWidth;
         private int _frameHeight;
         private SoundEffect _enemyDeathSFX;
+        private float _bobSpeed = 3f;
+        private float _bobHeight = 8f;
 
-        public Alien(Point startPosition)
+        public Eye(Point startPosition)
             : base(startPosition)
         {
             _currentHealth = MaxHealth;
@@ -38,7 +40,7 @@ namespace SpellFall.Enemies
         public override void Load(ContentManager content)
         {
             _enemyDeathSFX = content.Load<SoundEffect>("Enemy Death");
-            _texture = content.Load<Texture2D>("alien");
+            _texture = content.Load<Texture2D>("eye");
             _frameWidth = _texture.Width / 4;
             _frameHeight = _texture.Height;
             UpdateCollider();
@@ -93,10 +95,15 @@ namespace SpellFall.Enemies
             int frameIndex = GetFrameIndex(_gameManager.Player.GetPosition().Center.ToVector2());
             Rectangle sourceRectangle = new Rectangle(frameIndex * _frameWidth, 0, _frameWidth, _frameHeight);
             Vector2 origin = new Vector2(_frameWidth / 2f, _frameHeight / 2f);
+            
+            float elapsedSeconds = (float)gameTime.TotalGameTime.TotalSeconds;
+            float bobOffset = (float)Math.Sin(elapsedSeconds * _bobSpeed) * _bobHeight;
+
+            Vector2 floatingPosition = new Vector2(_position.X, _position.Y + bobOffset);
 
             spriteBatch.Draw(
                 _texture,
-                _position,
+                floatingPosition,
                 sourceRectangle,
                 Color.White,
                 0f,
@@ -145,22 +152,22 @@ namespace SpellFall.Enemies
             bool isRightOfPlayer = _position.X >= playerPosition.X;
             bool isAbovePlayer = _position.Y < playerPosition.Y;
 
-            if (isRightOfPlayer && isAbovePlayer)
+            if (!isRightOfPlayer && isAbovePlayer)
             {
                 return 0;
             }
 
-            if (!isRightOfPlayer && isAbovePlayer)
+            if (isRightOfPlayer && isAbovePlayer)
             {
                 return 1;
             }
 
             if (!isRightOfPlayer && !isAbovePlayer)
             {
-                return 2;
+                return 3;
             }
 
-            return 3;
+            return 2;
         }
 
         protected override void UpdateCollider()

@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using SpellFall.Character;
 using SpellFall.Quests;
 using SpellFall.UI;
+using SpellFall.Background;
 using Microsoft.Xna.Framework.Media;
 
 namespace SpellFall.Engine
@@ -33,7 +35,7 @@ namespace SpellFall.Engine
         private bool _isBattleMusicPlaying = false;
         private TimeSpan _battleMusicTimer = TimeSpan.Zero;
         private TimeSpan _battleMusicBufferTime = TimeSpan.FromSeconds(1);
-
+        public Map Map { get; set; }
         private bool _isOverWorldMusicPlaying = false;
 
         public static GameManager GetGameManager()
@@ -50,6 +52,7 @@ namespace SpellFall.Engine
             InputManager = new InputManager();
             Camera = new Camera();
             RNG = new Random();
+
 
             textBubble = new TextBubble();
             _toBeAdded.Add(textBubble);
@@ -147,24 +150,10 @@ namespace SpellFall.Engine
 
             foreach(GameObject obj in _gameObjects)
             {
-                if (obj is SpellFall.Enemies.Alien alien)
+                if (obj is SpellFall.Enemies.Enemy enemy)
                 {
                     Vector2 screenPos = Vector2.Transform(
-                        alien.GetPosition(),
-                        Camera.Transform
-                    );
-
-                    if (screenPos.X >= 0 && screenPos.X <= viewWidth &&
-                        screenPos.Y >= 0 && screenPos.Y <= viewHeight)
-                    {
-                        enemyOnScreen = true;
-                        break;
-                    }
-                }
-                if (obj is SpellFall.Enemies.AlienSpawner alienSpawner)
-                {
-                    Vector2 screenPos = Vector2.Transform(
-                        alienSpawner.GetPosition(),
+                        enemy.GetPosition(),
                         Camera.Transform
                     );
 
@@ -326,6 +315,21 @@ namespace SpellFall.Engine
             }
 
             return Math.Max(0, alienCount);
+        }
+
+        public List<T> GetObjectsOfType<T>() where T : class
+        {
+            List<T> result = new List<T>();
+    
+            foreach (var o in _gameObjects)
+            {
+                if (o is T matchedObject)
+                {
+                    result.Add(matchedObject);
+                }
+            }
+    
+            return result;
         }
     }
 }

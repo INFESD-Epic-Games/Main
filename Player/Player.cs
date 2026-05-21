@@ -6,16 +6,20 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using SpellFall.Sounds;
 using System;
+using System.Collections.Generic;
 using WeaponBase = SpellFall.Weapons.Weapons;
 using Microsoft.Xna.Framework.Audio;
+using SpellFall.Enemies;
+using SpellFall.Background;
+using FlatRedBall.Glue.StateInterpolation;
 
 namespace SpellFall.Character
 {
     public class Player : GameObject
     {
         private const float PlayerScale = 0.5f;
-        private const float ColliderWidthScale = 0.55f;
-        private const float ColliderHeightScale = 0.75f;
+        private const float ColliderWidthScale = 0.25f;
+        private const float ColliderHeightScale = 0.45f;
         public RectangleCollider rectangleCollider { get; private set; }
         private WeaponBase _equippedWeapon;
         Vector2 lastDirection = Vector2.UnitY;
@@ -45,16 +49,19 @@ namespace SpellFall.Character
         private Texture2D walkWest;
         private Texture2D currentTexture;
         private SoundEffect _dashSfx;
+        public Map Map { get; set; }
+        protected readonly GameManager _gameManager;
 
         public float DashCooldownPercentage => _dashTimer / _dashCooldown;
 
         public Player(Point Position)
         {
+            _gameManager = GameManager.GetGameManager();
+            Map = _gameManager.Map;
             Stats = new PlayerStats();
             rectangleCollider = new RectangleCollider(new Rectangle(Position, Point.Zero));
             position = Position.ToVector2();
             SetCollider(rectangleCollider);
-
             _healthBar = new HealthBar(Stats);
             _dashBar = new DashBar(this);
         }
@@ -69,6 +76,13 @@ namespace SpellFall.Character
             _dashSfx = content.Load<SoundEffect>("Dash");
 
             currentTexture = walkSouth;
+            int frameWidth = walkSouth.Width / 4;
+            int frameHeight = walkSouth.Height;
+
+            int colliderWidth = (int)(frameWidth * PlayerScale * ColliderWidthScale);
+            int colliderHeight = (int)(frameHeight * PlayerScale * ColliderHeightScale);
+
+            rectangleCollider.shape = new Rectangle(0, 0, colliderWidth, colliderHeight);
             UpdateCollider();
         }
 
@@ -85,11 +99,6 @@ namespace SpellFall.Character
                 _thrustInput.X -= 1;
             if (inputManager.IsKeyDown(Keys.D))
                 _thrustInput.X += 1;
-
-            // Temporary damage input for testing health bar
-            // TODO: Remove when implementing actual damage sources
-            if (inputManager.IsKeyPress(Keys.Down))
-                _healthBar.TakeDamage(10);
 
             if (inputManager.IsKeyPress(Keys.Space))
                 Dash();
@@ -141,7 +150,8 @@ namespace SpellFall.Character
                 inputDirection.Normalize();
                 lastDirection = inputDirection;
 
-                position += inputDirection * Stats.TotalSpeed;
+                Vector2 velocity = inputDirection * Stats.TotalSpeed;
+                TryMove(velocity);
 
                 if (Math.Abs(inputDirection.X) > Math.Abs(inputDirection.Y))
                 {
@@ -187,6 +197,8 @@ namespace SpellFall.Character
             _healthBar.Update(gameTime);
 
             _dashBar.SetPosition(GetVisualBounds());
+            
+            CheckFieldOfView();
             
             base.Update(gameTime);
         }
@@ -252,17 +264,39 @@ namespace SpellFall.Character
                 return;
 
             _dashSfx.Play();
+
             Vector2 dashDirection = _thrustInput != Vector2.Zero
                 ? Vector2.Normalize(_thrustInput)
                 : lastDirection;
 
-            // Setup dash animation
-            _dashStartPosition = position;
-            _dashEndPosition = position + (dashDirection * _dashDistance);
+            Vector2 dashStep = dashDirection * 20f;
+
+            Vector2 startPos = position;
+            Vector2 finalPos = position;
+
+            // Try moving in small steps
+            for (int i = 0; i < 10; i++)
+            {
+                if (TryMove(dashStep))
+                {
+                    finalPos = position;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            // Reset back before animation starts
+            position = startPos;
+
+            // Animate only to valid position
+            _dashStartPosition = startPos;
+            _dashEndPosition = finalPos;
+
             _isDashing = true;
             _dashElapsedTime = 0f;
 
-            // Start cooldown
             _canDash = false;
             _dashTimer = _dashCooldown;
         }
@@ -283,15 +317,97 @@ namespace SpellFall.Character
 
         private void UpdateCollider()
         {
-            Rectangle spriteBounds = GetSpriteBounds();
-            int colliderWidth = (int)(spriteBounds.Width * ColliderWidthScale);
-            int colliderHeight = (int)(spriteBounds.Height * ColliderHeightScale);
+            int colliderWidth = (int)(rectangleCollider.shape.Width == 0
+                ? (currentTexture.Width / 4) * PlayerScale * ColliderWidthScale
+                : rectangleCollider.shape.Width);
+
+            int colliderHeight = (int)(rectangleCollider.shape.Height == 0
+                ? currentTexture.Height * PlayerScale * ColliderHeightScale
+                : rectangleCollider.shape.Height);
+
+            Point colliderLocation = (position - new Vector2(colliderWidth / 2f, colliderHeight / 2f)).ToPoint();
 
             rectangleCollider.shape = new Rectangle(
-                spriteBounds.Center.X - colliderWidth / 2,
-                spriteBounds.Center.Y - colliderHeight / 2,
-                colliderWidth,
-                colliderHeight);
+                colliderLocation,
+                new Point(colliderWidth, colliderHeight)
+            );
+        }
+
+        private bool TryMove(Vector2 velocity)
+        {
+            if (Map == null)
+            {
+                position += velocity;
+                return true;
+            }
+
+            bool moved = false;
+            int width = rectangleCollider.shape.Width;
+            int height = rectangleCollider.shape.Height;
+
+        
+            Vector2 newPosX = new Vector2(position.X + velocity.X, position.Y);
+            if (!Map.IsColliding(newPosX - new Vector2(width / 2f, height / 2f), width, height))
+            {
+                position.X += velocity.X;
+                moved = true;
+            }
+            Vector2 newPosY = new Vector2(position.X, position.Y + velocity.Y);
+            if (!Map.IsColliding(newPosY - new Vector2(width / 2f, height / 2f), width, height))
+            {
+                position.Y += velocity.Y;
+                moved =  true;
+            }
+
+            return moved;
+           
+        }
+
+        private void CheckFieldOfView()
+        {
+            List<IWatchable> watchables = GameManager.GetGameManager().GetObjectsOfType<IWatchable>();
+    
+            float halfAngleCos = (float)Math.Cos(MathHelper.ToRadians(90f) / 2f);
+            float maxRadiusSquared = 750f * 750f;
+
+            Vector2 forwardDir = lastDirection;
+            if (forwardDir != Vector2.Zero) forwardDir.Normalize();
+
+            foreach (IWatchable watchable in watchables)
+            {
+                if (watchable is not Enemy enemy)
+                {
+                    watchable.IsWatched = false;
+                    continue;
+                }
+
+                Vector2 toTarget = enemy.GetPosition() - position;
+                float distanceSquared = toTarget.LengthSquared();
+
+                if (distanceSquared > maxRadiusSquared)
+                {
+                    watchable.IsWatched = false;
+                    continue;
+                }
+        
+                if (distanceSquared == 0)
+                {
+                    watchable.IsWatched = true;
+                    continue;
+                }
+
+                Vector2 toTargetNormalized = toTarget / (float)Math.Sqrt(distanceSquared);
+    
+                float dotProduct = Vector2.Dot(forwardDir, toTargetNormalized);
+
+                if (dotProduct >= halfAngleCos)
+                {
+                    watchable.IsWatched = true;
+                    continue;
+                }
+        
+                watchable.IsWatched = false;
+            }
         }
     }
 }

@@ -2,24 +2,24 @@ using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using SpellFall.Character;
+using SpellFall.Engine;
 
 namespace SpellFall.Weapons.Projectiles
 {
-    public class Arrow : Ammo
+    public class Stone : Ammo
     {
-        private const float ArrowScale = 0.4f;
-        private const float ArrowHitboxRatio = 0.2f;
+        private const float StoneScale = 1f;
+        private const float StoneHitboxRatio = 0.2f;
         public int Damage { get; }
 
-        protected override bool CanDamageEnemies => true;
-
-        public Arrow(Vector2 location, Vector2 direction, float speed, int damage, float maxLifetime = 5f)
+        public Stone(Vector2 location, Vector2 direction, float speed, int damage, float maxLifetime = 5f)
             : base(
                 location,
                 direction,
                 speed,
-                ArrowScale,
-                ArrowHitboxRatio,
+                StoneScale,
+                StoneHitboxRatio,
                 maxLifetime)
         {
             Damage = Math.Max(0, damage);
@@ -27,21 +27,21 @@ namespace SpellFall.Weapons.Projectiles
 
         public override void Load(ContentManager content)
         {
-            _texture = content.Load<Texture2D>("PIJL");
+            _texture = content.Load<Texture2D>("Stone");
             SetHitboxFromTexture();
             base.Load(content);
         }
 
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            Vector2 arrowOrigin = new Vector2(_texture.Width / 2f, _texture.Height / 2f);
+            Vector2 stoneOrigin = new Vector2(_texture.Width / 2f, _texture.Height / 2f);
             spriteBatch.Draw(
                 _texture,
                 _circleCollider.Center,
                 null,
                 Color.White,
                 _rotation,
-                arrowOrigin,
+                stoneOrigin,
                 Scale,
                 SpriteEffects.None,
                 0f);
@@ -49,9 +49,15 @@ namespace SpellFall.Weapons.Projectiles
             base.Draw(gameTime, spriteBatch);
         }
 
-        protected override int GetEnemyDamage()
+        public override void OnCollision(GameObject other)
         {
-            return Damage;
+            if (other is Player player)
+            {
+                player.HealthBar.TakeDamage(Damage);
+                _gameManager.RemoveGameObject(this);
+            }
+                    
+            base.OnCollision(other);
         }
     }
 }
