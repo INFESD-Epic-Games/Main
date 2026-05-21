@@ -1,7 +1,9 @@
 using System;
+using System.Reflection;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SpellFall.Collision;
+using SpellFall.Enemies;
 using SpellFall.Engine;
 
 namespace SpellFall.Weapons.Projectiles
@@ -20,14 +22,17 @@ namespace SpellFall.Weapons.Projectiles
         public float Scale { get; }
         public float HitboxRatio { get; }
 
-        // moet nog
-        public int VerticalAmount { get; }
-        public int HorizontalAmount { get; }
-        public bool HasHoming { get; }
-        public int PierceCount { get; }
-        public int BounceCount { get; }
-        public float ExplosionRadius { get; }
-        public int LightningChains { get; }
+        protected virtual bool CanDamageEnemies => false;
+
+        protected virtual int GetEnemyDamage()
+        {
+            return 0;
+        }
+
+        protected virtual void OnEnemyHit(Enemy enemy)
+        {
+            DealEnemyDamage(enemy, GetEnemyDamage());
+        }
 
         protected Ammo(
             Vector2 location,
@@ -35,15 +40,7 @@ namespace SpellFall.Weapons.Projectiles
             float speed,
             float scale,
             float hitboxRatio,
-            float maxLifetime,
-            // alles vanaf hier lijkt me nog cool toetevoegen
-            int verticalAmount = 1,
-            int horizontalAmount = 1,
-            bool hasHoming = false,
-            int pierceCount = 0,
-            int bounceCount = 0,
-            float explosionRadius = 0f,
-            int lightningChains = 0)
+            float maxLifetime)
         {
             _gameManager = GameManager.GetGameManager();
             _circleCollider = new CircleCollider(location, 8f);
@@ -65,15 +62,6 @@ namespace SpellFall.Weapons.Projectiles
             HitboxRatio = Math.Max(0f, hitboxRatio);
             _maxLifetime = Math.Max(0.01f, maxLifetime);
             _lifetime = 0f;
-
-            // moet nog
-            VerticalAmount = Math.Max(1, verticalAmount);
-            HorizontalAmount = Math.Max(1, horizontalAmount);
-            HasHoming = hasHoming;
-            PierceCount = Math.Max(0, pierceCount);
-            BounceCount = Math.Max(0, bounceCount);
-            ExplosionRadius = Math.Max(0f, explosionRadius);
-            LightningChains = Math.Max(0, lightningChains);
         }
 
         protected void SetHitboxFromTexture()
@@ -93,6 +81,32 @@ namespace SpellFall.Weapons.Projectiles
             }
 
             base.Update(gameTime);
+        }
+
+        public override void OnCollision(GameObject other)
+        {
+            if (other is Enemy enemy && CanDamageEnemies)
+            {
+                OnEnemyHit(enemy);
+
+                _gameManager.RemoveGameObject(this);
+            }
+
+            base.OnCollision(other);
+        }
+
+        protected void DealEnemyDamage(Enemy enemy, int damage)
+        {
+            if (Bishop.TryProtectEnemy(enemy))
+            {
+                return;
+            }
+
+            MethodInfo takeDamageMethod = enemy.GetType().GetMethod(
+                "TakeDamage",
+                BindingFlags.Instance | BindingFlags.NonPublic);
+
+            takeDamageMethod?.Invoke(enemy, new object[] { damage });
         }
     }
 }
