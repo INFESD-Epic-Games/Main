@@ -23,11 +23,17 @@ namespace SpellFall.Character
         private Vector2 _thrustInput = Vector2.Zero;
         private Vector2 _previousPosition;
         private const int _dashDistance = 200;
+        private const float _dashDuration = 0.3f; // Duration in seconds
         private float _dashCooldown = 5f;
         private float _dashTimer = 0f;
         private bool _canDash = true;
+        private bool _isDashing = false;
+        private float _dashElapsedTime = 0f;
+        private Vector2 _dashStartPosition;
+        private Vector2 _dashEndPosition;
         private HealthBar _healthBar;
         public HealthBar HealthBar => _healthBar;
+        private DashBar _dashBar;
         public PlayerStats Stats { get; }
         Vector2 position;
         private int currentFrame = 0;
@@ -43,6 +49,8 @@ namespace SpellFall.Character
         protected Map _map;
         protected readonly GameManager _gameManager;
 
+        public float DashCooldownPercentage => _dashTimer / _dashCooldown;
+
         public Player(Point Position)
         {
             _gameManager = GameManager.GetGameManager();
@@ -52,6 +60,7 @@ namespace SpellFall.Character
             position = Position.ToVector2();
             SetCollider(rectangleCollider);
             _healthBar = new HealthBar(Stats);
+            _dashBar = new DashBar(this);
         }
 
         public override void Load(ContentManager content)
@@ -104,6 +113,7 @@ namespace SpellFall.Character
         {
             float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
             Stats.DecreaseAttackCooldown();
+            
             // Update cooldown timer
             if (!_canDash)
             {
@@ -114,8 +124,27 @@ namespace SpellFall.Character
                 }
             }
 
+            // Handle dash animation
+            if (_isDashing)
+            {
+                _dashElapsedTime += deltaTime;
+                float progress = _dashElapsedTime / _dashDuration;
 
-            isMoving = _thrustInput != Vector2.Zero;
+                if (progress >= 1f)
+                {
+                    // Dash complete
+                    position = _dashEndPosition;
+                    _isDashing = false;
+                    progress = 1f;
+                }
+                else
+                {
+                    float easedProgress = 1f - (float)Math.Pow(1f - progress, 3f);
+                    position = Vector2.Lerp(_dashStartPosition, _dashEndPosition, easedProgress);
+                }
+            }
+
+            isMoving = _thrustInput != Vector2.Zero && !_isDashing;
 
             if (isMoving)
             {
@@ -168,6 +197,9 @@ namespace SpellFall.Character
 
             _healthBar.SetPosition(GetVisualBounds());
             _healthBar.Update(gameTime);
+
+            _dashBar.SetPosition(GetVisualBounds());
+            
             base.Update(gameTime);
         }
 
@@ -205,6 +237,7 @@ namespace SpellFall.Character
                 0f
             );
             _healthBar.DrawHealthBar(spriteBatch);
+            _dashBar.DrawDashBar(spriteBatch);
             base.Draw(gameTime, spriteBatch);
         }
 
@@ -240,6 +273,12 @@ namespace SpellFall.Character
                 TryMove(dashStep);
             }
           
+            // Setup dash animation
+            _dashStartPosition = position;
+            _dashEndPosition = position + (dashDirection * _dashDistance);
+            _isDashing = true;
+            _dashElapsedTime = 0f;
+
             // Start cooldown
             _canDash = false;
             _dashTimer = _dashCooldown;

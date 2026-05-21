@@ -23,3 +23,6 @@ Story.png was generated with AI and then edited/used by the developer.
 
 Assets used for UI from:
 Kenney Vleugels - (https://www.kenney.nl/assets/pixel-ui-pack)
+
+Asset for the Goblin from:
+ruveyhak - (https://ruveyhak.itch.io/goblin)

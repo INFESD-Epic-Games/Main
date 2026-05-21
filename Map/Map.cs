@@ -9,6 +9,8 @@ namespace SpellFall.Background
     {
         private Texture2D _map1;
 
+        private Texture2D _texture;
+        private Texture2D _controlsTexture;
         private const int _tileSize = 32;
         private const int _renderScale = 4;
         private const int _screenTileSize = _tileSize * _renderScale;
@@ -36,6 +38,12 @@ namespace SpellFall.Background
         public override void Load(ContentManager content)
         {
             _map1 = content.Load<Texture2D>("map");
+            _texture = content.Load<Texture2D>("TX Tileset Grass");
+            _controlsTexture = content.Load<Texture2D>("Control_layout");
+            _tilesPerRow = Math.Max(1, _texture.Width / _tileSize);
+
+            GenerateMap();
+            AddDetails();
             base.Load(content);
         }
 
@@ -79,6 +87,23 @@ namespace SpellFall.Background
             //         }
             //     }
             // }
+
+            Vector2 controlsPosition = new Vector2(
+                (_mapWidth * _screenTileSize - _controlsTexture.Width * 0.75f) / 2f,
+                (_mapHeight * _screenTileSize - _controlsTexture.Height * 0.75f) / 2f
+            );
+
+            spriteBatch.Draw(
+                _controlsTexture, 
+                controlsPosition, 
+                null, 
+                Color.White * 0.6f,
+                0f,
+                Vector2.Zero,
+                0.75f,
+                SpriteEffects.None,
+                0f
+            );
 
             base.Draw(gameTime, spriteBatch);
         }
