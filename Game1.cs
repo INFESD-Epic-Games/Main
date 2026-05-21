@@ -162,6 +162,7 @@ namespace SpellFall
             _gameManager.AddGameObject(new Goblin(projectileEnemyPosition));
             
             _gameManager.AddGameObject(new WeepingAngel(new Point(0, 0)));
+            _gameManager.AddGameObject(new BigElite(new Point(-50, -50)));
         }
 
         protected override void LoadContent()
