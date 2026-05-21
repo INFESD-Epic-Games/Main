@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using SpellFall.Engine;
+using SpellFall.Weapons.Projectiles;
 
 namespace SpellFall.Enemies
 {
@@ -11,7 +12,7 @@ namespace SpellFall.Enemies
         private const float EnemyScale = 0.5f;
         private const float HitboxScale = 0.4f;
         private const int MaxHealth = 20;
-        private const float TeleportDistance = 400f;
+        private const float TeleportDistance = 200f;
 
         private Texture2D _texture;
         private Texture2D _healthBarTexture;
@@ -25,8 +26,9 @@ namespace SpellFall.Enemies
         private float _teleportElapsedTime = 0f;
         private float _teleportDuration = 0.5f; // Duration of the teleportation in seconds 
         private float _teleportTimer = 0f;
-        private float _teleportCooldown = 5f;
+        private float _teleportCooldown = 3f;
         private static readonly Random _random = new Random();
+        private const int ShotsPerTeleport = 3;
 
         public Teleporter(Point startPosition) : base(startPosition)
         {
@@ -44,10 +46,39 @@ namespace SpellFall.Enemies
 
         public override void Update(GameTime gameTime)
         {
+            Teleport();
             float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
             if (!_canTeleport)
             {
                 _teleportTimer -= deltaTime;
+                if (_teleportTimer <= 0f)
+                {
+                    _canTeleport = true;
+                }
+                
+            }
+
+            if(_isTeleporting)
+            {
+                _teleportElapsedTime += deltaTime;
+                float progress = _teleportElapsedTime / _teleportDuration;
+
+                if (progress >= 1f)
+                {
+                    _position = _teleportEndPosition;
+                    _isTeleporting = false;
+
+                    for (int i = 0; i < ShotsPerTeleport; i++)
+                    {
+                        float spread = (i - (ShotsPerTeleport - 1) / 2f) * 0.15f;
+                        Attack(spread);
+                    }
+                }
+                else
+                {
+                    float easedProgress = 1f - (float)Math.Pow(1f - progress, 3);
+                    _position = Vector2.Lerp(_teleportStartPosition, _teleportEndPosition, easedProgress);
+                }
             }
 
             UpdateCollider();
@@ -137,6 +168,28 @@ namespace SpellFall.Enemies
 
             _canTeleport = false;
             _teleportTimer = _teleportCooldown;
+        }
+
+        private void Attack(float angleOffset = 0f)
+        {
+            Vector2 direction = _gameManager.Player.GetPosition().Center.ToVector2() - _position;
+            direction.Normalize();
+
+            if (angleOffset != 0f)
+            {
+                direction = RotateVector(direction, angleOffset);
+            }
+
+            float angle = (float)Math.Atan2(direction.Y, direction.X);
+
+            _gameManager.AddGameObject(new Fireball(_position, direction, angle, 300f, 10));
+        }
+
+        private Vector2 RotateVector(Vector2 v, float radians)
+        {
+            float cos = (float)Math.Cos(radians);
+            float sin = (float)Math.Sin(radians);
+            return new Vector2(v.X * cos - v.Y * sin, v.X * sin + v.Y * cos);
         }
     }
 }
