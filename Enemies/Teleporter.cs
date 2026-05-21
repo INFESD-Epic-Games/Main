@@ -37,7 +37,7 @@ namespace SpellFall.Enemies
 
         public override void Load(ContentManager content)
         {
-            _texture = content.Load<Texture2D>("alien");
+            _texture = content.Load<Texture2D>("Ghost");
             _frameWidth = _texture.Width / 4;
             _frameHeight = _texture.Height;
             UpdateCollider();
