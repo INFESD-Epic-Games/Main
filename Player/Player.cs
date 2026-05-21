@@ -11,6 +11,7 @@ using WeaponBase = SpellFall.Weapons.Weapons;
 using Microsoft.Xna.Framework.Audio;
 using SpellFall.Enemies;
 using SpellFall.Background;
+using FlatRedBall.Glue.StateInterpolation;
 
 namespace SpellFall.Character
 {
@@ -98,11 +99,6 @@ namespace SpellFall.Character
                 _thrustInput.X -= 1;
             if (inputManager.IsKeyDown(Keys.D))
                 _thrustInput.X += 1;
-
-            // Temporary damage input for testing health bar
-            // TODO: Remove when implementing actual damage sources
-            if (inputManager.IsKeyPress(Keys.Down))
-                _healthBar.TakeDamage(10);
 
             if (inputManager.IsKeyPress(Keys.Space))
                 Dash();
@@ -211,6 +207,8 @@ namespace SpellFall.Character
         {
             if (other is Enemies.AlienSpawner)
             {
+                position = _previousPosition;
+                UpdateCollider();
                 _healthBar.SetPosition(GetVisualBounds());
             }
 
@@ -266,24 +264,39 @@ namespace SpellFall.Character
                 return;
 
             _dashSfx.Play();
+
             Vector2 dashDirection = _thrustInput != Vector2.Zero
                 ? Vector2.Normalize(_thrustInput)
                 : lastDirection;
 
-            Vector2 dashStep = dashDirection * (_dashDistance / 10f);
+            Vector2 dashStep = dashDirection * 20f;
 
+            Vector2 startPos = position;
+            Vector2 finalPos = position;
+
+            // Try moving in small steps
             for (int i = 0; i < 10; i++)
             {
-                TryMove(dashStep);
+                if (TryMove(dashStep))
+                {
+                    finalPos = position;
+                }
+                else
+                {
+                    break;
+                }
             }
-          
-            // Setup dash animation
-            _dashStartPosition = position;
-            _dashEndPosition = position + (dashDirection * _dashDistance);
+
+            // Reset back before animation starts
+            position = startPos;
+
+            // Animate only to valid position
+            _dashStartPosition = startPos;
+            _dashEndPosition = finalPos;
+
             _isDashing = true;
             _dashElapsedTime = 0f;
 
-            // Start cooldown
             _canDash = false;
             _dashTimer = _dashCooldown;
         }
@@ -320,14 +333,15 @@ namespace SpellFall.Character
             );
         }
 
-        private void TryMove(Vector2 velocity)
+        private bool TryMove(Vector2 velocity)
         {
             if (Map == null)
             {
                 position += velocity;
-                return;
+                return true;
             }
 
+            bool moved = false;
             int width = rectangleCollider.shape.Width;
             int height = rectangleCollider.shape.Height;
 
@@ -336,13 +350,16 @@ namespace SpellFall.Character
             if (!Map.IsColliding(newPosX - new Vector2(width / 2f, height / 2f), width, height))
             {
                 position.X += velocity.X;
+                moved = true;
             }
-
             Vector2 newPosY = new Vector2(position.X, position.Y + velocity.Y);
             if (!Map.IsColliding(newPosY - new Vector2(width / 2f, height / 2f), width, height))
             {
                 position.Y += velocity.Y;
+                moved =  true;
             }
+
+            return moved;
            
         }
 
