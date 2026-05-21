@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using Gum.Forms;
 using Gum.Wireframe;
 using Microsoft.Xna.Framework;
@@ -172,6 +172,8 @@ namespace SpellFall
                 _player.GetPosition().Center.Y + 100
             );
             _gameManager.AddGameObject(new Bishop(bishopPosition));
+
+            _gameManager.AddGameObject(new WeepingAngel(new Point(0, 0)));
         }
 
         protected override void LoadContent()
