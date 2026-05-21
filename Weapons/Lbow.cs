@@ -9,7 +9,7 @@ namespace SpellFall.Weapons
 {
     public class Lbow : Weapons
     {
-        private const float BowScale = 5.6f;
+        private const float BowScale = 4.9f;
 
         private Texture2D _bowTexture;
         private Point _target;
