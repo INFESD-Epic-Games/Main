@@ -40,10 +40,6 @@ namespace SpellFall.Background
             _map1 = content.Load<Texture2D>("map");
             _texture = content.Load<Texture2D>("TX Tileset Grass");
             _controlsTexture = content.Load<Texture2D>("Control_layout");
-            _tilesPerRow = Math.Max(1, _texture.Width / _tileSize);
-
-            GenerateMap();
-            AddDetails();
             base.Load(content);
         }
 
@@ -88,10 +84,7 @@ namespace SpellFall.Background
             //     }
             // }
 
-            Vector2 controlsPosition = new Vector2(
-                (_mapWidth * _screenTileSize - _controlsTexture.Width * 0.75f) / 2f,
-                (_mapHeight * _screenTileSize - _controlsTexture.Height * 0.75f) / 2f
-            );
+            Vector2 controlsPosition = new Vector2(512,1024);
 
             spriteBatch.Draw(
                 _controlsTexture, 
