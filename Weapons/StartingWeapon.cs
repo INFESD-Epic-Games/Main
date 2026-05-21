@@ -29,6 +29,12 @@ namespace SpellFall.Weapons
 
 		public override void HandleInput(InputManager inputManager)
 		{
+			if (!IsEquipped)
+			{
+				base.HandleInput(inputManager);
+				return;
+			}
+
 			Vector2 gameMouse = Game1.ScreenToGameCoordinates(inputManager.CurrentMouseState.Position.ToVector2());
 			Matrix inverseCamera = Matrix.Invert(_gameManager.Camera.Transform);
 			Vector2 worldMouse = Vector2.Transform(gameMouse, inverseCamera);
@@ -49,6 +55,12 @@ namespace SpellFall.Weapons
 
 		public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
 		{
+			if (!IsEquipped)
+			{
+				base.Draw(gameTime, spriteBatch);
+				return;
+			}
+
 			Rectangle playerRect = _gameManager.Player.GetPosition();
 			Vector2 aimDirection = LinePieceCollider.GetDirection(playerRect.Center, _target);
 			float aimAngle = LinePieceCollider.GetAngle(aimDirection);

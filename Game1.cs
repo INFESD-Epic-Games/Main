@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using Gum.Forms;
 using Gum.Wireframe;
 using Microsoft.Xna.Framework;
@@ -25,6 +25,9 @@ namespace SpellFall
         private static RenderManager _renderManager;
         private GameManager _gameManager;
         private Npc _npc;
+        private Player _player;
+        private StartingWeapon _startingWeapon;
+        private Lbow _lbow;
         private KeyboardState _previousKeyboardState;
 
         private readonly MainMenu _mainMenu = new MainMenu();
@@ -132,14 +135,29 @@ namespace SpellFall
         protected void InitializeGame()
         {
             // Place the player at the center of the screen
-            Player player = new Player(new Point(RenderManager.VirtualWidth / 2 - 100, RenderManager.VirtualHeight / 2 - 100));
-            _gameManager.Initialize(Content, this, player);
+            int spawnTileX = 8;
+            int spawnTileY = 8;
+
+            int tileWorldSize = 32 * 4;
+
+            _player = new Player(
+                new Point(
+                    spawnTileX * tileWorldSize + tileWorldSize / 2,
+                    spawnTileY * tileWorldSize + tileWorldSize / 2
+                )
+            );
+            _gameManager.Initialize(Content, this, _player);
             StartingWeapon startingWeapon = new StartingWeapon();
-            player.EquipWeapon(startingWeapon);
+            _player.EquipWeapon(startingWeapon);
+            _player = new Player(new Point(RenderManager.VirtualWidth / 2 - 100, RenderManager.VirtualHeight / 2 - 100));
+            _gameManager.Initialize(Content, this, _player);
+            _startingWeapon = new StartingWeapon();
+            _lbow = new Lbow();
+            _player.EquipWeapon(_startingWeapon);
 
             Point npcPosition = new Point(
-                player.GetPosition().Center.X + 200,
-                player.GetPosition().Center.Y
+                _player.GetPosition().Center.X + 200,
+                _player.GetPosition().Center.Y
             );
 
             _npc = new Npc(npcPosition);
@@ -147,20 +165,32 @@ namespace SpellFall
             {
                 _gameManager.AddGameObject(AlienSpawner.CreateQuestSpawner());
             });
-            _npc.SetPlayerHealthBar(player.HealthBar);
+            _npc.SetPlayerHealthBar(_player.HealthBar);
+
+            
+            Map map = new Map();
+            _gameManager.Map = map;
+            _player.Map = map;
+            _gameManager.AddGameObject(map);
             
             // Add the starting objects to the GameManager
-            _gameManager.AddGameObject(new Map());
             _gameManager.AddGameObject(_npc);
-            _gameManager.AddGameObject(player);
-            _gameManager.AddGameObject(startingWeapon);
+            _gameManager.AddGameObject(_player);
+            _gameManager.AddGameObject(_startingWeapon);
+            _gameManager.AddGameObject(_lbow);
             // Spawn the projectile enemy near the player so it stays on the playable area.
             Point projectileEnemyPosition = new Point(
-                player.GetPosition().Center.X + 300,
-                player.GetPosition().Center.Y - 100
+                _player.GetPosition().Center.X + 300,
+                _player.GetPosition().Center.Y - 100
             );
             _gameManager.AddGameObject(new Goblin(projectileEnemyPosition));
-            
+
+            Point bishopPosition = new Point(
+                _player.GetPosition().Center.X + 500,
+                _player.GetPosition().Center.Y + 100
+            );
+            _gameManager.AddGameObject(new Bishop(bishopPosition));
+
             _gameManager.AddGameObject(new WeepingAngel(new Point(0, 0)));
             _gameManager.AddGameObject(new BigElite(new Point(-50, -50)));
         }
@@ -219,6 +249,8 @@ namespace SpellFall
                 return;
             }
 
+            HandleWeaponSwitch(currentKeyboard);
+
             GumUI.Update(gameTime);
             _gameManager.Update(gameTime);
 
@@ -235,6 +267,26 @@ namespace SpellFall
 
             _previousKeyboardState = currentKeyboard;
             base.Update(gameTime);
+        }
+
+        private void HandleWeaponSwitch(KeyboardState currentKeyboard)
+        {
+            if (_player == null)
+            {
+                return;
+            }
+
+            bool onePressed = currentKeyboard.IsKeyDown(Keys.D1) && !_previousKeyboardState.IsKeyDown(Keys.D1);
+            bool twoPressed = currentKeyboard.IsKeyDown(Keys.D2) && !_previousKeyboardState.IsKeyDown(Keys.D2);
+
+            if (onePressed && _startingWeapon != null)
+            {
+                _player.EquipWeapon(_startingWeapon);
+            }
+            else if (twoPressed && _lbow != null)
+            {
+                _player.EquipWeapon(_lbow);
+            }
         }
 
         protected override void Draw(GameTime gameTime)

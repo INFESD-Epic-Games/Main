@@ -66,21 +66,20 @@ namespace SpellFall.Enemies
             if (directionToPlayer != Vector2.Zero)
             {
                 directionToPlayer.Normalize();
-                _position += directionToPlayer * MoveSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
+                Vector2 velocity = directionToPlayer * MoveSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+                int colliderWidth = (int)(_frameWidth * AlienScale * HitboxScale);
+                int colliderHeight = (int)(_frameHeight * AlienScale * HitboxScale);
+                TryMove(velocity, colliderWidth, colliderHeight);
             }
 
-            UpdateCollider();
+            UpdateCollider();   
             base.Update(gameTime);
         }
 
         public override void OnCollision(GameObject other)
         {
-            if (other is Arrow arrow)
-            {
-                _gameManager.RemoveGameObject(other);
-                TakeDamage(arrow.Damage);
-            }
-            else if (other is Player && _contactCooldownTimer <= 0f)
+            if (other is Player && _contactCooldownTimer <= 0f)
             {
                 _gameManager.Player.HealthBar.TakeDamage(ContactDamage);
                 _contactCooldownTimer = ContactCooldownSeconds;
