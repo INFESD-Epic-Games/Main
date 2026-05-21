@@ -140,15 +140,15 @@ namespace SpellFall
 
             int tileWorldSize = 32 * 4;
 
-            Player player = new Player(
+            _player = new Player(
                 new Point(
                     spawnTileX * tileWorldSize + tileWorldSize / 2,
                     spawnTileY * tileWorldSize + tileWorldSize / 2
                 )
             );
-            _gameManager.Initialize(Content, this, player);
+            _gameManager.Initialize(Content, this, _player);
             StartingWeapon startingWeapon = new StartingWeapon();
-            player.EquipWeapon(startingWeapon);
+            _player.EquipWeapon(startingWeapon);
             _player = new Player(new Point(RenderManager.VirtualWidth / 2 - 100, RenderManager.VirtualHeight / 2 - 100));
             _gameManager.Initialize(Content, this, _player);
             _startingWeapon = new StartingWeapon();
@@ -167,12 +167,10 @@ namespace SpellFall
             });
             _npc.SetPlayerHealthBar(_player.HealthBar);
 
-
-            _npc.SetPlayerHealthBar(player.HealthBar);
-
+            
             Map map = new Map();
             _gameManager.Map = map;
-            player.Map = map;
+            _player.Map = map;
             _gameManager.AddGameObject(map);
             
             // Add the starting objects to the GameManager
