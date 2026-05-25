@@ -2,6 +2,7 @@ using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using SpellFall.Background;
 using SpellFall.Engine;
 using SpellFall.Weapons.Projectiles;
 
@@ -12,7 +13,7 @@ namespace SpellFall.Enemies
         private const float EnemyScale = 0.5f;
         private const float HitboxScale = 0.4f;
         private const int MaxHealth = 20;
-        private const float TeleportDistance = 200f;
+        private const float TeleportDistance = 20f;
 
         private Texture2D _texture;
         private Texture2D _healthBarTexture;
@@ -29,10 +30,12 @@ namespace SpellFall.Enemies
         private float _teleportCooldown = 3f;
         private static readonly Random _random = new Random();
         private const int ShotsPerTeleport = 3;
+        public Map Map { get; set; }
 
         public Teleporter(Point startPosition) : base(startPosition)
         {
             _currentHealth = MaxHealth;
+            Map = _gameManager.Map;
         }
 
         public override void Load(ContentManager content)
@@ -161,13 +164,59 @@ namespace SpellFall.Enemies
                 _random.Next(-1, 2)
             );
 
-            _teleportStartPosition = _position;
-            _teleportEndPosition = _position + (teleportDirection * TeleportDistance);
+            Vector2 teleportStep = teleportDirection * TeleportDistance;
+
+            Vector2 startPos = _position;
+            Vector2 finalPos = _position;
+
+            for (int i = 0; i < 10; i++)
+            {
+                if (TryMove(teleportStep))
+                {
+                    finalPos = _position;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            _position = startPos;
+
+            _teleportStartPosition = startPos;
+            _teleportEndPosition = finalPos;
             _isTeleporting = true;
             _teleportElapsedTime = 0f;
 
             _canTeleport = false;
             _teleportTimer = _teleportCooldown;
+        }
+
+        private bool TryMove(Vector2 velocity)
+        {
+            if (Map == null)
+            {
+                _position += velocity;
+                return true;
+            }
+
+            bool moved = false;
+            int width = _rectangleCollider.shape.Width;
+            int height = _rectangleCollider.shape.Height;
+
+            Vector2 newPosX = new Vector2(_position.X + velocity.X, _position.Y);
+            if (!Map.IsColliding(newPosX - new Vector2(width / 2f, height / 2f), width, height))
+            {
+                _position.X += velocity.X;
+                moved = true;
+            }
+            Vector2 newPosY = new Vector2(_position.X, _position.Y + velocity.Y);
+            if (!Map.IsColliding(newPosY - new Vector2(width / 2f, height / 2f), width, height))
+            {                
+                _position.Y += velocity.Y;
+                moved = true;
+            }
+            return moved;
         }
 
         private void Attack(float angleOffset = 0f)
