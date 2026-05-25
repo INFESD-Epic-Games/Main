@@ -9,7 +9,7 @@ using Microsoft.Xna.Framework.Audio;
 
 namespace SpellFall.Enemies
 {
-    public class Teleporter : Enemy
+    public class Ghost : Enemy
     {
         private const float EnemyScale = 0.5f;
         private const float HitboxScale = 0.4f;
@@ -35,7 +35,7 @@ namespace SpellFall.Enemies
         private const int ShotsPerTeleport = 3;
         public Map Map { get; set; }
 
-        public Teleporter(Point startPosition) : base(startPosition)
+        public Ghost(Point startPosition) : base(startPosition)
         {
             _currentHealth = MaxHealth;
             _isDead = false;

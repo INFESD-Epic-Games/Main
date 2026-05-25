@@ -204,7 +204,7 @@ namespace SpellFall
                 _player.GetPosition().Center.X + 300,
                 _player.GetPosition().Center.Y - 100
             );
-            _gameManager.AddGameObject(new Teleporter(enemyPosition));
+            _gameManager.AddGameObject(new Ghost(enemyPosition));
         }
 
         protected override void LoadContent()
