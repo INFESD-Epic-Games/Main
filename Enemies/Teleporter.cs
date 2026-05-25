@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 using SpellFall.Background;
 using SpellFall.Engine;
 using SpellFall.Weapons.Projectiles;
+using Microsoft.Xna.Framework.Audio;
 
 namespace SpellFall.Enemies
 {
@@ -18,6 +19,8 @@ namespace SpellFall.Enemies
         private Texture2D _texture;
         private Texture2D _healthBarTexture;
         private int _currentHealth;
+        private bool _isDead;
+        private SoundEffect _enemyDeathSFX;
         private int _frameWidth;
         private int _frameHeight;
         private bool _canTeleport = true;
@@ -35,11 +38,13 @@ namespace SpellFall.Enemies
         public Teleporter(Point startPosition) : base(startPosition)
         {
             _currentHealth = MaxHealth;
+            _isDead = false;
             Map = _gameManager.Map;
         }
 
         public override void Load(ContentManager content)
         {
+            _enemyDeathSFX = content.Load<SoundEffect>("Enemy Death");
             _texture = content.Load<Texture2D>("Ghost");
             _frameWidth = _texture.Width / 4;
             _frameHeight = _texture.Height;
@@ -88,10 +93,10 @@ namespace SpellFall.Enemies
             base.Update(gameTime);
         }
 
-        public override void OnCollision(GameObject other)
-        {
-            base.OnCollision(other);
-        }
+        // public override void OnCollision(GameObject other)
+        // {
+        //     base.OnCollision(other);
+        // }
 
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
@@ -145,6 +150,23 @@ namespace SpellFall.Enemies
             }
 
             return 3;
+        }
+
+        private void TakeDamage(int damage)
+        {
+            if (_isDead)
+            {
+                return;
+            }
+
+            _currentHealth -= damage;
+            if (_currentHealth > 0)
+            {
+                return;
+            }
+
+            _isDead = true;
+            KillEnemy(_enemyDeathSFX);
         }
 
         protected override void UpdateCollider()
