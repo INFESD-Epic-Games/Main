@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -118,6 +120,95 @@ namespace SpellFall.Background
                 (int)(position.X / _screenTileSize),
                 (int)(position.Y / _screenTileSize)
             );
+        }
+
+        public Vector2 TileToWorldCenter(Point tile)
+        {
+            return new Vector2(
+                tile.X * _screenTileSize + _screenTileSize / 2f,
+                tile.Y * _screenTileSize + _screenTileSize / 2f);
+        }
+
+        public List<Point> FindPath(Point start, Point goal)
+        {
+            int rows = _collision.GetLength(0);
+            int cols = _collision.GetLength(1);
+
+            if (start.X < 0 || start.Y < 0 || start.X >= cols || start.Y >= rows)
+                return null;
+
+            if (goal.X < 0 || goal.Y < 0 || goal.X >= cols || goal.Y >= rows)
+                return null;
+
+            if (IsBlocked(goal.X, goal.Y))
+                return null;
+
+            var directions = new Point[]
+            {
+                new Point(1,0), new Point(-1,0), new Point(0,1), new Point(0,-1),
+                new Point(1,1), new Point(1,-1), new Point(-1,1), new Point(-1,-1)
+            };
+
+            var open = new PriorityQueue<Point, float>();
+            var gScore = new Dictionary<Point, float>();
+            var fScore = new Dictionary<Point, float>();
+            var cameFrom = new Dictionary<Point, Point>();
+
+            float Heuristic(Point a, Point b) => (float)Math.Sqrt((a.X - b.X) * (a.X - b.X) + (a.Y - b.Y) * (a.Y - b.Y));
+
+            gScore[start] = 0f;
+            fScore[start] = Heuristic(start, goal);
+            open.Enqueue(start, fScore[start]);
+
+            while (open.Count > 0)
+            {
+                var current = open.Dequeue();
+
+                if (current == goal)
+                {
+                    var path = new List<Point>();
+                    var node = current;
+                    while (!node.Equals(start))
+                    {
+                        path.Add(node);
+                        node = cameFrom[node];
+                    }
+                    path.Reverse();
+                    return path;
+                }
+
+                foreach (var dir in directions)
+                {
+                    var neighbor = new Point(current.X + dir.X, current.Y + dir.Y);
+
+                    if (neighbor.X < 0 || neighbor.Y < 0 || neighbor.X >= cols || neighbor.Y >= rows)
+                        continue;
+
+                    if (IsBlocked(neighbor.X, neighbor.Y))
+                        continue;
+
+                    // prevent cutting corners: if moving diagonally, ensure adjacent cardinal tiles are free
+                    if (Math.Abs(dir.X) == 1 && Math.Abs(dir.Y) == 1)
+                    {
+                        if (IsBlocked(current.X + dir.X, current.Y) || IsBlocked(current.X, current.Y + dir.Y))
+                            continue;
+                    }
+
+                    float moveCost = (Math.Abs(dir.X) == 1 && Math.Abs(dir.Y) == 1) ? 1.41421356f : 1f;
+                    float tentativeG = gScore[current] + moveCost;
+
+                    if (!gScore.TryGetValue(neighbor, out var existingG) || tentativeG < existingG)
+                    {
+                        cameFrom[neighbor] = current;
+                        gScore[neighbor] = tentativeG;
+                        float f = tentativeG + Heuristic(neighbor, goal);
+                        fScore[neighbor] = f;
+                        open.Enqueue(neighbor, f);
+                    }
+                }
+            }
+
+            return null;
         }
 
         public bool IsColliding(Vector2 position, int width, int height)
