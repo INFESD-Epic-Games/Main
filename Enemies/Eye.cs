@@ -13,7 +13,7 @@ namespace SpellFall.Enemies
     public class Eye : Enemy
     {
         private const float MoveSpeed = 100f;
-        private const float AlienScale = 0.5f;
+        private const float EnemyScale = 0.5f;
         private const float HitboxScale = 0.4f;
         private const int MaxHealth = 50;
         private const int ContactDamage = 5;
@@ -83,8 +83,8 @@ namespace SpellFall.Enemies
                 _lastTargetTile = playerTile;
             }
 
-            int colliderWidth = (int)(_frameWidth * AlienScale * HitboxScale);
-            int colliderHeight = (int)(_frameHeight * AlienScale * HitboxScale);
+            int colliderWidth = (int)(_frameWidth * EnemyScale * HitboxScale);
+            int colliderHeight = (int)(_frameHeight * EnemyScale * HitboxScale);
 
             if (_path != null && _path.Count > 0 && _pathIndex < _path.Count)
             {
@@ -161,14 +161,14 @@ namespace SpellFall.Enemies
                 Color.White,
                 0f,
                 origin,
-                AlienScale,
+                EnemyScale,
                 SpriteEffects.None,
                 0f);
 
             DrawHealthBar(
                 spriteBatch,
                 ref _healthBarTexture,
-                _frameHeight * AlienScale,
+                _frameHeight * EnemyScale,
                 _currentHealth,
                 MaxHealth,
                 40,
@@ -225,8 +225,8 @@ namespace SpellFall.Enemies
 
         protected override void UpdateCollider()
         {
-            int colliderWidth = (int)(_frameWidth * AlienScale * HitboxScale);
-            int colliderHeight = (int)(_frameHeight * AlienScale * HitboxScale);
+            int colliderWidth = (int)(_frameWidth * EnemyScale * HitboxScale);
+            int colliderHeight = (int)(_frameHeight * EnemyScale * HitboxScale);
             UpdateCenteredCollider(colliderWidth, colliderHeight);
         }
     }
