@@ -21,12 +21,16 @@ namespace SpellFall.Enemies
         private int _currentHealth;
         private bool _isDead;
         private static readonly HashSet<Bishop> _activeBishops = new HashSet<Bishop>();
+        // private readonly Vector2 _fixedPosition;
 
         public Bishop(Point startPosition) : base(startPosition)
         {
             _currentHealth = MaxHealth;
             _isDead = false;
+            // _fixedPosition = new Vector2(startPosition.X, startPosition.Y);
         }
+
+        protected override bool CanBePushedByEnemies => false;
 
         public override void Load(ContentManager content)
         {
@@ -39,8 +43,8 @@ namespace SpellFall.Enemies
 
         public override void Update(GameTime gameTime)
         {
+            // _position = _fixedPosition;
             UpdateCollider();
-            base.Update(gameTime);
         }
 
         public override void Destroy()
