@@ -18,20 +18,18 @@ namespace SpellFall.Enemies
         protected readonly RectangleCollider _rectangleCollider;
         protected readonly int _enemyId;
         protected Vector2 _position;
-        public bool IsAlive { get; private set; } = true;
         protected Map _map;
-
+        public bool IsAlive { get; private set; } = true;
         protected Enemy(Point startPosition)
         {
             _gameManager = GameManager.GetGameManager();
-            
             _enemyId = _nextEnemyId++;
             _position = startPosition.ToVector2();
 
             _rectangleCollider = new RectangleCollider(new Rectangle(startPosition, Point.Zero));
             SetCollider(_rectangleCollider);
-            _map = _gameManager.Map;
             _activeEnemies.Add(this);
+            _map = _gameManager.CurrentMap;
         }
 
         public static IEnumerable<Enemy> GetActiveEnemies()
