@@ -75,16 +75,27 @@ namespace SpellFall.Enemies
                 return;
             }
 
+            Vector2 halfOffset = new Vector2(width / 2f, height / 2f);
+
+            // Try full move first (diagonal)
+            Vector2 newPos = _position + velocity;
+            if (!_map.IsColliding(newPos - halfOffset, width, height))
+            {
+                _position = newPos;
+                UpdateCollider();
+                return;
+            }
+
             // Move X
             Vector2 newPosX = new Vector2(_position.X + velocity.X, _position.Y);
-            if (!_map.IsColliding(newPosX, width, height))
+            if (!_map.IsColliding(newPosX - halfOffset, width, height))
             {
                 _position = newPosX;
             }
 
             // Move Y
             Vector2 newPosY = new Vector2(_position.X, _position.Y + velocity.Y);
-            if (!_map.IsColliding(newPosY, width, height))
+            if (!_map.IsColliding(newPosY - halfOffset, width, height))
             {
                 _position = newPosY;
             }

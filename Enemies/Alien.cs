@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -26,6 +27,10 @@ namespace SpellFall.Enemies
         private int _frameWidth;
         private int _frameHeight;
         private SoundEffect _enemyDeathSFX;
+        private List<Point> _path;
+        private int _pathIndex;
+        private float _pathRecalcTimer;
+        private Point _lastTargetTile = new Point(-1, -1);
 
         public Alien(Point startPosition)
             : base(startPosition)
@@ -61,16 +66,51 @@ namespace SpellFall.Enemies
             }
 
             Vector2 playerPosition = _gameManager.Player.GetPosition().Center.ToVector2();
-            Vector2 directionToPlayer = playerPosition - _position;
 
-            if (directionToPlayer != Vector2.Zero)
+            // Pathfinding update timer
+            _pathRecalcTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            var playerTile = _map.WorldToTile(playerPosition);
+            var myTile = _map.WorldToTile(_position);
+
+            if (_path == null || _pathIndex >= (_path?.Count ?? 0) || _pathRecalcTimer <= 0f || !playerTile.Equals(_lastTargetTile))
             {
-                directionToPlayer.Normalize();
-                Vector2 velocity = directionToPlayer * MoveSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
+                _path = _map.FindPath(myTile, playerTile);
+                _pathIndex = 0;
+                _pathRecalcTimer = 0.2f; // recalc every 0.2 second
+                _lastTargetTile = playerTile;
+            }
 
-                int colliderWidth = (int)(_frameWidth * AlienScale * HitboxScale);
-                int colliderHeight = (int)(_frameHeight * AlienScale * HitboxScale);
-                TryMove(velocity, colliderWidth, colliderHeight);
+            int colliderWidth = (int)(_frameWidth * AlienScale * HitboxScale);
+            int colliderHeight = (int)(_frameHeight * AlienScale * HitboxScale);
+
+            if (_path != null && _path.Count > 0 && _pathIndex < _path.Count)
+            {
+                Vector2 targetWorld = _map.TileToWorldCenter(_path[_pathIndex]);
+                Vector2 directionToTarget = targetWorld - _position;
+                float dist = directionToTarget.Length();
+                if (dist < 4f)
+                {
+                    _pathIndex++;
+                }
+                else
+                {
+                    directionToTarget.Normalize();
+                    Vector2 velocity = directionToTarget * MoveSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
+                    TryMove(velocity, colliderWidth, colliderHeight);
+                }
+            }
+            else
+            {
+                // fallback to direct movement if no path found
+                Vector2 directionToPlayer = playerPosition - _position;
+
+                if (directionToPlayer != Vector2.Zero)
+                {
+                    directionToPlayer.Normalize();
+                    Vector2 velocity = directionToPlayer * MoveSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
+                    TryMove(velocity, colliderWidth, colliderHeight);
+                }
             }
 
             UpdateCollider();   
