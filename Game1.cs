@@ -171,16 +171,93 @@ namespace SpellFall
             _npc = new Npc(npcPosition);
             _npc.Initialize(_gameManager.QuestManager, () =>
             {
-                _gameManager.AddGameObject(AlienSpawner.CreateQuestSpawner());
+                Point projectileEnemyPosition = new Point(
+                _player.GetPosition().Center.X + 300,
+                _player.GetPosition().Center.Y - 100
+                );
+                _gameManager.AddGameObject(new Goblin(projectileEnemyPosition));
+
+                Point bishopPosition = new Point(
+                    _player.GetPosition().Center.X + 500,
+                    _player.GetPosition().Center.Y + 100
+                );
+                _gameManager.AddGameObject(new Bishop(bishopPosition));
+
+                _gameManager.AddGameObject(new WeepingAngel(new Point(
+                    _player.GetPosition().Center.X + 200,
+                    _player.GetPosition().Center.Y + 100
+                )));
+                _gameManager.AddGameObject(new Eye(new Point(
+                    _player.GetPosition().Center.X + 200,
+                    _player.GetPosition().Center.Y + 150
+                )));
+
+                Point enemyPosition = new Point(
+                    _player.GetPosition().Center.X + 300,
+                    _player.GetPosition().Center.Y - 100
+                );
+                _gameManager.AddGameObject(new Ghost(enemyPosition));
             });
             _npc.SetPlayerHealthBar(_player.HealthBar);
 
+            int[,] map1Collision =
+            {
+                {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+                {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+                {1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1},
+                {1,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,1},
+                {1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+                {1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1},
+                {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+                {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+                {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+                {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+                {1,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1},
+                {1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1},
+                {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+                {1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,1},
+                {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+                {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
+            };
+            int[,] map2Collision =
+            {
+                {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+                {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+                {1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1},
+                {1,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,1},
+                {1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+                {1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1},
+                {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+                {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+                {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+                {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+                {1,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1},
+                {1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1},
+                {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+                {1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,1},
+                {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+                {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
+            };
+
+            Map map1 = new Map(
+                "map",
+                Vector2.Zero,
+                map1Collision
+            );
+
+            Map map2 = new Map(
+                "map (1)",
+                new Vector2(2304,0),
+                map2Collision
+            );
+
+            _gameManager.Maps.Add(map1);
+            _gameManager.Maps.Add(map2);
+
+            _gameManager.CurrentMap = map1;
             
-            Map map = new Map();
-            _gameManager.Map = map;
-            _player.Map = map;
-            _gameManager.AddGameObject(map);
-            
+            _gameManager.AddGameObject(map1);
+            _gameManager.AddGameObject(map2);
             // Add the starting objects to the GameManager
             _gameManager.AddGameObject(_npc);
             _gameManager.AddGameObject(_player);
@@ -190,27 +267,6 @@ namespace SpellFall
             _gameManager.AddGameObject(_icebow);
             _gameManager.AddGameObject(_earthbow);
             _gameManager.AddGameObject(_poisonbow);
-            // Spawn the projectile enemy near the player so it stays on the playable area.
-            Point projectileEnemyPosition = new Point(
-                _player.GetPosition().Center.X + 300,
-                _player.GetPosition().Center.Y - 100
-            );
-            _gameManager.AddGameObject(new Goblin(projectileEnemyPosition));
-
-            Point bishopPosition = new Point(
-                _player.GetPosition().Center.X + 500,
-                _player.GetPosition().Center.Y + 100
-            );
-            _gameManager.AddGameObject(new Bishop(bishopPosition));
-
-            _gameManager.AddGameObject(new WeepingAngel(new Point(
-                _player.GetPosition().Center.X + 200,
-                _player.GetPosition().Center.Y + 100
-            )));
-            _gameManager.AddGameObject(new Eye(new Point(
-                _player.GetPosition().Center.X + 200,
-                _player.GetPosition().Center.Y + 150
-            )));
         }
 
         protected override void LoadContent()
@@ -228,9 +284,9 @@ namespace SpellFall
 
             if (GameState.IsPaused)
             {
-                bool enterPressed = currentKeyboard.IsKeyDown(Keys.Enter) && !_previousKeyboardState.IsKeyDown(Keys.Enter);
+                bool ePressed = currentKeyboard.IsKeyDown(Keys.E) && !_previousKeyboardState.IsKeyDown(Keys.E);
 
-                if (enterPressed)
+                if (ePressed)
                 {
                     _npc?.ContinueDialogue();
                 }

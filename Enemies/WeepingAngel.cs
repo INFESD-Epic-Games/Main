@@ -1,19 +1,19 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using SpellFall.Engine;
-using SpellFall.Weapons.Projectiles;
 using SpellFall.Character;
-using Microsoft.Xna.Framework.Audio;
 using SpellFall.Collision;
+using SpellFall.Engine;
 
 namespace SpellFall.Enemies
 {
     public class WeepingAngel : Enemy, IWatchable
     {
         private const float MoveSpeed = 100f;
-        private const float AlienScale = 1.25f;
+        private const float EnemyScale = 1.25f;
         private const float HitboxScale = 0.4f;
         private const int MaxHealth = 50;
         private const int ContactDamage = 10;
@@ -25,8 +25,11 @@ namespace SpellFall.Enemies
         private int _frameWidth;
         private int _frameHeight;
         private SoundEffect _enemyDeathSFX;
-
         public bool IsWatched { get; set; }
+        private List<Point> _path;
+        private int _pathIndex;
+        private float _pathRecalcTimer;
+        private Point _lastTargetTile = new Point(-1, -1);
 
         public WeepingAngel(Point startPosition)
             : base(startPosition, MaxHealth)
@@ -60,15 +63,91 @@ namespace SpellFall.Enemies
                 return;
             }
 
-            Vector2 playerPosition = _gameManager.Player.GetPosition().Center.ToVector2();
-            Vector2 directionToPlayer = playerPosition - _position;
-
-            if (directionToPlayer != Vector2.Zero && !IsWatched)
+            if (_map == null)
             {
-                directionToPlayer.Normalize();
-                _position += directionToPlayer * MoveSpeed * MovementSpeedMultiplier * (float)gameTime.ElapsedGameTime.TotalSeconds;
+                _map = _gameManager.CurrentMap;
             }
 
+            if (IsWatched)
+            {
+                UpdateCollider();
+                base.Update(gameTime);
+                return;
+            }
+
+            Vector2 playerPosition = _gameManager.Player.GetPosition().Center.ToVector2();
+
+            if (_map == null)
+            {
+                Vector2 directionToPlayer = playerPosition - _position;
+                if (directionToPlayer != Vector2.Zero)
+                {
+                    directionToPlayer.Normalize();
+                    Vector2 velocity = directionToPlayer * MoveSpeed * MovementSpeedMultiplier * (float)gameTime.ElapsedGameTime.TotalSeconds;
+                    int directColliderWidth = (int)(_frameWidth * EnemyScale * HitboxScale);
+                    int directColliderHeight = (int)(_frameHeight * EnemyScale * HitboxScale);
+                    TryMove(velocity, directColliderWidth, directColliderHeight);
+                }
+
+                UpdateCollider();
+                base.Update(gameTime);
+                return;
+            }
+
+            _pathRecalcTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            Point playerTile = _map.WorldToTile(playerPosition);
+            Point myTile = _map.WorldToTile(_position);
+            HashSet<Point> blockedTiles = new HashSet<Point>();
+
+            foreach (Enemy enemy in Enemy.GetActiveEnemies())
+            {
+                if (enemy == this || !enemy.IsAlive)
+                {
+                    continue;
+                }
+
+                blockedTiles.Add(_map.WorldToTile(enemy.GetPosition()));
+            }
+
+            if (_path == null || _pathIndex >= (_path?.Count ?? 0) || _pathRecalcTimer <= 0f || !playerTile.Equals(_lastTargetTile))
+            {
+                _path = _map.FindPath(myTile, playerTile, blockedTiles);
+                _pathIndex = 0;
+                _pathRecalcTimer = 0.2f;
+                _lastTargetTile = playerTile;
+            }
+
+            int pathColliderWidth = (int)(_frameWidth * EnemyScale * HitboxScale);
+            int pathColliderHeight = (int)(_frameHeight * EnemyScale * HitboxScale);
+
+            if (_path != null && _path.Count > 0 && _pathIndex < _path.Count)
+            {
+                Vector2 targetWorld = _map.TileToWorldCenter(_path[_pathIndex]);
+                Vector2 directionToTarget = targetWorld - _position;
+                float dist = directionToTarget.Length();
+                if (dist < 4f)
+                {
+                    _pathIndex++;
+                }
+                else
+                {
+                    directionToTarget.Normalize();
+                    Vector2 velocity = directionToTarget * MoveSpeed * MovementSpeedMultiplier * (float)gameTime.ElapsedGameTime.TotalSeconds;
+                    TryMove(velocity, pathColliderWidth, pathColliderHeight);
+                }
+            }
+            else
+            {
+                Vector2 directionToPlayer = playerPosition - _position;
+
+                if (directionToPlayer != Vector2.Zero)
+                {
+                    directionToPlayer.Normalize();
+                    Vector2 velocity = directionToPlayer * MoveSpeed * MovementSpeedMultiplier * (float)gameTime.ElapsedGameTime.TotalSeconds;
+                    TryMove(velocity, pathColliderWidth, pathColliderHeight);
+                }
+            }
             UpdateCollider();
             base.Update(gameTime);
         }
@@ -97,14 +176,14 @@ namespace SpellFall.Enemies
                 Color.White,
                 0f,
                 origin,
-                AlienScale,
+                EnemyScale,
                 SpriteEffects.None,
                 0f);
 
             DrawHealthBar(
                 spriteBatch,
                 ref _healthBarTexture,
-                _frameHeight * AlienScale,
+                _frameHeight * EnemyScale,
                 CurrentHealth,
                 MaxHealthValue,
                 40,
@@ -132,8 +211,8 @@ namespace SpellFall.Enemies
 
         protected override void UpdateCollider()
         {
-            int colliderWidth = (int)(_frameWidth * AlienScale * HitboxScale);
-            int colliderHeight = (int)(_frameHeight * AlienScale * HitboxScale);
+            int colliderWidth = (int)(_frameWidth * EnemyScale * HitboxScale);
+            int colliderHeight = (int)(_frameHeight * EnemyScale * HitboxScale);
             UpdateCenteredCollider(colliderWidth, colliderHeight);
         }
     }

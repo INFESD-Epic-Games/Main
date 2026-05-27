@@ -35,7 +35,8 @@ namespace SpellFall.Engine
         private bool _isBattleMusicPlaying = false;
         private TimeSpan _battleMusicTimer = TimeSpan.Zero;
         private TimeSpan _battleMusicBufferTime = TimeSpan.FromSeconds(1);
-        public Map Map { get; set; }
+        public List<Map> Maps { get; } = new List<Map>();
+        public Map CurrentMap { get; set; }
         private bool _isOverWorldMusicPlaying = false;
 
         public static GameManager GetGameManager()
@@ -332,4 +333,5 @@ namespace SpellFall.Engine
             return result;
         }
     }
+
 }

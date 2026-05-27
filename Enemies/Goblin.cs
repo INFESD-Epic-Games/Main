@@ -1,8 +1,9 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Audio;
 using SpellFall.Engine;
 using SpellFall.Weapons.Projectiles;
 
@@ -24,6 +25,10 @@ namespace SpellFall.Enemies
         private float _fireCooldownTimer;
         private int _frameWidth;
         private int _frameHeight;
+        private List<Point> _path;
+        private int _pathIndex;
+        private float _pathRecalcTimer;
+        private Point _lastTargetTile = new Point(-1, -1);
 
         public Goblin(Point startPosition) : base(startPosition, MaxHealth)
         {
@@ -48,20 +53,73 @@ namespace SpellFall.Enemies
             if (_fireCooldownTimer >= FireCooldownSeconds)
             {
                 _fireCooldownTimer = 0f;
-                
-                // Fire a projectile towards the player
                 FireProjectile();
             }
-            
+
+            if (_map == null)
+            {
+                _map = _gameManager.CurrentMap;
+            }
 
             Vector2 playerPosition = _gameManager.Player.GetPosition().Center.ToVector2();
             Vector2 directionToPlayer = playerPosition - _position;
             float distanceToPlayer = directionToPlayer.Length();
 
-            if (distanceToPlayer > StopDistance && directionToPlayer != Vector2.Zero)
+            if (_map == null || distanceToPlayer <= StopDistance)
+            {
+                UpdateCollider();
+                base.Update(gameTime);
+                return;
+            }
+
+            _pathRecalcTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            Point playerTile = _map.WorldToTile(playerPosition);
+            Point myTile = _map.WorldToTile(_position);
+            HashSet<Point> blockedTiles = new HashSet<Point>();
+
+            foreach (Enemy enemy in Enemy.GetActiveEnemies())
+            {
+                if (enemy == this || !enemy.IsAlive)
+                {
+                    continue;
+                }
+
+                blockedTiles.Add(_map.WorldToTile(enemy.GetPosition()));
+            }
+
+            if (_path == null || _pathIndex >= (_path?.Count ?? 0) || _pathRecalcTimer <= 0f || !playerTile.Equals(_lastTargetTile))
+            {
+                _path = _map.FindPath(myTile, playerTile, blockedTiles);
+                _pathIndex = 0;
+                _pathRecalcTimer = 0.2f;
+                _lastTargetTile = playerTile;
+            }
+
+            int colliderWidth = (int)(_frameWidth * EnemyScale * HitboxScale);
+            int colliderHeight = (int)(_frameHeight * EnemyScale * HitboxScale);
+
+            if (_path != null && _path.Count > 0 && _pathIndex < _path.Count)
+            {
+                Vector2 targetWorld = _map.TileToWorldCenter(_path[_pathIndex]);
+                Vector2 directionToTarget = targetWorld - _position;
+                float dist = directionToTarget.Length();
+                if (dist < 4f)
+                {
+                    _pathIndex++;
+                }
+                else
+                {
+                    directionToTarget.Normalize();
+                    Vector2 velocity = directionToTarget * MoveSpeed * MovementSpeedMultiplier * (float)gameTime.ElapsedGameTime.TotalSeconds;
+                    TryMove(velocity, colliderWidth, colliderHeight);
+                }
+            }
+            else if (directionToPlayer != Vector2.Zero)
             {
                 directionToPlayer.Normalize();
-                _position += directionToPlayer * MoveSpeed * MovementSpeedMultiplier * (float)gameTime.ElapsedGameTime.TotalSeconds;
+                Vector2 velocity = directionToPlayer * MoveSpeed * MovementSpeedMultiplier * (float)gameTime.ElapsedGameTime.TotalSeconds;
+                TryMove(velocity, colliderWidth, colliderHeight);
             }
 
             UpdateCollider();
@@ -130,9 +188,8 @@ namespace SpellFall.Enemies
         private void FireProjectile()
         {
             Vector2 direction = _gameManager.Player.GetPosition().Center.ToVector2() - _position;
-            direction.Normalize();  
-
-            GameManager.GetGameManager().AddGameObject(new Stone(_position, direction, 400f, Damage));      
+            direction.Normalize();
+            GameManager.GetGameManager().AddGameObject(new Stone(_position, direction, 400f, Damage));
         }
     }
 }

@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
+using SpellFall.Background;
 using SpellFall.Collision;
 using SpellFall.Engine;
-using SpellFall.Background;
 
 namespace SpellFall.Enemies
 {
@@ -25,10 +25,12 @@ namespace SpellFall.Enemies
         protected readonly RectangleCollider _rectangleCollider;
         protected readonly int _enemyId;
         protected Vector2 _position;
-        public bool IsAlive { get; private set; } = true;
         protected Map _map;
+
+        public bool IsAlive { get; private set; } = true;
         public int MaxHealthValue { get; }
         protected int CurrentHealth { get; private set; }
+
         private float _movementSpeedMultiplier = 1f;
         private float _iceSlowTimer = 0f;
         private float _poisonTimer = 0f;
@@ -41,7 +43,6 @@ namespace SpellFall.Enemies
         protected Enemy(Point startPosition, int maxHealth)
         {
             _gameManager = GameManager.GetGameManager();
-            
             _enemyId = _nextEnemyId++;
             _position = startPosition.ToVector2();
             MaxHealthValue = Math.Max(1, maxHealth);
@@ -49,7 +50,7 @@ namespace SpellFall.Enemies
 
             _rectangleCollider = new RectangleCollider(new Rectangle(startPosition, Point.Zero));
             SetCollider(_rectangleCollider);
-            _map = _gameManager.Map;
+            _map = _gameManager.CurrentMap;
             _activeEnemies.Add(this);
         }
 
@@ -94,22 +95,31 @@ namespace SpellFall.Enemies
                 return;
             }
 
-            // Move X
+            Vector2 halfOffset = new Vector2(width / 2f, height / 2f);
+
+            Vector2 newPos = _position + velocity;
+            if (!_map.IsColliding(newPos - halfOffset, width, height))
+            {
+                _position = newPos;
+                UpdateCollider();
+                return;
+            }
+
             Vector2 newPosX = new Vector2(_position.X + velocity.X, _position.Y);
-            if (!_map.IsColliding(newPosX, width, height))
+            if (!_map.IsColliding(newPosX - halfOffset, width, height))
             {
                 _position = newPosX;
             }
 
-            // Move Y
             Vector2 newPosY = new Vector2(_position.X, _position.Y + velocity.Y);
-            if (!_map.IsColliding(newPosY, width, height))
+            if (!_map.IsColliding(newPosY - halfOffset, width, height))
             {
                 _position = newPosY;
             }
 
             UpdateCollider();
         }
+
         public override void OnCollision(GameObject other)
         {
             if (other is Enemy otherEnemy)
@@ -209,6 +219,16 @@ namespace SpellFall.Enemies
                 return;
             }
 
+            KillEnemy(onKilled);
+        }
+
+        protected void KillEnemy(Action onKilled = null)
+        {
+            if (!IsAlive)
+            {
+                return;
+            }
+
             IsAlive = false;
             onKilled?.Invoke();
             DeathSoundEffect?.Play();
@@ -267,20 +287,6 @@ namespace SpellFall.Enemies
                 }
             }
 
-            if (_poisonTimer > 0f)
-            {
-                ApplyHealthBarTint(new Color(0, 120, 0), 0.1f);
-            }
-            else if (_iceSlowTimer > 0f)
-            {
-                ApplyHealthBarTint(Color.CornflowerBlue, 0.1f);
-            }
-            else
-            {
-                _healthBarTintTimer = 0f;
-                _healthBarTintColor = Color.LimeGreen;
-            }
-
             if (_healthBarTintTimer > 0f)
             {
                 _healthBarTintTimer -= dt;
@@ -292,14 +298,6 @@ namespace SpellFall.Enemies
             }
 
             base.Update(gameTime);
-        }
-
-        protected void KillEnemy(SoundEffect deathSfx, Action onKilled = null)
-        {
-            IsAlive = false;
-            onKilled?.Invoke();
-            deathSfx.Play();
-            _gameManager.RemoveGameObject(this);
         }
 
         public Vector2 GetPosition()

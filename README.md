@@ -24,5 +24,11 @@ Story.png was generated with AI and then edited/used by the developer.
 Assets used for UI from:
 Kenney Vleugels - (https://www.kenney.nl/assets/pixel-ui-pack)
 
+Asset used for fireball from:
+nyknck - (https://nyknck.itch.io/pixelarteffectfx017)
+
+Asset used for the Ghost sprite from:
+oreo8u - (https://oreo8u.itch.io/pixel-ghosts)
+
 Asset for the Goblin from:
 ruveyhak - (https://ruveyhak.itch.io/goblin)

@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -7,47 +9,37 @@ namespace SpellFall.Background
 {
     public class Map : GameObject
     {
-        private Texture2D _map1;
-
         private Texture2D _texture;
-        private Texture2D _controlsTexture;
+        private string _textureName;
+
+        public Vector2 Position { get; set; }
         private const int _tileSize = 32;
         private const int _renderScale = 4;
         private const int _screenTileSize = _tileSize * _renderScale;
 
-        private int[,] _collision =
+        private int[,] _collision;
+
+        public Map(
+            string textureName,
+            Vector2 position,
+            int[,] collision)
         {
-            {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
-            {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
-            {1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1},
-            {1,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,1},
-            {1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-            {1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1},
-            {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-            {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-            {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-            {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-            {1,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1},
-            {1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1},
-            {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-            {1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,1},
-            {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-            {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
-        };
+            _textureName = textureName;
+            Position = position;
+            _collision = collision;
+        }
 
         public override void Load(ContentManager content)
         {
-            _map1 = content.Load<Texture2D>("map");
-            _texture = content.Load<Texture2D>("TX Tileset Grass");
-            _controlsTexture = content.Load<Texture2D>("Control_layout");
+            _texture = content.Load<Texture2D>(_textureName);
             base.Load(content);
         }
 
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(
-                _map1,
-                Vector2.Zero,
+                _texture,
+                Position,
                 null,
                 Color.White,
                 0f,
@@ -56,8 +48,7 @@ namespace SpellFall.Background
                 SpriteEffects.None,
                 0f
             );
-
-            ////For debugging collisions
+            
             // Texture2D pixel = new Texture2D(
             //     spriteBatch.GraphicsDevice,
             //     1,
@@ -84,21 +75,17 @@ namespace SpellFall.Background
             //     }
             // }
 
-            Vector2 controlsPosition = new Vector2(512,1024);
-
-            spriteBatch.Draw(
-                _controlsTexture, 
-                controlsPosition, 
-                null, 
-                Color.White * 0.6f,
-                0f,
-                Vector2.Zero,
-                0.75f,
-                SpriteEffects.None,
-                0f
-            );
-
             base.Draw(gameTime, spriteBatch);
+        }
+
+        public Point WorldToTile(Vector2 worldPosition)
+        {
+            Vector2 local = worldPosition - Position;
+
+            return new Point(
+                (int)(local.X / _screenTileSize),
+                (int)(local.Y / _screenTileSize)
+            );
         }
 
         public bool IsBlocked(int x, int y)
@@ -107,17 +94,104 @@ namespace SpellFall.Background
             int cols = _collision.GetLength(1);
 
             if (x < 0 || y < 0 || x >= cols || y >= rows)
-                return true;
+                return false;
 
             return _collision[y, x] == 1;
         }
 
-        public Point WorldToTile(Vector2 position)
+
+        public Vector2 TileToWorldCenter(Point tile)
         {
-            return new Point(
-                (int)(position.X / _screenTileSize),
-                (int)(position.Y / _screenTileSize)
-            );
+            return new Vector2(
+                tile.X * _screenTileSize + _screenTileSize / 2f,
+                tile.Y * _screenTileSize + _screenTileSize / 2f);
+        }
+
+        public List<Point> FindPath(Point start, Point goal, ISet<Point> blockedTiles = null)
+        {
+            int rows = _collision.GetLength(0);
+            int cols = _collision.GetLength(1);
+
+            if (start.X < 0 || start.Y < 0 || start.X >= cols || start.Y >= rows)
+                return null;
+
+            if (goal.X < 0 || goal.Y < 0 || goal.X >= cols || goal.Y >= rows)
+                return null;
+
+            bool IsTileBlocked(Point tile)
+            {
+                return IsBlocked(tile.X, tile.Y) || (blockedTiles != null && blockedTiles.Contains(tile));
+            }
+
+            if (IsTileBlocked(goal))
+                return null;
+
+            var directions = new Point[]
+            {
+                new Point(1,0), new Point(-1,0), new Point(0,1), new Point(0,-1),
+                new Point(1,1), new Point(1,-1), new Point(-1,1), new Point(-1,-1)
+            };
+
+            var open = new PriorityQueue<Point, float>();
+            var gScore = new Dictionary<Point, float>();
+            var fScore = new Dictionary<Point, float>();
+            var cameFrom = new Dictionary<Point, Point>();
+
+            float Heuristic(Point a, Point b) => (float)Math.Sqrt((a.X - b.X) * (a.X - b.X) + (a.Y - b.Y) * (a.Y - b.Y));
+
+            gScore[start] = 0f;
+            fScore[start] = Heuristic(start, goal);
+            open.Enqueue(start, fScore[start]);
+
+            while (open.Count > 0)
+            {
+                var current = open.Dequeue();
+
+                if (current == goal)
+                {
+                    var path = new List<Point>();
+                    var node = current;
+                    while (!node.Equals(start))
+                    {
+                        path.Add(node);
+                        node = cameFrom[node];
+                    }
+                    path.Reverse();
+                    return path;
+                }
+
+                foreach (var dir in directions)
+                {
+                    var neighbor = new Point(current.X + dir.X, current.Y + dir.Y);
+
+                    if (neighbor.X < 0 || neighbor.Y < 0 || neighbor.X >= cols || neighbor.Y >= rows)
+                        continue;
+
+                    if (IsTileBlocked(neighbor))
+                        continue;
+
+                    // prevent cutting corners: if moving diagonally, ensure adjacent cardinal tiles are free
+                    if (Math.Abs(dir.X) == 1 && Math.Abs(dir.Y) == 1)
+                    {
+                        if (IsTileBlocked(new Point(current.X + dir.X, current.Y)) || IsTileBlocked(new Point(current.X, current.Y + dir.Y)))
+                            continue;
+                    }
+
+                    float moveCost = (Math.Abs(dir.X) == 1 && Math.Abs(dir.Y) == 1) ? 1.41421356f : 1f;
+                    float tentativeG = gScore[current] + moveCost;
+
+                    if (!gScore.TryGetValue(neighbor, out var existingG) || tentativeG < existingG)
+                    {
+                        cameFrom[neighbor] = current;
+                        gScore[neighbor] = tentativeG;
+                        float f = tentativeG + Heuristic(neighbor, goal);
+                        fScore[neighbor] = f;
+                        open.Enqueue(neighbor, f);
+                    }
+                }
+            }
+
+            return null;
         }
 
         public bool IsColliding(Vector2 position, int width, int height)
@@ -135,9 +209,9 @@ namespace SpellFall.Background
                             position.Y + height - 1));
 
             return IsBlocked(topLeft.X, topLeft.Y) ||
-                   IsBlocked(topRight.X, topRight.Y) ||
-                   IsBlocked(bottomLeft.X, bottomLeft.Y) ||
-                   IsBlocked(bottomRight.X, bottomRight.Y);
+                IsBlocked(topRight.X, topRight.Y) ||
+                IsBlocked(bottomLeft.X, bottomLeft.Y) ||
+                IsBlocked(bottomRight.X, bottomRight.Y);
         }
     }
 }
