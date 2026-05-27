@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
@@ -11,22 +12,56 @@ namespace SpellFall.Enemies
     public abstract class Enemy : GameObject
     {
         private static int _nextEnemyId = 1;
+        private static readonly HashSet<Enemy> _activeEnemies = new HashSet<Enemy>();
 
         protected readonly GameManager _gameManager;
         protected readonly RectangleCollider _rectangleCollider;
         protected readonly int _enemyId;
         protected Vector2 _position;
+        public bool IsAlive { get; private set; } = true;
         protected Enemy(Point startPosition)
         {
             _gameManager = GameManager.GetGameManager();
-
-            // Get map from GameManager
-
+            
             _enemyId = _nextEnemyId++;
             _position = startPosition.ToVector2();
 
             _rectangleCollider = new RectangleCollider(new Rectangle(startPosition, Point.Zero));
             SetCollider(_rectangleCollider);
+            _activeEnemies.Add(this);
+        }
+
+        public static IEnumerable<Enemy> GetActiveEnemies()
+        {
+            return _activeEnemies;
+        }
+
+        public static Enemy GetClosestEnemy(Vector2 position, ISet<Enemy> excludedEnemies = null)
+        {
+            Enemy closestEnemy = null;
+            float closestDistanceSquared = float.MaxValue;
+
+            foreach (Enemy enemy in _activeEnemies)
+            {
+                if (!enemy.IsAlive)
+                {
+                    continue;
+                }
+
+                if (excludedEnemies != null && excludedEnemies.Contains(enemy))
+                {
+                    continue;
+                }
+
+                float distanceSquared = Vector2.DistanceSquared(position, enemy._position);
+                if (distanceSquared < closestDistanceSquared)
+                {
+                    closestDistanceSquared = distanceSquared;
+                    closestEnemy = enemy;
+                }
+            }
+
+            return closestEnemy;
         }
 
         protected void TryMove(Vector2 velocity, int width, int height)
@@ -84,6 +119,13 @@ namespace SpellFall.Enemies
             base.OnCollision(other);
         }
 
+        public override void Destroy()
+        {
+            IsAlive = false;
+            _activeEnemies.Remove(this);
+            base.Destroy();
+        }
+
         protected abstract void UpdateCollider();
 
         protected virtual bool CanBePushedByEnemies => true;
@@ -126,6 +168,7 @@ namespace SpellFall.Enemies
 
         protected void KillEnemy(SoundEffect deathSfx, Action onKilled = null)
         {
+            IsAlive = false;
             onKilled?.Invoke();
             deathSfx.Play();
             _gameManager.RemoveGameObject(this);

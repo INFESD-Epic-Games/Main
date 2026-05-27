@@ -6,9 +6,12 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using SpellFall.Sounds;
 using System;
+using System.Collections.Generic;
 using WeaponBase = SpellFall.Weapons.Weapons;
 using Microsoft.Xna.Framework.Audio;
+using SpellFall.Enemies;
 using SpellFall.Background;
+using FlatRedBall.Glue.StateInterpolation;
 
 namespace SpellFall.Character
 {
@@ -23,11 +26,17 @@ namespace SpellFall.Character
         private Vector2 _thrustInput = Vector2.Zero;
         private Vector2 _previousPosition;
         private const int _dashDistance = 200;
+        private const float _dashDuration = 0.3f; // Duration in seconds
         private float _dashCooldown = 5f;
         private float _dashTimer = 0f;
         private bool _canDash = true;
+        private bool _isDashing = false;
+        private float _dashElapsedTime = 0f;
+        private Vector2 _dashStartPosition;
+        private Vector2 _dashEndPosition;
         private HealthBar _healthBar;
         public HealthBar HealthBar => _healthBar;
+        private DashBar _dashBar;
         public PlayerStats Stats { get; }
         Vector2 position;
         private int currentFrame = 0;
@@ -40,8 +49,9 @@ namespace SpellFall.Character
         private Texture2D walkWest;
         private Texture2D currentTexture;
         private SoundEffect _dashSfx;
-
         protected readonly GameManager _gameManager;
+
+        public float DashCooldownPercentage => _dashTimer / _dashCooldown;
 
         public Player(Point Position)
         {
@@ -51,6 +61,7 @@ namespace SpellFall.Character
             position = Position.ToVector2();
             SetCollider(rectangleCollider);
             _healthBar = new HealthBar(Stats);
+            _dashBar = new DashBar(this);
         }
 
         public override void Load(ContentManager content)
@@ -87,11 +98,6 @@ namespace SpellFall.Character
             if (inputManager.IsKeyDown(Keys.D))
                 _thrustInput.X += 1;
 
-            // Temporary damage input for testing health bar
-            // TODO: Remove when implementing actual damage sources
-            if (inputManager.IsKeyPress(Keys.Down))
-                _healthBar.TakeDamage(10);
-
             if (inputManager.IsKeyPress(Keys.Space))
                 Dash();
 
@@ -103,6 +109,7 @@ namespace SpellFall.Character
         {
             float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
             Stats.DecreaseAttackCooldown();
+            
             // Update cooldown timer
             if (!_canDash)
             {
@@ -113,8 +120,27 @@ namespace SpellFall.Character
                 }
             }
 
+            // Handle dash animation
+            if (_isDashing)
+            {
+                _dashElapsedTime += deltaTime;
+                float progress = _dashElapsedTime / _dashDuration;
 
-            isMoving = _thrustInput != Vector2.Zero;
+                if (progress >= 1f)
+                {
+                    // Dash complete
+                    position = _dashEndPosition;
+                    _isDashing = false;
+                    progress = 1f;
+                }
+                else
+                {
+                    float easedProgress = 1f - (float)Math.Pow(1f - progress, 3f);
+                    position = Vector2.Lerp(_dashStartPosition, _dashEndPosition, easedProgress);
+                }
+            }
+
+            isMoving = _thrustInput != Vector2.Zero && !_isDashing;
 
             if (isMoving)
             {
@@ -167,6 +193,11 @@ namespace SpellFall.Character
 
             _healthBar.SetPosition(GetVisualBounds());
             _healthBar.Update(gameTime);
+
+            _dashBar.SetPosition(GetVisualBounds());
+            
+            CheckFieldOfView();
+            
             base.Update(gameTime);
         }
 
@@ -174,6 +205,8 @@ namespace SpellFall.Character
         {
             if (other is Enemies.AlienSpawner)
             {
+                position = _previousPosition;
+                UpdateCollider();
                 _healthBar.SetPosition(GetVisualBounds());
             }
 
@@ -204,6 +237,7 @@ namespace SpellFall.Character
                 0f
             );
             _healthBar.DrawHealthBar(spriteBatch);
+            _dashBar.DrawDashBar(spriteBatch);
             base.Draw(gameTime, spriteBatch);
         }
 
@@ -228,18 +262,39 @@ namespace SpellFall.Character
                 return;
 
             _dashSfx.Play();
+
             Vector2 dashDirection = _thrustInput != Vector2.Zero
                 ? Vector2.Normalize(_thrustInput)
                 : lastDirection;
 
-            Vector2 dashStep = dashDirection * (_dashDistance / 10f);
+            Vector2 dashStep = dashDirection * 20f;
 
+            Vector2 startPos = position;
+            Vector2 finalPos = position;
+
+            // Try moving in small steps
             for (int i = 0; i < 10; i++)
             {
-                TryMove(dashStep);
+                if (TryMove(dashStep))
+                {
+                    finalPos = position;
+                }
+                else
+                {
+                    break;
+                }
             }
-          
-            // Start cooldown
+
+            // Reset back before animation starts
+            position = startPos;
+
+            // Animate only to valid position
+            _dashStartPosition = startPos;
+            _dashEndPosition = finalPos;
+
+            _isDashing = true;
+            _dashElapsedTime = 0f;
+
             _canDash = false;
             _dashTimer = _dashCooldown;
         }
@@ -276,7 +331,7 @@ namespace SpellFall.Character
             );
         }
 
-        private void TryMove(Vector2 velocity)
+        private bool TryMove(Vector2 velocity)
         {
             int width = rectangleCollider.shape.Width;
             int height = rectangleCollider.shape.Height;
@@ -301,6 +356,7 @@ namespace SpellFall.Character
             if (!blockedX)
             {
                 position.X += velocity.X;
+                moved = true;
             }
 
             Vector2 newPosY =
@@ -324,6 +380,57 @@ namespace SpellFall.Character
             if (!blockedY)
             {
                 position.Y += velocity.Y;
+                moved =  true;
+            }
+
+            return moved;
+           
+        }
+
+        private void CheckFieldOfView()
+        {
+            List<IWatchable> watchables = GameManager.GetGameManager().GetObjectsOfType<IWatchable>();
+    
+            float halfAngleCos = (float)Math.Cos(MathHelper.ToRadians(90f) / 2f);
+            float maxRadiusSquared = 750f * 750f;
+
+            Vector2 forwardDir = lastDirection;
+            if (forwardDir != Vector2.Zero) forwardDir.Normalize();
+
+            foreach (IWatchable watchable in watchables)
+            {
+                if (watchable is not Enemy enemy)
+                {
+                    watchable.IsWatched = false;
+                    continue;
+                }
+
+                Vector2 toTarget = enemy.GetPosition() - position;
+                float distanceSquared = toTarget.LengthSquared();
+
+                if (distanceSquared > maxRadiusSquared)
+                {
+                    watchable.IsWatched = false;
+                    continue;
+                }
+        
+                if (distanceSquared == 0)
+                {
+                    watchable.IsWatched = true;
+                    continue;
+                }
+
+                Vector2 toTargetNormalized = toTarget / (float)Math.Sqrt(distanceSquared);
+    
+                float dotProduct = Vector2.Dot(forwardDir, toTargetNormalized);
+
+                if (dotProduct >= halfAngleCos)
+                {
+                    watchable.IsWatched = true;
+                    continue;
+                }
+        
+                watchable.IsWatched = false;
             }
         }
     }

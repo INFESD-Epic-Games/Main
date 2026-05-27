@@ -9,6 +9,8 @@ namespace SpellFall.Weapons
         protected readonly GameManager _gameManager;
         protected PlayerStats OwnerStats;
 
+        public bool IsEquipped { get; private set; }
+
         public int DamageBonus { get; }
         public float FireRateBonus { get; }
         public float LuckBonus { get; }
@@ -39,6 +41,7 @@ namespace SpellFall.Weapons
         public virtual void OnEquip(PlayerStats stats)
         {
             OwnerStats = stats;
+            IsEquipped = true;
             if (OwnerStats != null)
             {
                 OwnerStats.WeaponDamageBonus += DamageBonus;
@@ -52,6 +55,7 @@ namespace SpellFall.Weapons
 
         public virtual void OnUnequip()
         {
+            IsEquipped = false;
             if (OwnerStats != null)
             {
                 OwnerStats.WeaponDamageBonus = Math.Max(0, OwnerStats.WeaponDamageBonus - DamageBonus);

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -7,17 +6,19 @@ using SpellFall.Engine;
 using SpellFall.Weapons.Projectiles;
 using SpellFall.Character;
 using Microsoft.Xna.Framework.Audio;
+using SpellFall.Collision;
+using System.Collections.Generic;
 
 namespace SpellFall.Enemies
 {
-    public class Alien : Enemy
+    public class WeepingAngel : Enemy, IWatchable
     {
-        private const float MoveSpeed = 70f;
-        private const float AlienScale = 0.5f;
+        private const float MoveSpeed = 100f;
+        private const float EnemyScale = 1.25f;
         private const float HitboxScale = 0.4f;
-        private const int MaxHealth = 20;
-        private const int ContactDamage = 5;
-        private const float ContactCooldownSeconds = 3f;
+        private const int MaxHealth = 50;
+        private const int ContactDamage = 10;
+        private const float ContactCooldownSeconds = 2f;
 
         private Texture2D _texture;
         private Texture2D _healthBarTexture;
@@ -27,12 +28,13 @@ namespace SpellFall.Enemies
         private int _frameWidth;
         private int _frameHeight;
         private SoundEffect _enemyDeathSFX;
+        public bool IsWatched { get; set; }
         private List<Point> _path;
         private int _pathIndex;
         private float _pathRecalcTimer;
         private Point _lastTargetTile = new Point(-1, -1);
 
-        public Alien(Point startPosition)
+        public WeepingAngel(Point startPosition)
             : base(startPosition)
         {
             _currentHealth = MaxHealth;
@@ -43,8 +45,8 @@ namespace SpellFall.Enemies
         public override void Load(ContentManager content)
         {
             _enemyDeathSFX = content.Load<SoundEffect>("Enemy Death");
-            _texture = content.Load<Texture2D>("alien");
-            _frameWidth = _texture.Width / 4;
+            _texture = content.Load<Texture2D>("weeping-angel");
+            _frameWidth = _texture.Width / 3;
             _frameHeight = _texture.Height;
             UpdateCollider();
             base.Load(content);
@@ -59,14 +61,20 @@ namespace SpellFall.Enemies
                 {
                     _contactCooldownTimer = 0f;
                 }
+                UpdateCollider();
+                base.Update(gameTime);
+                return;
+            }
 
+            if (IsWatched)
+            {
                 UpdateCollider();
                 base.Update(gameTime);
                 return;
             }
 
             Vector2 playerPosition = _gameManager.Player.GetPosition().Center.ToVector2();
-
+            
             // Pathfinding update timer
             _pathRecalcTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
 
@@ -81,8 +89,8 @@ namespace SpellFall.Enemies
                 _lastTargetTile = playerTile;
             }
 
-            int colliderWidth = (int)(_frameWidth * AlienScale * HitboxScale);
-            int colliderHeight = (int)(_frameHeight * AlienScale * HitboxScale);
+            int colliderWidth = (int)(_frameWidth * EnemyScale * HitboxScale);
+            int colliderHeight = (int)(_frameHeight * EnemyScale * HitboxScale);
 
             if (_path != null && _path.Count > 0 && _pathIndex < _path.Count)
             {
@@ -112,8 +120,7 @@ namespace SpellFall.Enemies
                     TryMove(velocity, colliderWidth, colliderHeight);
                 }
             }
-
-            UpdateCollider();   
+            UpdateCollider();
             base.Update(gameTime);
         }
 
@@ -130,7 +137,7 @@ namespace SpellFall.Enemies
 
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            int frameIndex = GetFrameIndex(_gameManager.Player.GetPosition().Center.ToVector2());
+            int frameIndex = GetFrameIndex(_gameManager.Player.GetPosition().Center.ToVector2(), IsWatched);
             Rectangle sourceRectangle = new Rectangle(frameIndex * _frameWidth, 0, _frameWidth, _frameHeight);
             Vector2 origin = new Vector2(_frameWidth / 2f, _frameHeight / 2f);
 
@@ -141,14 +148,14 @@ namespace SpellFall.Enemies
                 Color.White,
                 0f,
                 origin,
-                AlienScale,
+                EnemyScale,
                 SpriteEffects.None,
                 0f);
 
             DrawHealthBar(
                 spriteBatch,
                 ref _healthBarTexture,
-                _frameHeight * AlienScale,
+                _frameHeight * EnemyScale,
                 _currentHealth,
                 MaxHealth,
                 40,
@@ -173,40 +180,31 @@ namespace SpellFall.Enemies
             _isDead = true;
             KillEnemy(_enemyDeathSFX, () =>
             {
-                if (_gameManager.QuestManager.HasActiveQuest("KillAliens"))
-                {
-                    _gameManager.QuestManager.AddProgress("KillAliens", 1);
-                }
+
             });
         }
 
-        private int GetFrameIndex(Vector2 playerPosition)
+        private int GetFrameIndex(Vector2 playerPosition, bool isWatched)
         {
-            bool isRightOfPlayer = _position.X >= playerPosition.X;
             bool isAbovePlayer = _position.Y < playerPosition.Y;
 
-            if (isRightOfPlayer && isAbovePlayer)
-            {
-                return 0;
-            }
-
-            if (!isRightOfPlayer && isAbovePlayer)
-            {
-                return 1;
-            }
-
-            if (!isRightOfPlayer && !isAbovePlayer)
+            if (!isAbovePlayer)
             {
                 return 2;
             }
 
-            return 3;
+            if (isWatched)
+            {
+                return 1;
+            }
+
+            return 0;
         }
 
         protected override void UpdateCollider()
         {
-            int colliderWidth = (int)(_frameWidth * AlienScale * HitboxScale);
-            int colliderHeight = (int)(_frameHeight * AlienScale * HitboxScale);
+            int colliderWidth = (int)(_frameWidth * EnemyScale * HitboxScale);
+            int colliderHeight = (int)(_frameHeight * EnemyScale * HitboxScale);
             UpdateCenteredCollider(colliderWidth, colliderHeight);
         }
     }
