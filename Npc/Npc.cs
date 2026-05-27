@@ -15,6 +15,20 @@ namespace SpellFall.Npcs
     public class Npc : GameObject
     {
         private const float NpcScale = 0.5f;
+        private readonly string[] introDialogueLines =
+        {
+            "Hello traveler!",
+            "Enemies are lurking all around us.",
+            "Can you clear all the rooms to help me?",
+            "I would be forever grateful!",
+            "Please, I need your help!"
+        };
+
+        private readonly string[] endDialogueLines =
+        {
+            "Thank you for clearing the rooms!",
+            "I can finally rest in peace now."
+        };
         private Texture2D walkSouth;
         public RectangleCollider rectangleCollider { get; private set; }
         Vector2 position;
@@ -22,6 +36,10 @@ namespace SpellFall.Npcs
         private bool playerInRange = false;
         private bool hasGivenQuest = false;
         private bool questCompletedRewardGiven = false;
+        private bool dialogueActive = false;
+        private bool endDialogueActive = false;
+        private int dialogueStage = 0;
+        private int endDialogueStage = 0;
 
         private Quest quest;
         private QuestManager questManager;
@@ -53,9 +71,9 @@ namespace SpellFall.Npcs
             this.onQuestAccepted = onQuestAccepted;
 
             quest = new Quest(
-                "KillAliens",
-                "Defeat 3 aliens",
-                3,
+                "Main Quest",
+                "Progress through the rooms",
+                5,
                 () => Console.WriteLine("Quest completed!")
             );
         }
@@ -93,6 +111,11 @@ namespace SpellFall.Npcs
 
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
+            if (hasGivenQuest && !quest.IsCompleted)
+            {
+                return;
+            }
+
             int frameHeight = currentTexture.Height / 4;
             int frameWidth = currentTexture.Width;
 
@@ -140,35 +163,25 @@ namespace SpellFall.Npcs
         }
         private void Interact()
         {
-            // if (textBubble == null)
-            // {
-            //     return;
-            // }
+            if (textBubble == null)
+            {
+                return;
+            }
 
             GameState.IsPaused = true;
 
             if (!hasGivenQuest)
             {
-                textBubble.SetText("Hello! Can you defeat 3 aliens?");
-                textBubble.Show();
-                questManager.AddQuest(quest);
-                onQuestAccepted?.Invoke();
-                onQuestAccepted = null;
-                hasGivenQuest = true;
-            }
-            else if (!quest.IsCompleted)
-            {
-                textBubble.SetText("You haven't completed the quest yet...");
-                textBubble.Show();
+                dialogueActive = true;
+                endDialogueActive = false;
+                dialogueStage = 0;
+                ShowDialogueLine(dialogueStage);
             }
             else if (!questCompletedRewardGiven)
             {
-                textBubble.SetText("Good job! Here's your reward! +10 max health!");
-                textBubble.Show();
-
-                GiveReward();
-
-                questCompletedRewardGiven = true;
+                endDialogueActive = true;
+                endDialogueStage = 0;
+                ShowEndDialogueLine(endDialogueStage);
             }
             else
             {
@@ -179,11 +192,61 @@ namespace SpellFall.Npcs
 
         public void ContinueDialogue()
         {
-            if (textBubble != null)
+            if (textBubble == null)
             {
-                textBubble.Hide();
+                GameState.IsPaused = false;
+                return;
             }
 
+            if (dialogueActive && !hasGivenQuest)
+            {
+                if (dialogueStage < introDialogueLines.Length - 1)
+                {
+                    dialogueStage++;
+                    ShowDialogueLine(dialogueStage);
+
+                    if (dialogueStage == introDialogueLines.Length - 1)
+                    {
+                        questManager.AddQuest(quest);
+                        onQuestAccepted?.Invoke();
+                        onQuestAccepted = null;
+                        hasGivenQuest = true;
+                    }
+
+                    return;
+                }
+
+                dialogueActive = false;
+                dialogueStage = 0;
+                textBubble.Hide();
+                GameState.IsPaused = false;
+                return;
+            }
+
+            if (endDialogueActive)
+            {
+                if (endDialogueStage < endDialogueLines.Length - 1)
+                {
+                    endDialogueStage++;
+                    ShowEndDialogueLine(endDialogueStage);
+
+                    if (endDialogueStage == endDialogueLines.Length - 1)
+                    {
+                        GiveReward();
+                        questCompletedRewardGiven = true;
+                    }
+
+                    return;
+                }
+
+                endDialogueActive = false;
+                endDialogueStage = 0;
+                textBubble.Hide();
+                GameState.IsPaused = false;
+                return;
+            }
+
+            textBubble.Hide();
             GameState.IsPaused = false;
         }
 
@@ -195,6 +258,28 @@ namespace SpellFall.Npcs
         private void GiveReward()
         {
             playerHealthBar.IncreaseMaxHealth(10);
+        }
+
+        private void ShowDialogueLine(int lineIndex)
+        {
+            if (lineIndex < 0 || lineIndex >= introDialogueLines.Length)
+            {
+                return;
+            }
+
+            textBubble.SetText(introDialogueLines[lineIndex]);
+            textBubble.Show();
+        }
+
+        private void ShowEndDialogueLine(int lineIndex)
+        {
+            if (lineIndex < 0 || lineIndex >= endDialogueLines.Length)
+            {
+                return;
+            }
+
+            textBubble.SetText(endDialogueLines[lineIndex]);
+            textBubble.Show();
         }
     }
 }
