@@ -1,11 +1,10 @@
-using System;
-using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using SpellFall.Engine;
-using SpellFall.Weapons.Projectiles;
 using SpellFall.Character;
-using Microsoft.Xna.Framework.Audio;
+using SpellFall.Engine;
+using System;
+using Microsoft.Xna.Framework;
 
 namespace SpellFall.Enemies
 {
@@ -20,8 +19,6 @@ namespace SpellFall.Enemies
 
         private Texture2D _texture;
         private Texture2D _healthBarTexture;
-        private int _currentHealth;
-        private bool _isDead;
         private float _contactCooldownTimer;
         private int _frameWidth;
         private int _frameHeight;
@@ -30,12 +27,12 @@ namespace SpellFall.Enemies
         private float _bobHeight = 8f;
 
         public Eye(Point startPosition)
-            : base(startPosition)
+            : base(startPosition, MaxHealth)
         {
-            _currentHealth = MaxHealth;
-            _isDead = false;
             _contactCooldownTimer = 0f;
         }
+
+        protected override SoundEffect DeathSoundEffect => _enemyDeathSFX;
 
         public override void Load(ContentManager content)
         {
@@ -68,7 +65,7 @@ namespace SpellFall.Enemies
             if (directionToPlayer != Vector2.Zero)
             {
                 directionToPlayer.Normalize();
-                Vector2 velocity = directionToPlayer * MoveSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
+                Vector2 velocity = directionToPlayer * MoveSpeed * MovementSpeedMultiplier * (float)gameTime.ElapsedGameTime.TotalSeconds;
 
                 int colliderWidth = (int)(_frameWidth * AlienScale * HitboxScale);
                 int colliderHeight = (int)(_frameHeight * AlienScale * HitboxScale);
@@ -116,35 +113,12 @@ namespace SpellFall.Enemies
                 spriteBatch,
                 ref _healthBarTexture,
                 _frameHeight * AlienScale,
-                _currentHealth,
-                MaxHealth,
+                CurrentHealth,
+                MaxHealthValue,
                 40,
                 6);
 
             base.Draw(gameTime, spriteBatch);
-        }
-
-        private void TakeDamage(int damage)
-        {
-            if (_isDead)
-            {
-                return;
-            }
-
-            _currentHealth -= damage;
-            if (_currentHealth > 0)
-            {
-                return;
-            }
-
-            _isDead = true;
-            KillEnemy(_enemyDeathSFX, () =>
-            {
-                if (_gameManager.QuestManager.HasActiveQuest("KillAliens"))
-                {
-                    _gameManager.QuestManager.AddProgress("KillAliens", 1);
-                }
-            });
         }
 
         private int GetFrameIndex(Vector2 playerPosition)

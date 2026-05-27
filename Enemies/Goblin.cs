@@ -22,17 +22,15 @@ namespace SpellFall.Enemies
         private SoundEffect _enemyDeathSFX;
         private Texture2D _healthBarTexture;
         private float _fireCooldownTimer;
-        private int _currentHealth;
         private int _frameWidth;
         private int _frameHeight;
-        private bool _isDead;
 
-        public Goblin(Point startPosition) : base(startPosition)
+        public Goblin(Point startPosition) : base(startPosition, MaxHealth)
         {
             _fireCooldownTimer = 0f;
-            _currentHealth = MaxHealth;
-            _isDead = false;
         }
+
+        protected override SoundEffect DeathSoundEffect => _enemyDeathSFX;
 
         public override void Load(ContentManager content)
         {
@@ -63,7 +61,7 @@ namespace SpellFall.Enemies
             if (distanceToPlayer > StopDistance && directionToPlayer != Vector2.Zero)
             {
                 directionToPlayer.Normalize();
-                _position += directionToPlayer * MoveSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
+                _position += directionToPlayer * MoveSpeed * MovementSpeedMultiplier * (float)gameTime.ElapsedGameTime.TotalSeconds;
             }
 
             UpdateCollider();
@@ -91,8 +89,8 @@ namespace SpellFall.Enemies
                 spriteBatch,
                 ref _healthBarTexture,
                 _frameHeight * EnemyScale,
-                _currentHealth,
-                MaxHealth,
+                CurrentHealth,
+                MaxHealthValue,
                 40,
                 6);
 
@@ -104,23 +102,6 @@ namespace SpellFall.Enemies
             int colliderWidth = (int)(_frameWidth * EnemyScale * HitboxScale);
             int colliderHeight = (int)(_frameHeight * EnemyScale * HitboxScale);
             UpdateCenteredCollider(colliderWidth, colliderHeight);
-        }
-
-        private void TakeDamage(int damage)
-        {
-            if (_isDead)
-            {
-                return;
-            }
-
-            _currentHealth -= damage;
-            if (_currentHealth > 0)
-            {
-                return;
-            }
-
-            _isDead = true;
-            KillEnemy(_enemyDeathSFX);
         }
 
         private int GetFrameIndex(Vector2 playerPosition)

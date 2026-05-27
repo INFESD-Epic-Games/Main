@@ -11,6 +11,13 @@ namespace SpellFall.Enemies
 {
     public abstract class Enemy : GameObject
     {
+        private const float IceSlowMultiplier = 0.5f;
+        private const float PoisonDamagePercentPerSecond = 0.025f;
+        private const float FireDamagePerSecond = 2.5f;
+        private const float DefaultPoisonDurationSeconds = 5f;
+        private const float DefaultFireDurationSeconds = 4f;
+        private const float DefaultIceDurationSeconds = 2f;
+
         private static int _nextEnemyId = 1;
         private static readonly HashSet<Enemy> _activeEnemies = new HashSet<Enemy>();
 
@@ -20,13 +27,25 @@ namespace SpellFall.Enemies
         protected Vector2 _position;
         public bool IsAlive { get; private set; } = true;
         protected Map _map;
+        public int MaxHealthValue { get; }
+        protected int CurrentHealth { get; private set; }
+        private float _movementSpeedMultiplier = 1f;
+        private float _iceSlowTimer = 0f;
+        private float _poisonTimer = 0f;
+        private float _poisonTickAccumulator = 0f;
+        private float _fireTimer = 0f;
+        private float _fireTickAccumulator = 0f;
+        private Color _healthBarTintColor = Color.LimeGreen;
+        private float _healthBarTintTimer = 0f;
 
-        protected Enemy(Point startPosition)
+        protected Enemy(Point startPosition, int maxHealth)
         {
             _gameManager = GameManager.GetGameManager();
             
             _enemyId = _nextEnemyId++;
             _position = startPosition.ToVector2();
+            MaxHealthValue = Math.Max(1, maxHealth);
+            CurrentHealth = MaxHealthValue;
 
             _rectangleCollider = new RectangleCollider(new Rectangle(startPosition, Point.Zero));
             SetCollider(_rectangleCollider);
@@ -110,7 +129,11 @@ namespace SpellFall.Enemies
 
         protected abstract void UpdateCollider();
 
+        protected abstract SoundEffect DeathSoundEffect { get; }
+
         protected virtual bool CanBePushedByEnemies => true;
+
+        protected float MovementSpeedMultiplier => _movementSpeedMultiplier;
 
         protected void UpdateCenteredCollider(int colliderWidth, int colliderHeight)
         {
@@ -142,10 +165,133 @@ namespace SpellFall.Enemies
                 new Rectangle(barX, barY, barWidth, barHeight),
                 Color.DarkRed);
 
+            Color fillColor = _healthBarTintTimer > 0f ? _healthBarTintColor : Color.LimeGreen;
             spriteBatch.Draw(
                 healthBarTexture,
                 new Rectangle(barX, barY, (int)(barWidth * healthPercentage), barHeight),
-                Color.LimeGreen);
+                fillColor);
+        }
+
+        public void ApplyHealthBarTint(Color color, float durationSeconds)
+        {
+            _healthBarTintColor = color;
+            _healthBarTintTimer = Math.Max(0f, durationSeconds);
+        }
+
+        public void ApplyIceSlow(float durationSeconds = DefaultIceDurationSeconds)
+        {
+            _iceSlowTimer = Math.Max(_iceSlowTimer, Math.Max(0f, durationSeconds));
+            _movementSpeedMultiplier = IceSlowMultiplier;
+            ApplyHealthBarTint(Color.CornflowerBlue, durationSeconds);
+        }
+
+        public void ApplyPoison(float durationSeconds = DefaultPoisonDurationSeconds)
+        {
+            _poisonTimer = Math.Max(_poisonTimer, Math.Max(0f, durationSeconds));
+            ApplyHealthBarTint(new Color(0, 120, 0), durationSeconds);
+        }
+
+        public void ApplyFire(float durationSeconds = DefaultFireDurationSeconds)
+        {
+            _fireTimer = Math.Max(_fireTimer, Math.Max(0f, durationSeconds));
+        }
+
+        protected void ApplyDamage(int damage, Action onKilled = null)
+        {
+            if (damage <= 0 || !IsAlive)
+            {
+                return;
+            }
+
+            CurrentHealth -= damage;
+            if (CurrentHealth > 0)
+            {
+                return;
+            }
+
+            IsAlive = false;
+            onKilled?.Invoke();
+            DeathSoundEffect?.Play();
+            _gameManager.RemoveGameObject(this);
+        }
+
+        public override void Update(GameTime gameTime)
+        {
+            float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            if (_iceSlowTimer > 0f)
+            {
+                _iceSlowTimer -= dt;
+                if (_iceSlowTimer <= 0f)
+                {
+                    _iceSlowTimer = 0f;
+                    _movementSpeedMultiplier = 1f;
+                }
+            }
+
+            if (_poisonTimer > 0f)
+            {
+                _poisonTimer -= dt;
+                _poisonTickAccumulator += MaxHealthValue * PoisonDamagePercentPerSecond * dt;
+
+                int poisonDamage = (int)_poisonTickAccumulator;
+                if (poisonDamage > 0)
+                {
+                    _poisonTickAccumulator -= poisonDamage;
+                    ApplyDamage(poisonDamage);
+                }
+
+                if (_poisonTimer <= 0f)
+                {
+                    _poisonTimer = 0f;
+                    _poisonTickAccumulator = 0f;
+                }
+            }
+
+            if (_fireTimer > 0f)
+            {
+                _fireTimer -= dt;
+                _fireTickAccumulator += FireDamagePerSecond * dt;
+
+                int fireDamage = (int)_fireTickAccumulator;
+                if (fireDamage > 0)
+                {
+                    _fireTickAccumulator -= fireDamage;
+                    ApplyDamage(fireDamage);
+                }
+
+                if (_fireTimer <= 0f)
+                {
+                    _fireTimer = 0f;
+                    _fireTickAccumulator = 0f;
+                }
+            }
+
+            if (_poisonTimer > 0f)
+            {
+                ApplyHealthBarTint(new Color(0, 120, 0), 0.1f);
+            }
+            else if (_iceSlowTimer > 0f)
+            {
+                ApplyHealthBarTint(Color.CornflowerBlue, 0.1f);
+            }
+            else
+            {
+                _healthBarTintTimer = 0f;
+                _healthBarTintColor = Color.LimeGreen;
+            }
+
+            if (_healthBarTintTimer > 0f)
+            {
+                _healthBarTintTimer -= dt;
+                if (_healthBarTintTimer <= 0f)
+                {
+                    _healthBarTintTimer = 0f;
+                    _healthBarTintColor = Color.LimeGreen;
+                }
+            }
+
+            base.Update(gameTime);
         }
 
         protected void KillEnemy(SoundEffect deathSfx, Action onKilled = null)

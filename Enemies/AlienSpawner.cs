@@ -21,19 +21,17 @@ namespace SpellFall.Enemies
         private readonly Random _rng;
         private Texture2D _texture;
         private Texture2D _healthBarTexture;
-        private int _currentHealth;
-        private bool _isDead;
         private float _spawnTimer;
         private SoundEffect _enemyDeathSFX;
 
         public AlienSpawner(Point startPosition)
-            : base(startPosition)
+            : base(startPosition, MaxHealth)
         {
             _rng = new Random();
-            _currentHealth = MaxHealth;
-            _isDead = false;
             _spawnTimer = SpawnIntervalSeconds;
         }
+
+        protected override SoundEffect DeathSoundEffect => _enemyDeathSFX;
 
         public static AlienSpawner CreateQuestSpawner()
         {
@@ -61,7 +59,7 @@ namespace SpellFall.Enemies
 
         public override void Update(GameTime gameTime)
         {
-            if (_isDead)
+            if (!IsAlive)
             {
                 base.Update(gameTime);
                 return;
@@ -100,8 +98,8 @@ namespace SpellFall.Enemies
                 spriteBatch,
                 ref _healthBarTexture,
                 _texture.Height * SpawnerScale,
-                _currentHealth,
-                MaxHealth,
+                CurrentHealth,
+                MaxHealthValue,
                 56,
                 8);
 
@@ -144,26 +142,6 @@ namespace SpellFall.Enemies
             float angle = (float)(_rng.NextDouble() * Math.PI * 2d);
             float distance = _rng.Next(120, 260);
             return _position + new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle)) * distance;
-        }
-
-        private void TakeDamage(int damage)
-        {
-            if (_isDead || damage <= 0)
-            {
-                return;
-            }
-
-            _currentHealth -= damage;
-            if (_currentHealth > 0)
-            {
-                return;
-            }
-
-            _isDead = true;
-            KillEnemy(_enemyDeathSFX, () =>
-            {
-                _gameManager.AddGameObject(new Loot(_position, _gameManager.Player.Stats.TotalLuck));
-            });
         }
 
         protected override void UpdateCollider()

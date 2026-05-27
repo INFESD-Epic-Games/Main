@@ -7,7 +7,7 @@ using SpellFall.Weapons.Projectiles;
 
 namespace SpellFall.Weapons
 {
-    public class Lbow : Weapons
+    public class Poisonbow : Weapons
     {
         private const float BowScale = 4.9f;
 
@@ -15,7 +15,7 @@ namespace SpellFall.Weapons
         private Point _target;
         private Vector2 _bowCenter;
 
-        public Lbow() : base(damageBonus: 5, baseCdFrames: 36, fireRateBonus: 0.2f)
+        public Poisonbow() : base(damageBonus: 5, baseCdFrames: 36, fireRateBonus: 0.2f)
         {
             _target = Point.Zero;
             _bowCenter = Vector2.Zero;
@@ -23,7 +23,7 @@ namespace SpellFall.Weapons
 
         public override void Load(ContentManager content)
         {
-            _bowTexture = content.Load<Texture2D>("Lbow");
+            _bowTexture = content.Load<Texture2D>("Poisonbow");
             base.Load(content);
         }
 
@@ -47,7 +47,7 @@ namespace SpellFall.Weapons
             if (inputManager.LeftMousePress() && TryStartPrimaryAttackCooldown())
             {
                 int totalDamage = _gameManager.Player.Stats.TotalDamage;
-                _gameManager.AddGameObject(new LightningBolt(_bowCenter, aimDirection, 420f, totalDamage));
+                _gameManager.AddGameObject(new PoisonArrow(_bowCenter, aimDirection, 300f, totalDamage));
             }
 
             base.HandleInput(inputManager);

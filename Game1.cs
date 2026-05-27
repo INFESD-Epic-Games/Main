@@ -1,4 +1,4 @@
-using System.Linq;
+﻿using System.Linq;
 using Gum.Forms;
 using Gum.Wireframe;
 using Microsoft.Xna.Framework;
@@ -28,6 +28,10 @@ namespace SpellFall
         private Player _player;
         private StartingWeapon _startingWeapon;
         private Lbow _lbow;
+        private Firebow _firebow;
+        private Icebow _icebow;
+        private Earthbow _earthbow;
+        private Poisonbow _poisonbow;
         private KeyboardState _previousKeyboardState;
 
         private readonly MainMenu _mainMenu = new MainMenu();
@@ -153,6 +157,10 @@ namespace SpellFall
             _gameManager.Initialize(Content, this, _player);
             _startingWeapon = new StartingWeapon();
             _lbow = new Lbow();
+            _firebow = new Firebow();
+            _icebow = new Icebow();
+            _earthbow = new Earthbow();
+            _poisonbow = new Poisonbow();
             _player.EquipWeapon(_startingWeapon);
 
             Point npcPosition = new Point(
@@ -178,6 +186,10 @@ namespace SpellFall
             _gameManager.AddGameObject(_player);
             _gameManager.AddGameObject(_startingWeapon);
             _gameManager.AddGameObject(_lbow);
+            _gameManager.AddGameObject(_firebow);
+            _gameManager.AddGameObject(_icebow);
+            _gameManager.AddGameObject(_earthbow);
+            _gameManager.AddGameObject(_poisonbow);
             // Spawn the projectile enemy near the player so it stays on the playable area.
             Point projectileEnemyPosition = new Point(
                 _player.GetPosition().Center.X + 300,
@@ -284,6 +296,10 @@ namespace SpellFall
 
             bool onePressed = currentKeyboard.IsKeyDown(Keys.D1) && !_previousKeyboardState.IsKeyDown(Keys.D1);
             bool twoPressed = currentKeyboard.IsKeyDown(Keys.D2) && !_previousKeyboardState.IsKeyDown(Keys.D2);
+            bool threePressed = currentKeyboard.IsKeyDown(Keys.D3) && !_previousKeyboardState.IsKeyDown(Keys.D3);
+            bool fourPressed = currentKeyboard.IsKeyDown(Keys.D4) && !_previousKeyboardState.IsKeyDown(Keys.D4);
+            bool fivePressed = currentKeyboard.IsKeyDown(Keys.D5) && !_previousKeyboardState.IsKeyDown(Keys.D5);
+            bool sixPressed = currentKeyboard.IsKeyDown(Keys.D6) && !_previousKeyboardState.IsKeyDown(Keys.D6);
 
             if (onePressed && _startingWeapon != null)
             {
@@ -292,6 +308,22 @@ namespace SpellFall
             else if (twoPressed && _lbow != null)
             {
                 _player.EquipWeapon(_lbow);
+            }
+            else if (threePressed && _firebow != null)
+            {
+                _player.EquipWeapon(_firebow);
+            }
+            else if (fourPressed && _icebow != null)
+            {
+                _player.EquipWeapon(_icebow);
+            }
+            else if (fivePressed && _earthbow != null)
+            {
+                _player.EquipWeapon(_earthbow);
+            }
+            else if (sixPressed && _poisonbow != null)
+            {
+                _player.EquipWeapon(_poisonbow);
             }
         }
 

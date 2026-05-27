@@ -21,8 +21,6 @@ namespace SpellFall.Enemies
 
         private Texture2D _texture;
         private Texture2D _healthBarTexture;
-        private int _currentHealth;
-        private bool _isDead;
         private float _contactCooldownTimer;
         private int _frameWidth;
         private int _frameHeight;
@@ -31,12 +29,12 @@ namespace SpellFall.Enemies
         public bool IsWatched { get; set; }
 
         public WeepingAngel(Point startPosition)
-            : base(startPosition)
+            : base(startPosition, MaxHealth)
         {
-            _currentHealth = MaxHealth;
-            _isDead = false;
             _contactCooldownTimer = 0f;
         }
+
+        protected override SoundEffect DeathSoundEffect => _enemyDeathSFX;
 
         public override void Load(ContentManager content)
         {
@@ -68,7 +66,7 @@ namespace SpellFall.Enemies
             if (directionToPlayer != Vector2.Zero && !IsWatched)
             {
                 directionToPlayer.Normalize();
-                _position += directionToPlayer * MoveSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
+                _position += directionToPlayer * MoveSpeed * MovementSpeedMultiplier * (float)gameTime.ElapsedGameTime.TotalSeconds;
             }
 
             UpdateCollider();
@@ -107,32 +105,12 @@ namespace SpellFall.Enemies
                 spriteBatch,
                 ref _healthBarTexture,
                 _frameHeight * AlienScale,
-                _currentHealth,
-                MaxHealth,
+                CurrentHealth,
+                MaxHealthValue,
                 40,
                 6);
 
             base.Draw(gameTime, spriteBatch);
-        }
-
-        private void TakeDamage(int damage)
-        {
-            if (_isDead)
-            {
-                return;
-            }
-
-            _currentHealth -= damage;
-            if (_currentHealth > 0)
-            {
-                return;
-            }
-
-            _isDead = true;
-            KillEnemy(_enemyDeathSFX, () =>
-            {
-
-            });
         }
 
         private int GetFrameIndex(Vector2 playerPosition, bool isWatched)
