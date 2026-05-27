@@ -8,8 +8,8 @@ namespace SpellFall.Weapons.Projectiles
 {
     public class IceArrow : Ammo
     {
-        private const float IceArrowScale = 0.4f;
-        private const float IceArrowHitboxRatio = 0.2f;
+        private const float IceArrowScale = 0.85f;
+        private const float IceArrowHitboxRatio = 0.30f;
         public int Damage { get; }
 
         public IceArrow(Vector2 location, Vector2 direction, float speed, int damage, float maxLifetime = 5f)

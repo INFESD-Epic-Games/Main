@@ -47,8 +47,7 @@ namespace SpellFall.Weapons
             if (inputManager.LeftMousePress() && TryStartPrimaryAttackCooldown())
             {
                 int totalDamage = _gameManager.Player.Stats.TotalDamage;
-                // Ice arrow speed half
-                _gameManager.AddGameObject(new IceArrow(_bowCenter, aimDirection, 150f, totalDamage));
+                _gameManager.AddGameObject(new IceArrow(_bowCenter, aimDirection, 250f, totalDamage));
             }
 
             base.HandleInput(inputManager);

@@ -35,12 +35,13 @@ namespace SpellFall.Weapons.Projectiles
 
         protected override int GetEnemyDamage()
         {
-            return 0;
+            return Damage;
         }
 
         protected override void OnEnemyHit(SpellFall.Enemies.Enemy enemy)
         {
             enemy.ApplyFire();
+            base.OnEnemyHit(enemy);
         }
     }
 }

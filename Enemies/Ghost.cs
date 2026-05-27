@@ -18,8 +18,6 @@ namespace SpellFall.Enemies
 
         private Texture2D _texture;
         private Texture2D _healthBarTexture;
-        private int _currentHealth;
-        private bool _isDead;
         private SoundEffect _enemyDeathSFX;
         private int _frameWidth;
         private int _frameHeight;
@@ -37,8 +35,6 @@ namespace SpellFall.Enemies
 
         public Ghost(Point startPosition) : base(startPosition, MaxHealth)
         {
-            _currentHealth = MaxHealth;
-            _isDead = false;
             Map = _gameManager.CurrentMap;
         }
 
@@ -122,8 +118,8 @@ namespace SpellFall.Enemies
                 spriteBatch,
                 ref _healthBarTexture,
                 _frameHeight * EnemyScale,
-                _currentHealth,
-                MaxHealth,
+                CurrentHealth,
+                MaxHealthValue,
                 40,
                 6
             );
@@ -152,23 +148,6 @@ namespace SpellFall.Enemies
             }
 
             return 3;
-        }
-
-        private void TakeDamage(int damage)
-        {
-            if (_isDead)
-            {
-                return;
-            }
-
-            _currentHealth -= damage;
-            if (_currentHealth > 0)
-            {
-                return;
-            }
-
-            _isDead = true;
-            KillEnemy();
         }
 
         protected override void UpdateCollider()

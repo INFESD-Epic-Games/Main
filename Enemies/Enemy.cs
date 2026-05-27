@@ -204,6 +204,7 @@ namespace SpellFall.Enemies
         public void ApplyFire(float durationSeconds = DefaultFireDurationSeconds)
         {
             _fireTimer = Math.Max(_fireTimer, Math.Max(0f, durationSeconds));
+            ApplyHealthBarTint(Color.Orange, durationSeconds);
         }
 
         protected void ApplyDamage(int damage, Action onKilled = null)
@@ -220,6 +221,11 @@ namespace SpellFall.Enemies
             }
 
             KillEnemy(onKilled);
+        }
+
+        public void TakeDamage(int damage)
+        {
+            ApplyDamage(damage);
         }
 
         protected void KillEnemy(Action onKilled = null)
