@@ -128,6 +128,7 @@
 /processorParam:Quality=Best
 /build:Final Battle.mp3
 
+#begin Fireball.png
 #begin Goblin.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -138,6 +139,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
+/build:Fireball.png
+
+#begin Ghost.png
 /build:Goblin.png
 
 #begin Lbow.png
@@ -150,6 +154,7 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
+/build:Ghost.png
 /build:Lbow.png
 
 #begin lightning.png

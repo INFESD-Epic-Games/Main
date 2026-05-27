@@ -1,4 +1,4 @@
-using System.Linq;
+﻿using System.Linq;
 using Gum.Forms;
 using Gum.Wireframe;
 using Microsoft.Xna.Framework;
@@ -199,6 +199,12 @@ namespace SpellFall
                 _player.GetPosition().Center.X + 200,
                 _player.GetPosition().Center.Y + 150
             )));
+
+            Point enemyPosition = new Point(
+                _player.GetPosition().Center.X + 300,
+                _player.GetPosition().Center.Y - 100
+            );
+            _gameManager.AddGameObject(new Ghost(enemyPosition));
         }
 
         protected override void LoadContent()
