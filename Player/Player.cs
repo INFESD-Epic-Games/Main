@@ -188,6 +188,11 @@ namespace SpellFall.Character
             {
                 currentFrame = 0;
             }
+            if(position.X > 2304)
+            {
+                _gameManager.CurrentMap =
+                    _gameManager.Maps[1];
+            }
 
             UpdateCollider();
 
@@ -360,6 +365,24 @@ namespace SpellFall.Character
                 moved = true;
             }
 
+            foreach(var gate in _gameManager.GetObjectsOfType<Gate>())
+            {
+                if (!gate.IsOpen)
+                {
+                    Rectangle futureRect = new Rectangle(
+                        (int)(newPosX.X - width/2f),
+                        (int)(newPosX.Y - height/2f),
+                        width,
+                        height
+                    );
+
+                    if (futureRect.Intersects(gate.Bounds))
+                    {
+                        blockedX = true;
+                    }
+                }
+            }
+
             Vector2 newPosY =
                 new Vector2(position.X,
                             position.Y + velocity.Y);
@@ -382,6 +405,24 @@ namespace SpellFall.Character
             {
                 position.Y += velocity.Y;
                 moved =  true;
+            }
+            
+            foreach(var gate in _gameManager.GetObjectsOfType<Gate>())
+            {
+                if (!gate.IsOpen)
+                {
+                    Rectangle futureRect = new Rectangle(
+                        (int)(newPosX.X - width/2f),
+                        (int)(newPosX.Y - height/2f),
+                        width,
+                        height
+                    );
+
+                    if (futureRect.Intersects(gate.Bounds))
+                    {
+                        blockedY = true;
+                    }
+                }
             }
 
             return moved;
