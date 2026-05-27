@@ -49,31 +49,31 @@ namespace SpellFall.Background
                 0f
             );
             
-            Texture2D pixel = new Texture2D(
-                spriteBatch.GraphicsDevice,
-                1,
-                1);
+            // Texture2D pixel = new Texture2D(
+            //     spriteBatch.GraphicsDevice,
+            //     1,
+            //     1);
 
-            pixel.SetData(new[] { Color.Red });
+            // pixel.SetData(new[] { Color.Red });
 
-            for (int x = 0; x < _collision.GetLength(1); x++)
-            {
-                for (int y = 0; y < _collision.GetLength(0); y++)
-                {
-                    if (_collision[y,x] == 1)
-                    {
-                        spriteBatch.Draw(
-                            pixel,
-                            new Rectangle(
-                                x * _screenTileSize,
-                                y * _screenTileSize,
-                                _screenTileSize,
-                                _screenTileSize),
-                            Color.Red * 0.3f
-                        );
-                    }
-                }
-            }
+            // for (int x = 0; x < _collision.GetLength(1); x++)
+            // {
+            //     for (int y = 0; y < _collision.GetLength(0); y++)
+            //     {
+            //         if (_collision[y,x] == 1)
+            //         {
+            //             spriteBatch.Draw(
+            //                 pixel,
+            //                 new Rectangle(
+            //                     x * _screenTileSize,
+            //                     y * _screenTileSize,
+            //                     _screenTileSize,
+            //                     _screenTileSize),
+            //                 Color.Red * 0.3f
+            //             );
+            //         }
+            //     }
+            // }
 
             base.Draw(gameTime, spriteBatch);
         }
