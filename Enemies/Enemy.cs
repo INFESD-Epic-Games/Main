@@ -18,17 +18,18 @@ namespace SpellFall.Enemies
         protected readonly RectangleCollider _rectangleCollider;
         protected readonly int _enemyId;
         protected Vector2 _position;
+        protected Map _map;
         public bool IsAlive { get; private set; } = true;
         protected Enemy(Point startPosition)
         {
             _gameManager = GameManager.GetGameManager();
-            
             _enemyId = _nextEnemyId++;
             _position = startPosition.ToVector2();
 
             _rectangleCollider = new RectangleCollider(new Rectangle(startPosition, Point.Zero));
             SetCollider(_rectangleCollider);
             _activeEnemies.Add(this);
+            _map = _gameManager.CurrentMap;
         }
 
         public static IEnumerable<Enemy> GetActiveEnemies()
@@ -66,43 +67,33 @@ namespace SpellFall.Enemies
 
         protected void TryMove(Vector2 velocity, int width, int height)
         {
-            // X movement
-            Vector2 newPosX =
-                new Vector2(_position.X + velocity.X, _position.Y);
-
-            bool blockedX = false;
-
-            foreach (var map in _gameManager.Maps)
+            if (_map == null)
             {
-                if (map.IsColliding(newPosX, width, height))
-                {
-                    blockedX = true;
-                    break;
-                }
+                _position += velocity;
+                return;
             }
 
-            if (!blockedX)
+            Vector2 halfOffset = new Vector2(width / 2f, height / 2f);
+
+            // Try full move first (diagonal)
+            Vector2 newPos = _position + velocity;
+            if (!_map.IsColliding(newPos - halfOffset, width, height))
+            {
+                _position = newPos;
+                UpdateCollider();
+                return;
+            }
+
+            // Move X
+            Vector2 newPosX = new Vector2(_position.X + velocity.X, _position.Y);
+            if (!_map.IsColliding(newPosX - halfOffset, width, height))
             {
                 _position = newPosX;
             }
 
-            // Y movement
-            Vector2 newPosY =
-                new Vector2(_position.X,
-                            _position.Y + velocity.Y);
-
-            bool blockedY = false;
-
-            foreach (var map in _gameManager.Maps)
-            {
-                if (map.IsColliding(newPosY, width, height))
-                {
-                    blockedY = true;
-                    break;
-                }
-            }
-
-            if (!blockedY)
+            // Move Y
+            Vector2 newPosY = new Vector2(_position.X, _position.Y + velocity.Y);
+            if (!_map.IsColliding(newPosY - halfOffset, width, height))
             {
                 _position = newPosY;
             }

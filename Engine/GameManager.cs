@@ -36,6 +36,7 @@ namespace SpellFall.Engine
         private TimeSpan _battleMusicTimer = TimeSpan.Zero;
         private TimeSpan _battleMusicBufferTime = TimeSpan.FromSeconds(1);
         public List<Map> Maps { get; } = new List<Map>();
+        public Map CurrentMap { get; set; }
         private bool _isOverWorldMusicPlaying = false;
 
         public static GameManager GetGameManager()

@@ -220,6 +220,9 @@ namespace SpellFall
 
             _gameManager.Maps.Add(map1);
             _gameManager.Maps.Add(map2);
+
+            _gameManager.CurrentMap = map1;
+            
             _gameManager.AddGameObject(map1);
             _gameManager.AddGameObject(map2);
             // Add the starting objects to the GameManager

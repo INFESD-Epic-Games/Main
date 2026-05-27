@@ -39,7 +39,7 @@ namespace SpellFall.Enemies
         {
             _currentHealth = MaxHealth;
             _isDead = false;
-            Map = _gameManager.Map;
+            Map = _gameManager.CurrentMap;
         }
 
         public override void Load(ContentManager content)

@@ -13,8 +13,6 @@ namespace SpellFall.Background
         private string _textureName;
 
         public Vector2 Position { get; set; }
-
-        private Texture2D _controlsTexture;
         private const int _tileSize = 32;
         private const int _renderScale = 4;
         private const int _screenTileSize = _tileSize * _renderScale;
