@@ -49,31 +49,31 @@ namespace SpellFall.Background
                 0f
             );
             
-            Texture2D pixel = new Texture2D(
-                spriteBatch.GraphicsDevice,
-                1,
-                1);
+            // Texture2D pixel = new Texture2D(
+            //     spriteBatch.GraphicsDevice,
+            //     1,
+            //     1);
 
-            pixel.SetData(new[] { Color.Red });
+            // pixel.SetData(new[] { Color.Red });
 
-            for (int x = 0; x < _collision.GetLength(1); x++)
-            {
-                for (int y = 0; y < _collision.GetLength(0); y++)
-                {
-                    if (_collision[y,x] == 1)
-                    {
-                        spriteBatch.Draw(
-                            pixel,
-                            new Rectangle(
-                                x * _screenTileSize,
-                                y * _screenTileSize,
-                                _screenTileSize,
-                                _screenTileSize),
-                            Color.Red * 0.3f
-                        );
-                    }
-                }
-            }
+            // for (int x = 0; x < _collision.GetLength(1); x++)
+            // {
+            //     for (int y = 0; y < _collision.GetLength(0); y++)
+            //     {
+            //         if (_collision[y,x] == 1)
+            //         {
+            //             spriteBatch.Draw(
+            //                 pixel,
+            //                 new Rectangle(
+            //                     x * _screenTileSize,
+            //                     y * _screenTileSize,
+            //                     _screenTileSize,
+            //                     _screenTileSize),
+            //                 Color.Red * 0.3f
+            //             );
+            //         }
+            //     }
+            // }
 
             base.Draw(gameTime, spriteBatch);
         }
@@ -107,7 +107,7 @@ namespace SpellFall.Background
                 tile.Y * _screenTileSize + _screenTileSize / 2f);
         }
 
-        public List<Point> FindPath(Point start, Point goal)
+        public List<Point> FindPath(Point start, Point goal, ISet<Point> blockedTiles = null)
         {
             int rows = _collision.GetLength(0);
             int cols = _collision.GetLength(1);
@@ -118,7 +118,12 @@ namespace SpellFall.Background
             if (goal.X < 0 || goal.Y < 0 || goal.X >= cols || goal.Y >= rows)
                 return null;
 
-            if (IsBlocked(goal.X, goal.Y))
+            bool IsTileBlocked(Point tile)
+            {
+                return IsBlocked(tile.X, tile.Y) || (blockedTiles != null && blockedTiles.Contains(tile));
+            }
+
+            if (IsTileBlocked(goal))
                 return null;
 
             var directions = new Point[]
@@ -162,13 +167,13 @@ namespace SpellFall.Background
                     if (neighbor.X < 0 || neighbor.Y < 0 || neighbor.X >= cols || neighbor.Y >= rows)
                         continue;
 
-                    if (IsBlocked(neighbor.X, neighbor.Y))
+                    if (IsTileBlocked(neighbor))
                         continue;
 
                     // prevent cutting corners: if moving diagonally, ensure adjacent cardinal tiles are free
                     if (Math.Abs(dir.X) == 1 && Math.Abs(dir.Y) == 1)
                     {
-                        if (IsBlocked(current.X + dir.X, current.Y) || IsBlocked(current.X, current.Y + dir.Y))
+                        if (IsTileBlocked(new Point(current.X + dir.X, current.Y)) || IsTileBlocked(new Point(current.X, current.Y + dir.Y)))
                             continue;
                     }
 

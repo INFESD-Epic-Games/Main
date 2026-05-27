@@ -78,10 +78,21 @@ namespace SpellFall.Enemies
 
             var playerTile = _map.WorldToTile(playerPosition);
             var myTile = _map.WorldToTile(_position);
+            var blockedTiles = new HashSet<Point>();
+
+            foreach (Enemy enemy in Enemy.GetActiveEnemies())
+            {
+                if (enemy == this || !enemy.IsAlive)
+                {
+                    continue;
+                }
+
+                blockedTiles.Add(_map.WorldToTile(enemy.GetPosition()));
+            }
 
             if (_path == null || _pathIndex >= (_path?.Count ?? 0) || _pathRecalcTimer <= 0f || !playerTile.Equals(_lastTargetTile))
             {
-                _path = _map.FindPath(myTile, playerTile);
+                _path = _map.FindPath(myTile, playerTile, blockedTiles);
                 _pathIndex = 0;
                 _pathRecalcTimer = 0.2f; // recalc every 0.2 second
                 _lastTargetTile = playerTile;
