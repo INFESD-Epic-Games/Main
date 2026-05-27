@@ -222,9 +222,9 @@ namespace SpellFall
 
             if (GameState.IsPaused)
             {
-                bool enterPressed = currentKeyboard.IsKeyDown(Keys.Enter) && !_previousKeyboardState.IsKeyDown(Keys.Enter);
+                bool ePressed = currentKeyboard.IsKeyDown(Keys.E) && !_previousKeyboardState.IsKeyDown(Keys.E);
 
-                if (enterPressed)
+                if (ePressed)
                 {
                     _npc?.ContinueDialogue();
                 }
