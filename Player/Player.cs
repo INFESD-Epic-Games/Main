@@ -333,6 +333,7 @@ namespace SpellFall.Character
 
         private bool TryMove(Vector2 velocity)
         {
+            bool moved = false;
             int width = rectangleCollider.shape.Width;
             int height = rectangleCollider.shape.Height;
 
