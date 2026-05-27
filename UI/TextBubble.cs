@@ -57,11 +57,6 @@ namespace SpellFall.UI
         {
             UpdateScale();
 
-            if (_isVisible)
-            {
-                Hide();
-            }
-
             base.Update(gameTime);
         }
 
