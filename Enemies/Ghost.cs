@@ -13,7 +13,7 @@ namespace SpellFall.Enemies
     {
         private const float EnemyScale = 0.5f;
         private const float HitboxScale = 0.4f;
-        private const int MaxHealth = 20;
+        private const int MaxHealth = 28;
         private const float TeleportDistance = 20f;
 
         private Texture2D _texture;

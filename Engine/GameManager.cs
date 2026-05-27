@@ -203,6 +203,7 @@ namespace SpellFall.Engine
                     _battleMusicTimer += gameTime.ElapsedGameTime;
                 }
             }
+
         }
 
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch) 
@@ -332,6 +333,7 @@ namespace SpellFall.Engine
     
             return result;
         }
+
     }
 
 }

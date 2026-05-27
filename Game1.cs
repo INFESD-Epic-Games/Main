@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System;
 using Gum.Forms;
 using Gum.Wireframe;
 using Microsoft.Xna.Framework;
@@ -14,6 +15,7 @@ using SpellFall.UI;
 using SpellFall.Quests;
 using SpellFall.Npcs;
 using SpellFall.Background;
+using SpellFall.Items;
 using Microsoft.Xna.Framework.Media;
 
 namespace SpellFall
@@ -161,6 +163,10 @@ namespace SpellFall
             _icebow = new Icebow();
             _earthbow = new Earthbow();
             _poisonbow = new Poisonbow();
+
+            // Starting weapon is Common; other weapons are unlocked through loot.
+            _startingWeapon.ApplyLootTier("Common");
+
             _player.EquipWeapon(_startingWeapon);
 
             Point npcPosition = new Point(
@@ -267,6 +273,7 @@ namespace SpellFall
             _gameManager.AddGameObject(_icebow);
             _gameManager.AddGameObject(_earthbow);
             _gameManager.AddGameObject(_poisonbow);
+            _gameManager.AddGameObject(new EnemyClearChestTestSpawner());
         }
 
         protected override void LoadContent()
@@ -350,36 +357,25 @@ namespace SpellFall
                 return;
             }
 
-            bool onePressed = currentKeyboard.IsKeyDown(Keys.D1) && !_previousKeyboardState.IsKeyDown(Keys.D1);
-            bool twoPressed = currentKeyboard.IsKeyDown(Keys.D2) && !_previousKeyboardState.IsKeyDown(Keys.D2);
-            bool threePressed = currentKeyboard.IsKeyDown(Keys.D3) && !_previousKeyboardState.IsKeyDown(Keys.D3);
-            bool fourPressed = currentKeyboard.IsKeyDown(Keys.D4) && !_previousKeyboardState.IsKeyDown(Keys.D4);
-            bool fivePressed = currentKeyboard.IsKeyDown(Keys.D5) && !_previousKeyboardState.IsKeyDown(Keys.D5);
-            bool sixPressed = currentKeyboard.IsKeyDown(Keys.D6) && !_previousKeyboardState.IsKeyDown(Keys.D6);
+            Keys[] slotKeys = { Keys.D1, Keys.D2, Keys.D3, Keys.D4, Keys.D5, Keys.D6 };
+            int maxSlots = Math.Min(slotKeys.Length, _player.OwnedWeaponCount);
 
-            if (onePressed && _startingWeapon != null)
+            for (int slot = 1; slot <= maxSlots; slot++)
             {
-                _player.EquipWeapon(_startingWeapon);
-            }
-            else if (twoPressed && _lbow != null)
-            {
-                _player.EquipWeapon(_lbow);
-            }
-            else if (threePressed && _firebow != null)
-            {
-                _player.EquipWeapon(_firebow);
-            }
-            else if (fourPressed && _icebow != null)
-            {
-                _player.EquipWeapon(_icebow);
-            }
-            else if (fivePressed && _earthbow != null)
-            {
-                _player.EquipWeapon(_earthbow);
-            }
-            else if (sixPressed && _poisonbow != null)
-            {
-                _player.EquipWeapon(_poisonbow);
+                Keys key = slotKeys[slot - 1];
+                bool keyPressed = currentKeyboard.IsKeyDown(key) && !_previousKeyboardState.IsKeyDown(key);
+                if (!keyPressed)
+                {
+                    continue;
+                }
+
+                SpellFall.Weapons.Weapons ownedWeapon = _player.GetOwnedWeaponAtSlot(slot);
+                if (ownedWeapon != null)
+                {
+                    _player.EquipWeapon(ownedWeapon);
+                }
+
+                break;
             }
         }
 

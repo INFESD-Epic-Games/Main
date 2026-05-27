@@ -15,7 +15,7 @@ namespace SpellFall.Enemies
         private const float MoveSpeed = 100f;
         private const float EnemyScale = 0.5f;
         private const float HitboxScale = 0.4f;
-        private const int MaxHealth = 50;
+        private const int MaxHealth = 60;
         private const int ContactDamage = 5;
         private const float ContactCooldownSeconds = 1f;
 
