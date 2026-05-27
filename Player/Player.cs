@@ -12,6 +12,7 @@ using Microsoft.Xna.Framework.Audio;
 using SpellFall.Enemies;
 using SpellFall.Background;
 using FlatRedBall.Glue.StateInterpolation;
+using System.Linq;
 
 namespace SpellFall.Character
 {
@@ -188,6 +189,13 @@ namespace SpellFall.Character
             else
             {
                 currentFrame = 0;
+            }
+            
+            Gate gate = _gameManager.GetObjectsOfType<Gate>().FirstOrDefault();
+
+            if (position.X > 2304 && gate != null && gate.IsOpen)
+            {
+                _gameManager.CurrentMap = _gameManager.Maps[1];
             }
 
             UpdateCollider();
@@ -381,14 +389,31 @@ namespace SpellFall.Character
             Vector2 newPosX =
                 new Vector2(position.X + velocity.X, position.Y);
 
+            Rectangle futureRectX = new Rectangle(
+                (int)(newPosX.X - width / 2f),
+                (int)(newPosX.Y - height / 2f),
+                width,
+                height
+            );
+
             bool blockedX = false;
 
             foreach (var map in _gameManager.Maps)
             {
                 if (map.IsColliding(
-                    newPosX - new Vector2(width/2f,height/2f),
+                    newPosX - new Vector2(width / 2f, height / 2f),
                     width,
                     height))
+                {
+                    blockedX = true;
+                    break;
+                }
+            }
+
+            foreach (var gate in _gameManager.GetObjectsOfType<Gate>())
+            {
+                if (!gate.IsOpen &&
+                    futureRectX.Intersects(gate.Bounds))
                 {
                     blockedX = true;
                     break;
@@ -400,10 +425,17 @@ namespace SpellFall.Character
                 position.X += velocity.X;
                 moved = true;
             }
-
+           
             Vector2 newPosY =
                 new Vector2(position.X,
                             position.Y + velocity.Y);
+
+            Rectangle futureRect = new Rectangle(
+                (int)(newPosY.X - width/2f),
+                (int)(newPosY.Y - height/2f),
+                width,
+                height
+            );
 
             bool blockedY = false;
 
@@ -423,6 +455,17 @@ namespace SpellFall.Character
             {
                 position.Y += velocity.Y;
                 moved =  true;
+            }
+            
+            foreach(var gate in _gameManager.GetObjectsOfType<Gate>())
+            {
+                if (!gate.IsOpen)
+                {
+                    if (futureRect.Intersects(gate.Bounds))
+                    {
+                        blockedY = true;
+                    }
+                }
             }
 
             return moved;

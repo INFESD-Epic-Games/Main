@@ -26,7 +26,7 @@ namespace SpellFall.Enemies
         protected readonly int _enemyId;
         protected Vector2 _position;
         protected Map _map;
-
+        public Map CurrentMap => _map;
         public bool IsAlive { get; private set; } = true;
         public int MaxHealthValue { get; }
         protected int CurrentHealth { get; private set; }

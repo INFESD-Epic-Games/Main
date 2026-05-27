@@ -11,7 +11,6 @@ namespace SpellFall.Background
     {
         private Texture2D _texture;
         private string _textureName;
-
         public Vector2 Position { get; set; }
         private const int _tileSize = 32;
         private const int _renderScale = 4;
@@ -60,13 +59,13 @@ namespace SpellFall.Background
             // {
             //     for (int y = 0; y < _collision.GetLength(0); y++)
             //     {
-            //         if (_collision[y,x] == 1)
+            //         if (_collision[y, x] == 1)
             //         {
             //             spriteBatch.Draw(
             //                 pixel,
             //                 new Rectangle(
-            //                     x * _screenTileSize,
-            //                     y * _screenTileSize,
+            //                     (int)Position.X + x * _screenTileSize,
+            //                     (int)Position.Y + y * _screenTileSize,
             //                     _screenTileSize,
             //                     _screenTileSize),
             //                 Color.Red * 0.3f
