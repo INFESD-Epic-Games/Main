@@ -16,7 +16,7 @@ using System.Linq;
 
 namespace SpellFall.Character
 {
-    public class Player : GameObject
+    public partial class Player : GameObject
     {
         private const float PlayerScale = 0.5f;
         private const float ColliderWidthScale = 0.25f;

@@ -96,6 +96,19 @@ namespace SpellFall.Npcs
         {
             var player = GameManager.GetGameManager().Player;
 
+            if (player == null)
+            {
+                return;
+            }
+
+            bool npcVisible = !hasGivenQuest || quest.IsCompleted;
+
+            if (!npcVisible)
+            {
+                previousKeyboard = Keyboard.GetState();
+                return;
+            }
+
             float distance = Vector2.DistanceSquared(position, player.GetPosition().Center.ToVector2());
 
             playerInRange = distance < 10000f;
@@ -140,7 +153,7 @@ namespace SpellFall.Npcs
                 0f
             );
 
-            if (!hasGivenQuest || (!questCompletedRewardGiven && quest.IsCompleted))
+            if (!hasGivenQuest || quest.IsCompleted)
             {
                 _indicatorPosition = position + new Vector2(0, -150);
 
@@ -155,10 +168,6 @@ namespace SpellFall.Npcs
                     SpriteEffects.None,
                     0f
                 );
-            }
-            else
-            {
-                return;
             }
         }
         private void Interact()
@@ -177,7 +186,7 @@ namespace SpellFall.Npcs
                 dialogueStage = 0;
                 ShowDialogueLine(dialogueStage);
             }
-            else if (!questCompletedRewardGiven)
+            else if (quest.IsCompleted && !questCompletedRewardGiven)
             {
                 endDialogueActive = true;
                 endDialogueStage = 0;

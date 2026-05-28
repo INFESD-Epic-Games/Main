@@ -29,7 +29,7 @@ namespace SpellFall.Items
         private const float LootScale = 0.75f;
         private const float FrameDurationSeconds = 0.2f;
         private const int FrameCount = 3;
-        private const float OpenedLifetimeSeconds = 4f;
+        private const float OpenedLifetimeSeconds = 5f;
         private const float SpinDurationSeconds = 3.2f;
         private const float RewardHoverDurationSeconds = 1.3f;
         private const float SpinFrameDurationSeconds = 0.15f;
@@ -77,13 +77,15 @@ namespace SpellFall.Items
         {
             public Type WeaponType { get; }
             public Texture2D Texture { get; }
-            public float Scale { get; }
+            public float IconScale { get; }
+            public float RewardScale { get; }
 
-            public WeaponSpinEntry(Type weaponType, Texture2D texture, float scale)
+            public WeaponSpinEntry(Type weaponType, Texture2D texture, float rewardScale, float iconScale)
             {
                 WeaponType = weaponType;
                 Texture = texture;
-                Scale = scale;
+                RewardScale = rewardScale;
+                IconScale = iconScale;
             }
         }
 
@@ -228,7 +230,7 @@ namespace SpellFall.Items
                     Color.White * alpha,
                     0f,
                     origin,
-                    entry.Scale,
+                    entry.IconScale,
                     SpriteEffects.None,
                     0f);
             }
@@ -272,14 +274,13 @@ namespace SpellFall.Items
                 Color.White * Math.Clamp(alpha, 0f, 1f),
                 0f,
                 iconOrigin,
-                reward.Scale,
+                reward.RewardScale,
                 SpriteEffects.None,
                 0f);
         }
 
         private void TryLoadWeaponSpinTextures(ContentManager content)
         {
-            // Use the same scales as the weapon classes so icons aren't too tiny in the loot wheel.
             AddSpinEntry(content, typeof(StartingWeapon), "BOOG", 0.45f);
             AddSpinEntry(content, typeof(Lbow), "Lbow", 4.9f);
             AddSpinEntry(content, typeof(Firebow), "Firebow", 4.9f);
@@ -288,12 +289,13 @@ namespace SpellFall.Items
             AddSpinEntry(content, typeof(Poisonbow), "Poisonbow", 4.9f);
         }
 
-        private void AddSpinEntry(ContentManager content, Type weaponType, string textureName, float scale)
+        private void AddSpinEntry(ContentManager content, Type weaponType, string textureName, float rewardScale)
         {
             try
             {
                 Texture2D texture = content.Load<Texture2D>(textureName);
-                _weaponSpinEntries.Add(new WeaponSpinEntry(weaponType, texture, scale));
+                float iconScale = rewardScale * 0.6f;
+                _weaponSpinEntries.Add(new WeaponSpinEntry(weaponType, texture, rewardScale, iconScale));
             }
             catch
             {

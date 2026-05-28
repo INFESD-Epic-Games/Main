@@ -341,6 +341,11 @@ namespace SpellFall
                 return;
             }
 
+            if (currentKeyboard.IsKeyDown(Keys.B) && !_previousKeyboardState.IsKeyDown(Keys.B))
+            {
+                (_gameManager.Player ?? _player)?.UnlockAllWeapons();
+            }
+
             HandleWeaponSwitch(currentKeyboard);
 
             GumUI.Update(gameTime);
@@ -363,13 +368,15 @@ namespace SpellFall
 
         private void HandleWeaponSwitch(KeyboardState currentKeyboard)
         {
-            if (_player == null)
+            Player activePlayer = _gameManager.Player ?? _player;
+
+            if (activePlayer == null)
             {
                 return;
             }
 
             Keys[] slotKeys = { Keys.D1, Keys.D2, Keys.D3, Keys.D4, Keys.D5, Keys.D6 };
-            int maxSlots = Math.Min(slotKeys.Length, _player.OwnedWeaponCount);
+            int maxSlots = Math.Min(slotKeys.Length, activePlayer.OwnedWeaponCount);
 
             for (int slot = 1; slot <= maxSlots; slot++)
             {
@@ -380,11 +387,7 @@ namespace SpellFall
                     continue;
                 }
 
-                SpellFall.Weapons.Weapons ownedWeapon = _player.GetOwnedWeaponAtSlot(slot);
-                if (ownedWeapon != null)
-                {
-                    _player.EquipWeapon(ownedWeapon);
-                }
+                activePlayer.EquipWeaponBySlot(slot);
 
                 break;
             }
