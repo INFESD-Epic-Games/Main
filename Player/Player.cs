@@ -420,6 +420,11 @@ namespace SpellFall.Character
                 }
             }
 
+            if (!blockedX && IsBlockedByNpc(futureRectX))
+            {
+                blockedX = true;
+            }
+
             if (!blockedX)
             {
                 position.X += velocity.X;
@@ -453,6 +458,14 @@ namespace SpellFall.Character
 
             if (!blockedY)
             {
+                if (IsBlockedByNpc(futureRect))
+                {
+                    blockedY = true;
+                }
+            }
+
+            if (!blockedY)
+            {
                 position.Y += velocity.Y;
                 moved =  true;
             }
@@ -470,6 +483,19 @@ namespace SpellFall.Character
 
             return moved;
            
+        }
+
+        private bool IsBlockedByNpc(Rectangle futureRect)
+        {
+            foreach (SpellFall.Npcs.Npc npc in _gameManager.GetObjectsOfType<SpellFall.Npcs.Npc>())
+            {
+                if (futureRect.Intersects(npc.rectangleCollider.shape))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private void CheckFieldOfView()
