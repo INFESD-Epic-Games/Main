@@ -168,7 +168,8 @@ namespace SpellFall.Enemies
             float bobOffset = (float)Math.Sin(elapsedSeconds * _bobSpeed) * _bobHeight;
             Vector2 floatingPosition = new Vector2(_position.X, _position.Y + bobOffset);
 
-            spriteBatch.Draw(
+            DrawEnemySprite(
+                spriteBatch,
                 _texture,
                 floatingPosition,
                 sourceRectangle,

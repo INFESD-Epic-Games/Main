@@ -9,7 +9,7 @@ using SpellFall.Engine;
 
 namespace SpellFall.Enemies
 {
-    public abstract class Enemy : GameObject
+    public abstract partial class Enemy : GameObject
     {
         private const float IceSlowMultiplier = 0.5f;
         private const float PoisonDamagePercentPerSecond = 0.025f;
@@ -193,18 +193,22 @@ namespace SpellFall.Enemies
             _iceSlowTimer = Math.Max(_iceSlowTimer, Math.Max(0f, durationSeconds));
             _movementSpeedMultiplier = IceSlowMultiplier;
             ApplyHealthBarTint(Color.CornflowerBlue, durationSeconds);
+            ApplyStatusFlash(Color.CornflowerBlue, durationSeconds);
         }
 
         public void ApplyPoison(float durationSeconds = DefaultPoisonDurationSeconds)
         {
             _poisonTimer = Math.Max(_poisonTimer, Math.Max(0f, durationSeconds));
-            ApplyHealthBarTint(new Color(0, 120, 0), durationSeconds);
+            Color poisonColor = new Color(0, 120, 0);
+            ApplyHealthBarTint(poisonColor, durationSeconds);
+            ApplyStatusFlash(poisonColor, durationSeconds);
         }
 
         public void ApplyFire(float durationSeconds = DefaultFireDurationSeconds)
         {
             _fireTimer = Math.Max(_fireTimer, Math.Max(0f, durationSeconds));
             ApplyHealthBarTint(Color.Orange, durationSeconds);
+            ApplyStatusFlash(Color.Orange, durationSeconds);
         }
 
         protected void ApplyDamage(int damage, Action onKilled = null)
@@ -302,6 +306,8 @@ namespace SpellFall.Enemies
                     _healthBarTintColor = Color.LimeGreen;
                 }
             }
+
+            UpdateVisualEffects(dt);
 
             base.Update(gameTime);
         }

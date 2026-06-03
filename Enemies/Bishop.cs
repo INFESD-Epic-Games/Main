@@ -52,7 +52,8 @@ namespace SpellFall.Enemies
         {
             Vector2 origin = new Vector2(_texture.Width / 2f, _texture.Height / 2f);
 
-            spriteBatch.Draw(
+            DrawEnemySprite(
+                spriteBatch,
                 _texture,
                 _position,
                 null,
@@ -102,6 +103,7 @@ namespace SpellFall.Enemies
                 return false;
             }
 
+            ally.ApplyHitFlash();
             _gameManager.AddGameObject(new BishopLightning(this, ally, ProtectionEffectDurationSeconds));
             return true;
         }
