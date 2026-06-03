@@ -88,8 +88,12 @@ namespace SpellFall.Npcs
 
             int colliderWidth = currentTexture.Width;
             int colliderHeight = currentTexture.Height / 4;
-            rectangleCollider.shape.Size = new Point(colliderWidth, colliderHeight);
-            rectangleCollider.shape.Location -= new Point(colliderWidth / 2, colliderHeight / 2);
+            int scaledColliderWidth = (int)(colliderWidth * NpcScale);
+            int scaledColliderHeight = (int)(colliderHeight * NpcScale);
+
+            rectangleCollider.shape = new Rectangle(
+                (position - new Vector2(scaledColliderWidth / 2f, scaledColliderHeight / 2f)).ToPoint(),
+                new Point(scaledColliderWidth, scaledColliderHeight));
         }
 
         public override void Update(GameTime gameTime)
@@ -109,9 +113,9 @@ namespace SpellFall.Npcs
                 return;
             }
 
-            float distance = Vector2.DistanceSquared(position, player.GetPosition().Center.ToVector2());
-
-            playerInRange = distance < 10000f;
+            Rectangle interactionBounds = rectangleCollider.shape;
+            interactionBounds.Inflate(48, 48);
+            playerInRange = interactionBounds.Intersects(player.GetPosition());
 
             KeyboardState currentKeyboard = Keyboard.GetState();
 
@@ -220,6 +224,13 @@ namespace SpellFall.Npcs
                         onQuestAccepted?.Invoke();
                         onQuestAccepted = null;
                         hasGivenQuest = true;
+                        // Move NPC off-map so it is hidden but still available later for end dialogue
+                        position = new Vector2(-10000f, -10000f);
+                        int w = rectangleCollider.shape.Width;
+                        int h = rectangleCollider.shape.Height;
+                        rectangleCollider.shape = new Rectangle(
+                            (position - new Vector2(w / 2f, h / 2f)).ToPoint(),
+                            new Point(w, h));
                     }
 
                     return;

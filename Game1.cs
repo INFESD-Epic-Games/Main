@@ -340,9 +340,11 @@ namespace SpellFall
 
             if (GameState.IsPaused)
             {
-                bool ePressed = currentKeyboard.IsKeyDown(Keys.E) && !_previousKeyboardState.IsKeyDown(Keys.E);
+                bool isInteractKeyPressed = (currentKeyboard.IsKeyDown(Keys.E) && !_previousKeyboardState.IsKeyDown(Keys.E)) || 
+                                (currentKeyboard.IsKeyDown(Keys.Space) && !_previousKeyboardState.IsKeyDown(Keys.Space)) || 
+                                (currentKeyboard.IsKeyDown(Keys.Enter) && !_previousKeyboardState.IsKeyDown(Keys.Enter));
 
-                if (ePressed)
+                if (isInteractKeyPressed)
                 {
                     _npc?.ContinueDialogue();
                 }
