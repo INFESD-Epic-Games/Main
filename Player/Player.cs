@@ -20,7 +20,7 @@ namespace SpellFall.Character
     {
         private const float PlayerScale = 0.5f;
         private const float ColliderWidthScale = 0.25f;
-        private const float ColliderHeightScale = 0.45f;
+        private const float ColliderHeightScale = 0.40f;
         public RectangleCollider rectangleCollider { get; private set; }
         private WeaponBase _equippedWeapon;
         private readonly List<WeaponBase> _ownedWeapons;
