@@ -6,4 +6,5 @@ public static class GameState
     public static bool InIntro = false;
     public static bool IsPaused = false;
     public static bool InGameOver = false;
+    public static bool InPauseMenu = false;
 }
