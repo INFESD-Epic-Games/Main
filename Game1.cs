@@ -387,7 +387,7 @@ namespace SpellFall
                 return;
             }
 
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || escapePressed)
+            if ((GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || escapePressed) && !GameState.InMainMenu)
                 // Exit();
                 PauseGame();
 
