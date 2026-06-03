@@ -1,5 +1,4 @@
 using System;
-using System.Reflection;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SpellFall.Collision;
@@ -87,6 +86,13 @@ namespace SpellFall.Weapons.Projectiles
         {
             if (other is Enemy enemy && CanDamageEnemies)
             {
+                if (Bishop.TryProtectEnemy(enemy))
+                {
+                    _gameManager.RemoveGameObject(this);
+                    base.OnCollision(other);
+                    return;
+                }
+
                 OnEnemyHit(enemy);
 
                 _gameManager.RemoveGameObject(this);
@@ -97,16 +103,7 @@ namespace SpellFall.Weapons.Projectiles
 
         protected void DealEnemyDamage(Enemy enemy, int damage)
         {
-            if (Bishop.TryProtectEnemy(enemy))
-            {
-                return;
-            }
-
-            MethodInfo takeDamageMethod = enemy.GetType().GetMethod(
-                "TakeDamage",
-                BindingFlags.Instance | BindingFlags.NonPublic);
-
-            takeDamageMethod?.Invoke(enemy, new object[] { damage });
+            enemy.TakeDamage(damage);
         }
     }
 }

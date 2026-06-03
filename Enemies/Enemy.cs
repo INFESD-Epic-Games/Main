@@ -3,14 +3,21 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
+using SpellFall.Background;
 using SpellFall.Collision;
 using SpellFall.Engine;
-using SpellFall.Background;
 
 namespace SpellFall.Enemies
 {
     public abstract class Enemy : GameObject
     {
+        private const float IceSlowMultiplier = 0.5f;
+        private const float PoisonDamagePercentPerSecond = 0.025f;
+        private const float FireDamagePerSecond = 2.5f;
+        private const float DefaultPoisonDurationSeconds = 5f;
+        private const float DefaultFireDurationSeconds = 4f;
+        private const float DefaultIceDurationSeconds = 2f;
+
         private static int _nextEnemyId = 1;
         private static readonly HashSet<Enemy> _activeEnemies = new HashSet<Enemy>();
 
@@ -21,16 +28,30 @@ namespace SpellFall.Enemies
         protected Map _map;
         public Map CurrentMap => _map;
         public bool IsAlive { get; private set; } = true;
-        protected Enemy(Point startPosition)
+        public int MaxHealthValue { get; }
+        protected int CurrentHealth { get; private set; }
+
+        private float _movementSpeedMultiplier = 1f;
+        private float _iceSlowTimer = 0f;
+        private float _poisonTimer = 0f;
+        private float _poisonTickAccumulator = 0f;
+        private float _fireTimer = 0f;
+        private float _fireTickAccumulator = 0f;
+        private Color _healthBarTintColor = Color.LimeGreen;
+        private float _healthBarTintTimer = 0f;
+
+        protected Enemy(Point startPosition, int maxHealth)
         {
             _gameManager = GameManager.GetGameManager();
             _enemyId = _nextEnemyId++;
             _position = startPosition.ToVector2();
+            MaxHealthValue = Math.Max(1, maxHealth);
+            CurrentHealth = MaxHealthValue;
 
             _rectangleCollider = new RectangleCollider(new Rectangle(startPosition, Point.Zero));
             SetCollider(_rectangleCollider);
-            _activeEnemies.Add(this);
             _map = _gameManager.CurrentMap;
+            _activeEnemies.Add(this);
         }
 
         public static IEnumerable<Enemy> GetActiveEnemies()
@@ -76,7 +97,6 @@ namespace SpellFall.Enemies
 
             Vector2 halfOffset = new Vector2(width / 2f, height / 2f);
 
-            // Try full move first (diagonal)
             Vector2 newPos = _position + velocity;
             if (!_map.IsColliding(newPos - halfOffset, width, height))
             {
@@ -85,14 +105,12 @@ namespace SpellFall.Enemies
                 return;
             }
 
-            // Move X
             Vector2 newPosX = new Vector2(_position.X + velocity.X, _position.Y);
             if (!_map.IsColliding(newPosX - halfOffset, width, height))
             {
                 _position = newPosX;
             }
 
-            // Move Y
             Vector2 newPosY = new Vector2(_position.X, _position.Y + velocity.Y);
             if (!_map.IsColliding(newPosY - halfOffset, width, height))
             {
@@ -101,6 +119,7 @@ namespace SpellFall.Enemies
 
             UpdateCollider();
         }
+
         public override void OnCollision(GameObject other)
         {
             if (other is Enemy otherEnemy)
@@ -120,7 +139,11 @@ namespace SpellFall.Enemies
 
         protected abstract void UpdateCollider();
 
+        protected abstract SoundEffect DeathSoundEffect { get; }
+
         protected virtual bool CanBePushedByEnemies => true;
+
+        protected float MovementSpeedMultiplier => _movementSpeedMultiplier;
 
         protected void UpdateCenteredCollider(int colliderWidth, int colliderHeight)
         {
@@ -152,18 +175,135 @@ namespace SpellFall.Enemies
                 new Rectangle(barX, barY, barWidth, barHeight),
                 Color.DarkRed);
 
+            Color fillColor = _healthBarTintTimer > 0f ? _healthBarTintColor : Color.LimeGreen;
             spriteBatch.Draw(
                 healthBarTexture,
                 new Rectangle(barX, barY, (int)(barWidth * healthPercentage), barHeight),
-                Color.LimeGreen);
+                fillColor);
         }
 
-        protected void KillEnemy(SoundEffect deathSfx, Action onKilled = null)
+        public void ApplyHealthBarTint(Color color, float durationSeconds)
         {
+            _healthBarTintColor = color;
+            _healthBarTintTimer = Math.Max(0f, durationSeconds);
+        }
+
+        public void ApplyIceSlow(float durationSeconds = DefaultIceDurationSeconds)
+        {
+            _iceSlowTimer = Math.Max(_iceSlowTimer, Math.Max(0f, durationSeconds));
+            _movementSpeedMultiplier = IceSlowMultiplier;
+            ApplyHealthBarTint(Color.CornflowerBlue, durationSeconds);
+        }
+
+        public void ApplyPoison(float durationSeconds = DefaultPoisonDurationSeconds)
+        {
+            _poisonTimer = Math.Max(_poisonTimer, Math.Max(0f, durationSeconds));
+            ApplyHealthBarTint(new Color(0, 120, 0), durationSeconds);
+        }
+
+        public void ApplyFire(float durationSeconds = DefaultFireDurationSeconds)
+        {
+            _fireTimer = Math.Max(_fireTimer, Math.Max(0f, durationSeconds));
+            ApplyHealthBarTint(Color.Orange, durationSeconds);
+        }
+
+        protected void ApplyDamage(int damage, Action onKilled = null)
+        {
+            if (damage <= 0 || !IsAlive)
+            {
+                return;
+            }
+
+            CurrentHealth -= damage;
+            if (CurrentHealth > 0)
+            {
+                return;
+            }
+
+            KillEnemy(onKilled);
+        }
+
+        public void TakeDamage(int damage)
+        {
+            ApplyDamage(damage);
+        }
+
+        protected void KillEnemy(Action onKilled = null)
+        {
+            if (!IsAlive)
+            {
+                return;
+            }
+
             IsAlive = false;
             onKilled?.Invoke();
-            deathSfx.Play();
+            DeathSoundEffect?.Play();
             _gameManager.RemoveGameObject(this);
+        }
+
+        public override void Update(GameTime gameTime)
+        {
+            float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            if (_iceSlowTimer > 0f)
+            {
+                _iceSlowTimer -= dt;
+                if (_iceSlowTimer <= 0f)
+                {
+                    _iceSlowTimer = 0f;
+                    _movementSpeedMultiplier = 1f;
+                }
+            }
+
+            if (_poisonTimer > 0f)
+            {
+                _poisonTimer -= dt;
+                _poisonTickAccumulator += MaxHealthValue * PoisonDamagePercentPerSecond * dt;
+
+                int poisonDamage = (int)_poisonTickAccumulator;
+                if (poisonDamage > 0)
+                {
+                    _poisonTickAccumulator -= poisonDamage;
+                    ApplyDamage(poisonDamage);
+                }
+
+                if (_poisonTimer <= 0f)
+                {
+                    _poisonTimer = 0f;
+                    _poisonTickAccumulator = 0f;
+                }
+            }
+
+            if (_fireTimer > 0f)
+            {
+                _fireTimer -= dt;
+                _fireTickAccumulator += FireDamagePerSecond * dt;
+
+                int fireDamage = (int)_fireTickAccumulator;
+                if (fireDamage > 0)
+                {
+                    _fireTickAccumulator -= fireDamage;
+                    ApplyDamage(fireDamage);
+                }
+
+                if (_fireTimer <= 0f)
+                {
+                    _fireTimer = 0f;
+                    _fireTickAccumulator = 0f;
+                }
+            }
+
+            if (_healthBarTintTimer > 0f)
+            {
+                _healthBarTintTimer -= dt;
+                if (_healthBarTintTimer <= 0f)
+                {
+                    _healthBarTintTimer = 0f;
+                    _healthBarTintColor = Color.LimeGreen;
+                }
+            }
+
+            base.Update(gameTime);
         }
 
         public Vector2 GetPosition()

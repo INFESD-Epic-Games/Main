@@ -58,6 +58,11 @@ namespace SpellFall.Weapons.Projectiles
         protected override void OnEnemyHit(Enemy enemy)
         {
             HashSet<Enemy> hitEnemies = new HashSet<Enemy> { enemy };
+            if (Bishop.TryProtectEnemy(enemy))
+            {
+                return;
+            }
+
             DealEnemyDamage(enemy, Damage);
 
             Vector2 chainOrigin = enemy.GetPosition();
@@ -77,6 +82,11 @@ namespace SpellFall.Weapons.Projectiles
                 }
 
                 hitEnemies.Add(nextEnemy);
+                if (Bishop.TryProtectEnemy(nextEnemy))
+                {
+                    continue;
+                }
+
                 DealEnemyDamage(nextEnemy, Damage);
                
                 _gameManager.AddGameObject(new LightningChain(previous, nextEnemy, 0.15f));

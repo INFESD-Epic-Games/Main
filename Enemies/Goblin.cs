@@ -1,11 +1,11 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Audio;
 using SpellFall.Engine;
 using SpellFall.Weapons.Projectiles;
-using System.Collections.Generic;
 
 namespace SpellFall.Enemies
 {
@@ -14,7 +14,7 @@ namespace SpellFall.Enemies
         private const float MoveSpeed = 50f;
         private const float EnemyScale = 0.35f;
         private const float HitboxScale = 0.4f;
-        private const int MaxHealth = 15;
+        private const int MaxHealth = 22;
         private const int Damage = 10;
         private const float FireCooldownSeconds = 2f;
         private const float StopDistance = 400f;
@@ -23,22 +23,19 @@ namespace SpellFall.Enemies
         private SoundEffect _enemyDeathSFX;
         private Texture2D _healthBarTexture;
         private float _fireCooldownTimer;
-        private int _currentHealth;
         private int _frameWidth;
         private int _frameHeight;
-        private bool _isDead;
         private List<Point> _path;
         private int _pathIndex;
         private float _pathRecalcTimer;
         private Point _lastTargetTile = new Point(-1, -1);
 
-
-        public Goblin(Point startPosition) : base(startPosition)
+        public Goblin(Point startPosition) : base(startPosition, MaxHealth)
         {
             _fireCooldownTimer = 0f;
-            _currentHealth = MaxHealth;
-            _isDead = false;
         }
+
+        protected override SoundEffect DeathSoundEffect => _enemyDeathSFX;
 
         public override void Load(ContentManager content)
         {
@@ -56,29 +53,30 @@ namespace SpellFall.Enemies
             if (_fireCooldownTimer >= FireCooldownSeconds)
             {
                 _fireCooldownTimer = 0f;
-                
-                // Fire a projectile towards the player
                 FireProjectile();
             }
-            
+
+            if (_map == null)
+            {
+                _map = _gameManager.CurrentMap;
+            }
 
             Vector2 playerPosition = _gameManager.Player.GetPosition().Center.ToVector2();
             Vector2 directionToPlayer = playerPosition - _position;
             float distanceToPlayer = directionToPlayer.Length();
 
-            if (distanceToPlayer <= StopDistance && directionToPlayer != Vector2.Zero)
+            if (_map == null || distanceToPlayer <= StopDistance)
             {
                 UpdateCollider();
                 base.Update(gameTime);
                 return;
             }
 
-            // Pathfinding update timer
             _pathRecalcTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-            var playerTile = _map.WorldToTile(playerPosition);
-            var myTile = _map.WorldToTile(_position);
-            var blockedTiles = new HashSet<Point>();
+            Point playerTile = _map.WorldToTile(playerPosition);
+            Point myTile = _map.WorldToTile(_position);
+            HashSet<Point> blockedTiles = new HashSet<Point>();
 
             foreach (Enemy enemy in Enemy.GetActiveEnemies())
             {
@@ -94,7 +92,7 @@ namespace SpellFall.Enemies
             {
                 _path = _map.FindPath(myTile, playerTile, blockedTiles);
                 _pathIndex = 0;
-                _pathRecalcTimer = 0.2f; // recalc every 0.2 second
+                _pathRecalcTimer = 0.2f;
                 _lastTargetTile = playerTile;
             }
 
@@ -113,20 +111,15 @@ namespace SpellFall.Enemies
                 else
                 {
                     directionToTarget.Normalize();
-                    Vector2 velocity = directionToTarget * MoveSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
+                    Vector2 velocity = directionToTarget * MoveSpeed * MovementSpeedMultiplier * (float)gameTime.ElapsedGameTime.TotalSeconds;
                     TryMove(velocity, colliderWidth, colliderHeight);
                 }
             }
-            else
+            else if (directionToPlayer != Vector2.Zero)
             {
-                // fallback to direct movement if no path found
-
-                if (directionToPlayer != Vector2.Zero)
-                {
-                    directionToPlayer.Normalize();
-                    Vector2 velocity = directionToPlayer * MoveSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
-                    TryMove(velocity, colliderWidth, colliderHeight);
-                }
+                directionToPlayer.Normalize();
+                Vector2 velocity = directionToPlayer * MoveSpeed * MovementSpeedMultiplier * (float)gameTime.ElapsedGameTime.TotalSeconds;
+                TryMove(velocity, colliderWidth, colliderHeight);
             }
 
             UpdateCollider();
@@ -154,8 +147,8 @@ namespace SpellFall.Enemies
                 spriteBatch,
                 ref _healthBarTexture,
                 _frameHeight * EnemyScale,
-                _currentHealth,
-                MaxHealth,
+                CurrentHealth,
+                MaxHealthValue,
                 40,
                 6);
 
@@ -167,23 +160,6 @@ namespace SpellFall.Enemies
             int colliderWidth = (int)(_frameWidth * EnemyScale * HitboxScale);
             int colliderHeight = (int)(_frameHeight * EnemyScale * HitboxScale);
             UpdateCenteredCollider(colliderWidth, colliderHeight);
-        }
-
-        private void TakeDamage(int damage)
-        {
-            if (_isDead)
-            {
-                return;
-            }
-
-            _currentHealth -= damage;
-            if (_currentHealth > 0)
-            {
-                return;
-            }
-
-            _isDead = true;
-            KillEnemy(_enemyDeathSFX);
         }
 
         private int GetFrameIndex(Vector2 playerPosition)
@@ -212,9 +188,8 @@ namespace SpellFall.Enemies
         private void FireProjectile()
         {
             Vector2 direction = _gameManager.Player.GetPosition().Center.ToVector2() - _position;
-            direction.Normalize();  
-
-            GameManager.GetGameManager().AddGameObject(new Stone(_position, direction, 400f, Damage));      
+            direction.Normalize();
+            GameManager.GetGameManager().AddGameObject(new Stone(_position, direction, 400f, Damage));
         }
     }
 }

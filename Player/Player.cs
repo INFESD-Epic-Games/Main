@@ -16,17 +16,17 @@ using System.Linq;
 
 namespace SpellFall.Character
 {
-    public class Player : GameObject
+    public partial class Player : GameObject
     {
         private const float PlayerScale = 0.5f;
         private const float ColliderWidthScale = 0.25f;
         private const float ColliderHeightScale = 0.40f;
         public RectangleCollider rectangleCollider { get; private set; }
         private WeaponBase _equippedWeapon;
+        private readonly List<WeaponBase> _ownedWeapons;
         Vector2 lastDirection = Vector2.UnitY;
         private Vector2 _thrustInput = Vector2.Zero;
         private Vector2 _previousPosition;
-        private const int _dashDistance = 200;
         private const float _dashDuration = 0.3f; // Duration in seconds
         private float _dashCooldown = 5f;
         private float _dashTimer = 0f;
@@ -58,6 +58,7 @@ namespace SpellFall.Character
         {
             _gameManager = GameManager.GetGameManager();
             Stats = new PlayerStats();
+            _ownedWeapons = new List<WeaponBase>();
             rectangleCollider = new RectangleCollider(new Rectangle(Position, Point.Zero));
             position = Position.ToVector2();
             SetCollider(rectangleCollider);
@@ -259,9 +260,49 @@ namespace SpellFall.Character
 
         public void EquipWeapon(WeaponBase weapon)
         {
+            if (weapon == null)
+            {
+                return;
+            }
+
+            AddWeaponToInventory(weapon);
             _equippedWeapon?.OnUnequip();
             _equippedWeapon = weapon;
             _equippedWeapon?.OnEquip(Stats);
+        }
+
+        public bool AddWeaponToInventory(WeaponBase weapon)
+        {
+            if (weapon == null)
+            {
+                return false;
+            }
+
+            if (_ownedWeapons.Contains(weapon))
+            {
+                return false;
+            }
+
+            _ownedWeapons.Add(weapon);
+            return true;
+        }
+
+        public bool OwnsWeapon(WeaponBase weapon)
+        {
+            return weapon != null && _ownedWeapons.Contains(weapon);
+        }
+
+        public int OwnedWeaponCount => _ownedWeapons.Count;
+
+        public WeaponBase GetOwnedWeaponAtSlot(int oneBasedSlot)
+        {
+            int index = oneBasedSlot - 1;
+            if (index < 0 || index >= _ownedWeapons.Count)
+            {
+                return null;
+            }
+
+            return _ownedWeapons[index];
         }
 
         private void Dash()

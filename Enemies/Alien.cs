@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using SpellFall.Character;
 using SpellFall.Engine;
 using SpellFall.Weapons.Projectiles;
-using SpellFall.Character;
-using Microsoft.Xna.Framework.Audio;
 
 namespace SpellFall.Enemies
 {
@@ -15,14 +15,12 @@ namespace SpellFall.Enemies
         private const float MoveSpeed = 70f;
         private const float AlienScale = 0.5f;
         private const float HitboxScale = 0.4f;
-        private const int MaxHealth = 20;
+        private const int MaxHealth = 28;
         private const int ContactDamage = 5;
         private const float ContactCooldownSeconds = 3f;
 
         private Texture2D _texture;
         private Texture2D _healthBarTexture;
-        private int _currentHealth;
-        private bool _isDead;
         private float _contactCooldownTimer;
         private int _frameWidth;
         private int _frameHeight;
@@ -33,12 +31,12 @@ namespace SpellFall.Enemies
         private Point _lastTargetTile = new Point(-1, -1);
 
         public Alien(Point startPosition)
-            : base(startPosition)
+            : base(startPosition, MaxHealth)
         {
-            _currentHealth = MaxHealth;
-            _isDead = false;
             _contactCooldownTimer = 0f;
         }
+
+        protected override SoundEffect DeathSoundEffect => _enemyDeathSFX;
 
         public override void Load(ContentManager content)
         {
@@ -65,14 +63,35 @@ namespace SpellFall.Enemies
                 return;
             }
 
+            if (_map == null)
+            {
+                _map = _gameManager.CurrentMap;
+            }
+
             Vector2 playerPosition = _gameManager.Player.GetPosition().Center.ToVector2();
 
-            // Pathfinding update timer
+            if (_map == null)
+            {
+                Vector2 directionToPlayer = playerPosition - _position;
+                if (directionToPlayer != Vector2.Zero)
+                {
+                    directionToPlayer.Normalize();
+                    Vector2 velocity = directionToPlayer * MoveSpeed * MovementSpeedMultiplier * (float)gameTime.ElapsedGameTime.TotalSeconds;
+                    int colliderWidth = (int)(_frameWidth * AlienScale * HitboxScale);
+                    int colliderHeight = (int)(_frameHeight * AlienScale * HitboxScale);
+                    TryMove(velocity, colliderWidth, colliderHeight);
+                }
+
+                UpdateCollider();
+                base.Update(gameTime);
+                return;
+            }
+
             _pathRecalcTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-            var playerTile = _map.WorldToTile(playerPosition);
-            var myTile = _map.WorldToTile(_position);
-            var blockedTiles = new HashSet<Point>();
+            Point playerTile = _map.WorldToTile(playerPosition);
+            Point myTile = _map.WorldToTile(_position);
+            HashSet<Point> blockedTiles = new HashSet<Point>();
 
             foreach (Enemy enemy in Enemy.GetActiveEnemies())
             {
@@ -88,12 +107,12 @@ namespace SpellFall.Enemies
             {
                 _path = _map.FindPath(myTile, playerTile, blockedTiles);
                 _pathIndex = 0;
-                _pathRecalcTimer = 0.2f; // recalc every 0.2 second
+                _pathRecalcTimer = 0.2f;
                 _lastTargetTile = playerTile;
             }
 
-            int colliderWidth = (int)(_frameWidth * AlienScale * HitboxScale);
-            int colliderHeight = (int)(_frameHeight * AlienScale * HitboxScale);
+            int colliderW = (int)(_frameWidth * AlienScale * HitboxScale);
+            int colliderH = (int)(_frameHeight * AlienScale * HitboxScale);
 
             if (_path != null && _path.Count > 0 && _pathIndex < _path.Count)
             {
@@ -107,24 +126,22 @@ namespace SpellFall.Enemies
                 else
                 {
                     directionToTarget.Normalize();
-                    Vector2 velocity = directionToTarget * MoveSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
-                    TryMove(velocity, colliderWidth, colliderHeight);
+                    Vector2 velocity = directionToTarget * MoveSpeed * MovementSpeedMultiplier * (float)gameTime.ElapsedGameTime.TotalSeconds;
+                    TryMove(velocity, colliderW, colliderH);
                 }
             }
             else
             {
-                // fallback to direct movement if no path found
                 Vector2 directionToPlayer = playerPosition - _position;
-
                 if (directionToPlayer != Vector2.Zero)
                 {
                     directionToPlayer.Normalize();
-                    Vector2 velocity = directionToPlayer * MoveSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds;
-                    TryMove(velocity, colliderWidth, colliderHeight);
+                    Vector2 velocity = directionToPlayer * MoveSpeed * MovementSpeedMultiplier * (float)gameTime.ElapsedGameTime.TotalSeconds;
+                    TryMove(velocity, colliderW, colliderH);
                 }
             }
 
-            UpdateCollider();   
+            UpdateCollider();
             base.Update(gameTime);
         }
 
@@ -160,35 +177,12 @@ namespace SpellFall.Enemies
                 spriteBatch,
                 ref _healthBarTexture,
                 _frameHeight * AlienScale,
-                _currentHealth,
-                MaxHealth,
+                CurrentHealth,
+                MaxHealthValue,
                 40,
                 6);
 
             base.Draw(gameTime, spriteBatch);
-        }
-
-        private void TakeDamage(int damage)
-        {
-            if (_isDead)
-            {
-                return;
-            }
-
-            _currentHealth -= damage;
-            if (_currentHealth > 0)
-            {
-                return;
-            }
-
-            _isDead = true;
-            KillEnemy(_enemyDeathSFX, () =>
-            {
-                if (_gameManager.QuestManager.HasActiveQuest("KillAliens"))
-                {
-                    _gameManager.QuestManager.AddProgress("KillAliens", 1);
-                }
-            });
         }
 
         private int GetFrameIndex(Vector2 playerPosition)

@@ -57,6 +57,7 @@ namespace SpellFall.Engine
 
             textBubble = new TextBubble();
             _toBeAdded.Add(textBubble);
+            _toBeAdded.Add(new ControlLayoutOverlay());
 
             SoundManager = new SoundManager();
         }
@@ -203,16 +204,37 @@ namespace SpellFall.Engine
                     _battleMusicTimer += gameTime.ElapsedGameTime;
                 }
             }
+
         }
 
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch) 
         {
             spriteBatch.Begin(transformMatrix: Camera.Transform);
 
-            // Draw world objects first.
             foreach (GameObject gameObject in _gameObjects)
             {
-                if (gameObject is TextBubble)
+                if (gameObject is not Map)
+                {
+                    continue;
+                }
+
+                gameObject.Draw(gameTime, spriteBatch);
+            }
+
+            foreach (GameObject gameObject in _gameObjects)
+            {
+                if (gameObject is not ControlLayoutOverlay)
+                {
+                    continue;
+                }
+
+                gameObject.Draw(gameTime, spriteBatch);
+            }
+
+            // Draw the remaining world objects on top of the map.
+            foreach (GameObject gameObject in _gameObjects)
+            {
+                if (gameObject is Map || gameObject is TextBubble || gameObject is ControlLayoutOverlay)
                 {
                     continue;
                 }
@@ -262,6 +284,7 @@ namespace SpellFall.Engine
             _toBeRemoved.Clear();
             _toBeAdded.Clear();
             _toBeAdded.Add(textBubble);
+            _toBeAdded.Add(new ControlLayoutOverlay());
             Player = null;
 
             _isBattleMusicPlaying = false;
@@ -332,6 +355,7 @@ namespace SpellFall.Engine
     
             return result;
         }
+
     }
 
 }

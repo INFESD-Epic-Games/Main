@@ -13,13 +13,11 @@ namespace SpellFall.Enemies
     {
         private const float EnemyScale = 0.5f;
         private const float HitboxScale = 0.4f;
-        private const int MaxHealth = 20;
+        private const int MaxHealth = 28;
         private const float TeleportDistance = 20f;
 
         private Texture2D _texture;
         private Texture2D _healthBarTexture;
-        private int _currentHealth;
-        private bool _isDead;
         private SoundEffect _enemyDeathSFX;
         private int _frameWidth;
         private int _frameHeight;
@@ -35,12 +33,12 @@ namespace SpellFall.Enemies
         private const int ShotsPerTeleport = 3;
         public Map Map { get; set; }
 
-        public Ghost(Point startPosition) : base(startPosition)
+        public Ghost(Point startPosition) : base(startPosition, MaxHealth)
         {
-            _currentHealth = MaxHealth;
-            _isDead = false;
             Map = _gameManager.CurrentMap;
         }
+
+        protected override SoundEffect DeathSoundEffect => _enemyDeathSFX;
 
         public override void Load(ContentManager content)
         {
@@ -120,8 +118,8 @@ namespace SpellFall.Enemies
                 spriteBatch,
                 ref _healthBarTexture,
                 _frameHeight * EnemyScale,
-                _currentHealth,
-                MaxHealth,
+                CurrentHealth,
+                MaxHealthValue,
                 40,
                 6
             );
@@ -150,23 +148,6 @@ namespace SpellFall.Enemies
             }
 
             return 3;
-        }
-
-        private void TakeDamage(int damage)
-        {
-            if (_isDead)
-            {
-                return;
-            }
-
-            _currentHealth -= damage;
-            if (_currentHealth > 0)
-            {
-                return;
-            }
-
-            _isDead = true;
-            KillEnemy(_enemyDeathSFX);
         }
 
         protected override void UpdateCollider()

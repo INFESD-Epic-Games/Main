@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System;
 using Gum.Forms;
 using Gum.Wireframe;
 using Microsoft.Xna.Framework;
@@ -14,6 +15,7 @@ using SpellFall.UI;
 using SpellFall.Quests;
 using SpellFall.Npcs;
 using SpellFall.Background;
+using SpellFall.Items;
 using Microsoft.Xna.Framework.Media;
 
 namespace SpellFall
@@ -28,6 +30,10 @@ namespace SpellFall
         private Player _player;
         private StartingWeapon _startingWeapon;
         private Lbow _lbow;
+        private Firebow _firebow;
+        private Icebow _icebow;
+        private Earthbow _earthbow;
+        private Poisonbow _poisonbow;
         private KeyboardState _previousKeyboardState;
 
         private readonly MainMenu _mainMenu = new MainMenu();
@@ -153,6 +159,14 @@ namespace SpellFall
             _gameManager.Initialize(Content, this, _player);
             _startingWeapon = new StartingWeapon();
             _lbow = new Lbow();
+            _firebow = new Firebow();
+            _icebow = new Icebow();
+            _earthbow = new Earthbow();
+            _poisonbow = new Poisonbow();
+
+            // Starting weapon is Common; other weapons are unlocked through loot.
+            _startingWeapon.ApplyLootTier("Common");
+
             _player.EquipWeapon(_startingWeapon);
 
             Point npcPosition = new Point(
@@ -294,6 +308,11 @@ namespace SpellFall
             _gameManager.AddGameObject(_player);
             _gameManager.AddGameObject(_startingWeapon);
             _gameManager.AddGameObject(_lbow);
+            _gameManager.AddGameObject(_firebow);
+            _gameManager.AddGameObject(_icebow);
+            _gameManager.AddGameObject(_earthbow);
+            _gameManager.AddGameObject(_poisonbow);
+            _gameManager.AddGameObject(new EnemyClearChestTestSpawner());
         }
 
         protected override void LoadContent()
@@ -350,6 +369,11 @@ namespace SpellFall
                 return;
             }
 
+            if (currentKeyboard.IsKeyDown(Keys.B) && !_previousKeyboardState.IsKeyDown(Keys.B))
+            {
+                (_gameManager.Player ?? _player)?.UnlockAllWeapons();
+            }
+
             HandleWeaponSwitch(currentKeyboard);
 
             GumUI.Update(gameTime);
@@ -372,21 +396,28 @@ namespace SpellFall
 
         private void HandleWeaponSwitch(KeyboardState currentKeyboard)
         {
-            if (_player == null)
+            Player activePlayer = _gameManager.Player ?? _player;
+
+            if (activePlayer == null)
             {
                 return;
             }
 
-            bool onePressed = currentKeyboard.IsKeyDown(Keys.D1) && !_previousKeyboardState.IsKeyDown(Keys.D1);
-            bool twoPressed = currentKeyboard.IsKeyDown(Keys.D2) && !_previousKeyboardState.IsKeyDown(Keys.D2);
+            Keys[] slotKeys = { Keys.D1, Keys.D2, Keys.D3, Keys.D4, Keys.D5, Keys.D6 };
+            int maxSlots = Math.Min(slotKeys.Length, activePlayer.OwnedWeaponCount);
 
-            if (onePressed && _startingWeapon != null)
+            for (int slot = 1; slot <= maxSlots; slot++)
             {
-                _player.EquipWeapon(_startingWeapon);
-            }
-            else if (twoPressed && _lbow != null)
-            {
-                _player.EquipWeapon(_lbow);
+                Keys key = slotKeys[slot - 1];
+                bool keyPressed = currentKeyboard.IsKeyDown(key) && !_previousKeyboardState.IsKeyDown(key);
+                if (!keyPressed)
+                {
+                    continue;
+                }
+
+                activePlayer.EquipWeaponBySlot(slot);
+
+                break;
             }
         }
 
