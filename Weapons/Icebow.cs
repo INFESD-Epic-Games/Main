@@ -44,7 +44,7 @@ namespace SpellFall.Weapons
             Vector2 aimDirection = LinePieceCollider.GetDirection(playerRect.Center, _target);
             _bowCenter = GetBowCenter(aimDirection);
 
-            if (inputManager.LeftMousePress() && TryStartPrimaryAttackCooldown())
+            if (inputManager.LeftMouseDown() && TryStartPrimaryAttackCooldown())
             {
                 int totalDamage = _gameManager.Player.Stats.TotalDamage;
                 _gameManager.AddGameObject(new IceArrow(_bowCenter, aimDirection, 250f, totalDamage));

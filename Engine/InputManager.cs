@@ -79,6 +79,15 @@ namespace SpellFall.Engine
             return CurrentMouseState.LeftButton == ButtonState.Pressed && LastMouseState.LeftButton == ButtonState.Released;
         }
 
+        /// <summary>
+        /// Gets whether the left mouse button is currently down (held).
+        /// </summary>
+        /// <returns>true if the left mouse button is currently pressed, otherwise false</returns>
+        public bool LeftMouseDown()
+        {
+            return CurrentMouseState.LeftButton == ButtonState.Pressed;
+        }
+
 
         /// <summary>
         /// Gets whether the right mouse button was pressed in this frame.
