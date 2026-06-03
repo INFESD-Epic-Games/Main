@@ -301,8 +301,18 @@ namespace SpellFall
                 ),
                 map1
             );
+             Gate roomGate2 = new Gate(
+                new Rectangle(
+                    4400,
+                    820,
+                    128,
+                    256
+                ),
+                map2
+            );
 
             _gameManager.AddGameObject(roomGate);
+            _gameManager.AddGameObject(roomGate2);
             // Add the starting objects to the GameManager
             _gameManager.AddGameObject(_npc);
             _gameManager.AddGameObject(_player);
