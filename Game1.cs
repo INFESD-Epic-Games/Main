@@ -154,8 +154,8 @@ namespace SpellFall
         protected void InitializeGame()
         {
             // Place the player at the center of the screen
-            int spawnTileX = 8;
-            int spawnTileY = 8;
+            int spawnTileX = 6;
+            int spawnTileY = 4;
 
             int tileWorldSize = 32 * 4;
 
@@ -168,7 +168,7 @@ namespace SpellFall
             _gameManager.Initialize(Content, this, _player);
             StartingWeapon startingWeapon = new StartingWeapon();
             _player.EquipWeapon(startingWeapon);
-            _player = new Player(new Point(RenderManager.VirtualWidth / 2 - 100, RenderManager.VirtualHeight / 2 - 100));
+            // _player = new Player(new Point(RenderManager.VirtualWidth / 2 - 100, RenderManager.VirtualHeight / 2 - 100));
             _gameManager.Initialize(Content, this, _player);
             _startingWeapon = new StartingWeapon();
             _lbow = new Lbow();

@@ -123,6 +123,18 @@
 /processorParam:TextureFormat=Color
 /build:Earthbow.png
 
+#begin Earthbow.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Earthbow.png
+
 #begin Enemy Death.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
@@ -159,6 +171,18 @@
 /processorParam:TextureFormat=Color
 /build:firearrow.png
 
+#begin firearrow.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:firearrow.png
+
 #begin Fireball.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -170,6 +194,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:Fireball.png
+
+#begin Firebow.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Firebow.png
 
 #begin Firebow.png
 /importer:TextureImporter
@@ -220,6 +256,7 @@
 /build:Goblin.png
 
 #begin icearrow.png
+#begin icearrow.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -229,6 +266,7 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
+/build:icearrow.png
 /build:icearrow.png
 
 #begin Icebow.png
@@ -242,6 +280,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:Icebow.png
+
+#begin inventory tut.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:inventory tut.png
 
 #begin Lbow.png
 /importer:TextureImporter
@@ -344,6 +394,30 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:PIJL.png
+
+#begin poisonarrow.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:poisonarrow.png
+
+#begin Poisonbow.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Poisonbow.png
 
 #begin poisonarrow.png
 /importer:TextureImporter
