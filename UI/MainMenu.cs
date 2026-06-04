@@ -36,12 +36,20 @@ public class MainMenu
     {
         Texture2D buttonTexture = content.Load<Texture2D>("brown");
         _backgroundmusic = content.Load<Song>("Title Theme");
+        Texture2D titleTexture = content.Load<Texture2D>("Titlescreen_logo");
 
         MediaPlayer.Play(_backgroundmusic);
 
         _panel = new Panel();
         _panel.Dock(Dock.Fill);
         _panel.AddToRoot();
+
+        // Draw the title logo
+        var logoImage = new Image();
+        logoImage.Texture = titleTexture;
+        logoImage.Anchor(Anchor.Center);
+        logoImage.Y = 20;
+        _panel.AddChild(logoImage);
 
         const float startX = 16;
         const float spacing = 48;
