@@ -32,3 +32,6 @@ oreo8u - (https://oreo8u.itch.io/pixel-ghosts)
 
 Asset for the Goblin from:
 ruveyhak - (https://ruveyhak.itch.io/goblin)
+
+Title image: 
+Titlescreen_logo.png was generated with AI and then edited/used by the developer.

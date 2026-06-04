@@ -503,6 +503,18 @@
 /processorParam:Quality=Best
 /build:Title Theme.mp3
 
+#begin Titlescreen_logo.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Titlescreen_logo.png
+
 #begin Treasure_chest_horizontal.png
 /importer:TextureImporter
 /processor:TextureProcessor
