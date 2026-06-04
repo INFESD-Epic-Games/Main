@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework.Graphics;
 using MonoGameGum;
 using SpellFall.UI.Fluent;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 
 namespace SpellFall.UI;
 
@@ -16,6 +17,8 @@ public class Settings
     public event Action<DisplayMode> ResolutionChanged;
     public event Action<bool> FullscreenChanged;
     public event Action<double> VolumeChanged;
+
+    public event Action<double> SFXchanged;
     public event Action ReturnClicked;
     
     public bool IsVisible
@@ -29,7 +32,8 @@ public class Settings
     private ComboBox _resolutionSelect;
     private CheckBox _fullscreenToggle;
     private Slider _volumeSlider;
-    
+    private Slider _sfx;
+    private Slider _music;
     private FluentButton _returnButton;
 
     public static readonly List<DisplayMode> Resolutions = GraphicsAdapter.DefaultAdapter.SupportedDisplayModes
@@ -85,7 +89,7 @@ public class Settings
         label.Anchor(Anchor.Center);
         label.X = 0;
         label.Y = 16 + 48;
-        label.Text = "Volume:";
+        label.Text = "Music:";
         _panel.AddChild(label);
 
         _volumeSlider = new Slider();
@@ -101,6 +105,26 @@ public class Settings
         _volumeSlider.ValueChanged += OnVolumeChanged;
         _panel.AddChild(_volumeSlider);
         
+        var label2 = new Label();
+        label2.Anchor(Anchor.Center);
+        label2.X = 0;
+        label2.Y = 16 + 104;
+        label2.Text = "SFX:";
+        _panel.AddChild(label2);
+
+        _sfx = new Slider();
+        _sfx.Anchor(Anchor.Center);
+        _sfx.X = 0;
+        _sfx.Y = 16 + 120 + 10;
+        _sfx.Width = 128;
+        _sfx.Value = 100;
+        _sfx.Minimum = 0;
+        _sfx.Maximum = 100;
+        _sfx.IsSnapToTickEnabled = true;
+        _sfx.TicksFrequency = 1;
+        _sfx.ValueChanged += onSFXChanged;
+        _panel.AddChild(_sfx);
+
         _returnButton = new FluentButton(buttonTexture)
             .WithText("Return")
             .WithFont("Test.fnt")
@@ -123,5 +147,10 @@ public class Settings
     private void OnVolumeChanged(object sender, EventArgs e)
     {
         VolumeChanged?.Invoke(_volumeSlider.Value / 100f);
+    }
+
+    private void onSFXChanged(object sender, EventArgs e)
+    {
+        SFXchanged?.Invoke(_sfx.Value / 100f);
     }
 }

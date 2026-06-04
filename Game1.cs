@@ -17,6 +17,7 @@ using SpellFall.Npcs;
 using SpellFall.Background;
 using SpellFall.Items;
 using Microsoft.Xna.Framework.Media;
+using Microsoft.Xna.Framework.Audio;
 
 namespace SpellFall
 {
@@ -111,6 +112,10 @@ namespace SpellFall
             _settings.VolumeChanged += (volume) =>
             {
                 MediaPlayer.Volume = (float)volume;
+            };
+            _settings.SFXchanged += (volume) =>
+            {
+                SoundEffect.MasterVolume = (float)volume;
             };
             _settings.ReturnClicked += () =>
             {
