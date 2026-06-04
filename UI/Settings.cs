@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGameGum;
 using SpellFall.UI.Fluent;
+using System.Runtime.InteropServices;
 
 namespace SpellFall.UI;
 
@@ -34,8 +35,22 @@ public class Settings
     public static readonly List<DisplayMode> Resolutions = GraphicsAdapter.DefaultAdapter.SupportedDisplayModes
         .Distinct()
         .Where(m => m.Height >= 480)
+        .Where(IsVirtualAspectRatio)
         .OrderByDescending(m => m.Width)
         .ToList();
+
+    private static bool IsVirtualAspectRatio(DisplayMode mode)
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            // macOS reports all modes as 16:10, even if they are actually 16:9, so we need to check the actual aspect ratio
+            return mode.Width * 10 == mode.Height * 16 || mode.Width * 9 == mode.Height * 16;
+        }
+        else
+        {
+            return mode.Width * 9 == mode.Height * 16;
+        }
+    }
 
     public void CreatePanel(ContentManager content)
     {

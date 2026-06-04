@@ -162,7 +162,8 @@ namespace SpellFall.Enemies
             Rectangle sourceRectangle = new Rectangle(frameIndex * _frameWidth, 0, _frameWidth, _frameHeight);
             Vector2 origin = new Vector2(_frameWidth / 2f, _frameHeight / 2f);
 
-            spriteBatch.Draw(
+            DrawEnemySprite(
+                spriteBatch,
                 _texture,
                 _position,
                 sourceRectangle,

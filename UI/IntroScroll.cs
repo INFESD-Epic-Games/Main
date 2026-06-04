@@ -37,12 +37,12 @@ public class IntroScroll
     private KeyboardState _previousKeyboardState;
 
     private float _scrollY;
-    private float _scrollSpeed = 200f;
+    private float _scrollSpeed = 180f;
     private float _storyRevealTimer;
     private IntroPhase _phase = IntroPhase.Scrolling;
-    private const float StoryTextScale = 5f;
+    private const float StoryTextScale = 2.5f;
     private const float StoryLineSpacingOffset = 10f;
-    private const float HintTextScale = 2.6f;
+    private const float HintTextScale = 1.3f;
     private const int StoryPanelCount = 3;
     private const float PanelRevealSeconds = 1.8f;
     private const float RevealDuration = PanelRevealSeconds * StoryPanelCount;
@@ -71,7 +71,7 @@ public class IntroScroll
 
     public void Load(ContentManager content)
     {
-        _font = content.Load<SpriteFont>("BubbleText");
+        _font = content.Load<SpriteFont>("IntroText");
         _pixel = content.Load<Texture2D>("white");
         _storyTexture = content.Load<Texture2D>("Story");
     }
