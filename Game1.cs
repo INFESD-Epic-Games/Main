@@ -35,11 +35,14 @@ namespace SpellFall
         private Earthbow _earthbow;
         private Poisonbow _poisonbow;
         private KeyboardState _previousKeyboardState;
+        private bool _settingsOpenedFromPause;
+        private Texture2D _pauseOverlayTexture;
 
         private readonly MainMenu _mainMenu = new MainMenu();
         private readonly Settings _settings = new Settings();
         private readonly IntroScroll _introScroll = new IntroScroll();
         private readonly GameOverScreen _gameOverScreen = new GameOverScreen();
+        private readonly PauseMenu _pauseMenu = new PauseMenu();
         GumService GumUI => GumService.Default;
 
         public Game1()
@@ -83,6 +86,7 @@ namespace SpellFall
             _mainMenu.QuitClicked += Exit;
             _mainMenu.SettingsClicked += () =>
             {
+                _settingsOpenedFromPause = false;
                 _mainMenu.IsVisible = false;
                 _settings.IsVisible = true;
             };
@@ -111,7 +115,16 @@ namespace SpellFall
             _settings.ReturnClicked += () =>
             {
                 _settings.IsVisible = false;
-                _mainMenu.IsVisible = true;
+                if (_settingsOpenedFromPause)
+                {
+                    _pauseMenu.IsVisible = true;
+                }
+                else
+                {
+                    _mainMenu.IsVisible = true;
+                }
+
+                _settingsOpenedFromPause = false;
             };
 
             _gameOverScreen.RestartRequested += () =>
@@ -328,6 +341,8 @@ namespace SpellFall
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
+            _pauseOverlayTexture = new Texture2D(GraphicsDevice, 1, 1);
+            _pauseOverlayTexture.SetData(new[] { Color.White });
             _renderManager.Initialize(GraphicsDevice);
             _introScroll.Load(Content);
             _gameOverScreen.Load(Content);
@@ -337,23 +352,47 @@ namespace SpellFall
         protected override void Update(GameTime gameTime)
         {
             KeyboardState currentKeyboard = Keyboard.GetState();
+            bool escapePressed = currentKeyboard.IsKeyDown(Keys.Escape) && !_previousKeyboardState.IsKeyDown(Keys.Escape);
 
             if (GameState.IsPaused)
             {
-                bool ePressed = currentKeyboard.IsKeyDown(Keys.E) && !_previousKeyboardState.IsKeyDown(Keys.E);
+                bool isInteractKeyPressed = (currentKeyboard.IsKeyDown(Keys.E) && !_previousKeyboardState.IsKeyDown(Keys.E)) || 
+                                (currentKeyboard.IsKeyDown(Keys.Space) && !_previousKeyboardState.IsKeyDown(Keys.Space)) || 
+                                (currentKeyboard.IsKeyDown(Keys.Enter) && !_previousKeyboardState.IsKeyDown(Keys.Enter));
 
-                if (ePressed)
+                if (escapePressed)
+                {
+                    if (_settings.IsVisible)
+                    {
+                        _settings.IsVisible = false;
+                        GameState.InPauseMenu = true;
+                        _pauseMenu.IsVisible = true;
+                    }
+                    else
+                    {
+                        GameState.IsPaused = false;
+                        GameState.InPauseMenu = false;
+                        _pauseMenu.IsVisible = false;
+                    }
+                }
+
+                if (isInteractKeyPressed)
                 {
                     _npc?.ContinueDialogue();
                 }
 
+                GumUI.Update(gameTime);
                 _previousKeyboardState = currentKeyboard;
                 base.Update(gameTime);
                 return;
             }
 
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || currentKeyboard.IsKeyDown(Keys.Escape))
-                Exit();
+            if ((GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || escapePressed) && !GameState.InMainMenu)
+                // Exit();
+                PauseGame();
+
+            // if (currentKeyboard.IsKeyDown(Keys.Escape) && !_previousKeyboardState.IsKeyDown(Keys.Escape))
+            //     PauseGame();
 
             if (GameState.InIntro)
             {
@@ -456,6 +495,20 @@ namespace SpellFall
 
             _renderManager.PresentWorld(GraphicsDevice, _spriteBatch);
 
+            if (GameState.IsPaused)
+            {
+                _spriteBatch.Begin();
+                if (GameState.InPauseMenu)
+                {
+                    _spriteBatch.Draw(
+                        _pauseOverlayTexture,
+                        new Rectangle(0, 0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height),
+                        Color.Black * 0.65f
+                    );
+                }
+                _spriteBatch.End();
+            }
+
             GumUI.Draw();
             base.Draw(gameTime);
         }
@@ -468,6 +521,40 @@ namespace SpellFall
         public static GraphicsDeviceManager GetGraphicsDeviceManager()
         {
             return _graphics;
+        }
+
+        private void PauseGame()
+        {
+            GameState.IsPaused = true;
+            GameState.InPauseMenu = true;
+
+            _pauseMenu.CreatePanel(Content);
+            _pauseMenu.ResumeClicked += () =>
+            {
+                GameState.IsPaused = false;
+                GameState.InPauseMenu = false;
+                _pauseMenu.IsVisible = false;
+            };
+            _pauseMenu.MainMenuClicked += () =>
+            {
+                GameState.IsPaused = false;
+                GameState.InPauseMenu = false;
+                GameState.InMainMenu = true;
+                GameState.InIntro = false;
+                MediaPlayer.Stop();
+                _gameManager.ClearWorldState();
+                _pauseMenu.IsVisible = false;
+                _mainMenu.IsVisible = true;
+            };
+            _pauseMenu.SettingsClicked += () =>
+            {
+                _settingsOpenedFromPause = true;
+                GameState.InPauseMenu = true;
+                _pauseMenu.IsVisible = false;
+                _settings.IsVisible = true;
+            };
+            _pauseMenu.QuitClicked += Exit;
+
         }
     }
 }

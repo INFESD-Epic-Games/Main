@@ -66,10 +66,17 @@ public class Settings
         _fullscreenToggle.Click += OnFullscreenChanged;
         _panel.AddChild(_fullscreenToggle);
         
+        var label = new Label();
+        label.Anchor(Anchor.Center);
+        label.X = 0;
+        label.Y = 16 + 48;
+        label.Text = "Volume:";
+        _panel.AddChild(label);
+
         _volumeSlider = new Slider();
         _volumeSlider.Anchor(Anchor.Center);
         _volumeSlider.X = 0;
-        _volumeSlider.Y = 16 + 64;
+        _volumeSlider.Y = 16 + 64 + 10;
         _volumeSlider.Width = 128;
         _volumeSlider.Value = 100;
         _volumeSlider.Minimum = 0;

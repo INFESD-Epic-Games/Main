@@ -46,13 +46,16 @@ public class MainMenu
         const float startX = 16;
         const float spacing = 48;
 
-        _loadGameButton = new FluentButton(buttonTexture)
-            .WithText("Load Game")
-            .WithFont("Test.fnt")
-            .Anchored(Anchor.BottomLeft)
-            .At(startX, -16 - (spacing * 3))
-            .OnClick(() => LoadGameClicked?.Invoke())
-            .AddTo(_panel);
+        ///
+        // The Load Game button is currently disabled, as the save/load system is not yet implemented.
+        ///
+        // _loadGameButton = new FluentButton(buttonTexture)
+        //     .WithText("Load Game")
+        //     .WithFont("Test.fnt")
+        //     .Anchored(Anchor.BottomLeft)
+        //     .At(startX, -16 - (spacing * 3))
+        //     .OnClick(() => LoadGameClicked?.Invoke())
+        //     .AddTo(_panel);
 
         _newGameButton = new FluentButton(buttonTexture)
             .WithText("New Game")
