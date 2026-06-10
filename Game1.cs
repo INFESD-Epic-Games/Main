@@ -425,11 +425,6 @@ namespace SpellFall
                 return;
             }
 
-            if (currentKeyboard.IsKeyDown(Keys.B) && !_previousKeyboardState.IsKeyDown(Keys.B))
-            {
-                (_gameManager.Player ?? _player)?.UnlockAllWeapons();
-            }
-
             HandleWeaponSwitch(currentKeyboard);
 
             GumUI.Update(gameTime);

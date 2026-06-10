@@ -67,6 +67,7 @@ namespace SpellFall.Items
         private float _spinElapsed;
         private float _rewardHoverElapsed;
         private bool _rewardGranted;
+        public bool IsCollected => _rewardGranted;
         private WeaponSpinEntry? _selectedReward;
 
         private readonly float _luck;

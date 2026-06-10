@@ -3,7 +3,6 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using SpellFall.Engine;
-using SpellFall.Items;
 using SpellFall.Weapons.Projectiles;
 using Microsoft.Xna.Framework.Audio;
 
@@ -111,7 +110,7 @@ namespace SpellFall.Enemies
         {
             if (_gameManager.Player != null)
             {
-                _gameManager.AddGameObject(new Loot(_position, _gameManager.Player.Stats.TotalLuck));
+                _gameManager.SpawnLootChest(_position, _gameManager.Player.Stats.TotalLuck);
             }
 
             base.Destroy();

@@ -8,6 +8,7 @@ using SpellFall.Character;
 using SpellFall.Quests;
 using SpellFall.UI;
 using SpellFall.Background;
+using SpellFall.Items;
 using Microsoft.Xna.Framework.Media;
 
 namespace SpellFall.Engine
@@ -355,6 +356,36 @@ namespace SpellFall.Engine
             }
     
             return result;
+        }
+
+        /// <summary>
+        /// Open or activate all gates that belong to the given map.
+        /// If <c>permanent</c> is true the gates will be set permanently open,
+        /// otherwise they will be activated so their normal enemy-based logic applies.
+        /// </summary>
+        public void OpenGatesForMap(Map map, bool permanent = true)
+        {
+            if (map == null) return;
+
+            var gates = GetObjectsOfType<SpellFall.Background.Gate>();
+            foreach (var gate in gates)
+            {
+                if (gate.Room == map)
+                {
+                    if (permanent)
+                        gate.SetPermanentlyOpen(true);
+                    else
+                        gate.Activate();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Spawn a loot chest at the given world position.
+        /// </summary>
+        public void SpawnLootChest(Vector2 position, float luck)
+        {
+            AddGameObject(new Loot(position, luck));
         }
 
     }
