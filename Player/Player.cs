@@ -12,7 +12,6 @@ using Microsoft.Xna.Framework.Audio;
 using SpellFall.Enemies;
 using SpellFall.Background;
 using FlatRedBall.Glue.StateInterpolation;
-using System.Linq;
 
 namespace SpellFall.Character
 {
@@ -88,6 +87,9 @@ namespace SpellFall.Character
 
         public override void HandleInput(InputManager inputManager)
         {
+            UpdateCurrentMapFromPosition();
+            HandleCheatInput(inputManager);
+
             _previousPosition = position;
             _thrustInput = Vector2.Zero;
 
@@ -191,12 +193,7 @@ namespace SpellFall.Character
                 currentFrame = 0;
             }
             
-            Gate gate = _gameManager.GetObjectsOfType<Gate>().FirstOrDefault();
-
-            if (position.X > 2304 && gate != null && gate.IsOpen)
-            {
-                _gameManager.CurrentMap = _gameManager.Maps[1];
-            }
+            UpdateCurrentMapFromPosition();
 
             UpdateCollider();
 
@@ -208,6 +205,27 @@ namespace SpellFall.Character
             CheckFieldOfView();
             
             base.Update(gameTime);
+        }
+
+        private void UpdateCurrentMapFromPosition()
+        {
+            if (_gameManager.Maps.Count == 0)
+            {
+                return;
+            }
+
+            Map selectedMap = _gameManager.Maps[0];
+            float playerX = position.X;
+
+            foreach (Map map in _gameManager.Maps)
+            {
+                if (map.Position.X <= playerX && map.Position.X >= selectedMap.Position.X)
+                {
+                    selectedMap = map;
+                }
+            }
+
+            _gameManager.CurrentMap = selectedMap;
         }
 
         public override void OnCollision(GameObject other)
