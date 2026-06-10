@@ -25,8 +25,7 @@ namespace SpellFall.Enemies
         protected readonly RectangleCollider _rectangleCollider;
         protected readonly int _enemyId;
         protected Vector2 _position;
-        protected Map _map;
-        public Map CurrentMap => _map;
+        public Map CurrentMap {get; private set;}
         public bool IsAlive { get; private set; } = true;
         public int MaxHealthValue { get; }
         protected int CurrentHealth { get; private set; }
@@ -40,7 +39,7 @@ namespace SpellFall.Enemies
         private Color _healthBarTintColor = Color.LimeGreen;
         private float _healthBarTintTimer = 0f;
 
-        protected Enemy(Point startPosition, int maxHealth)
+        public Enemy(Point startPosition, int maxHealth)
         {
             _gameManager = GameManager.GetGameManager();
             _enemyId = _nextEnemyId++;
@@ -50,7 +49,7 @@ namespace SpellFall.Enemies
 
             _rectangleCollider = new RectangleCollider(new Rectangle(startPosition, Point.Zero));
             SetCollider(_rectangleCollider);
-            _map = _gameManager.CurrentMap;
+            CurrentMap = _gameManager.CurrentMap;
             _activeEnemies.Add(this);
         }
 
@@ -89,7 +88,7 @@ namespace SpellFall.Enemies
 
         protected void TryMove(Vector2 velocity, int width, int height)
         {
-            if (_map == null)
+            if (CurrentMap == null)
             {
                 _position += velocity;
                 return;
@@ -98,7 +97,7 @@ namespace SpellFall.Enemies
             Vector2 halfOffset = new Vector2(width / 2f, height / 2f);
 
             Vector2 newPos = _position + velocity;
-            if (!_map.IsColliding(newPos - halfOffset, width, height))
+            if (!CurrentMap.IsColliding(newPos - halfOffset, width, height))
             {
                 _position = newPos;
                 UpdateCollider();
@@ -106,13 +105,13 @@ namespace SpellFall.Enemies
             }
 
             Vector2 newPosX = new Vector2(_position.X + velocity.X, _position.Y);
-            if (!_map.IsColliding(newPosX - halfOffset, width, height))
+            if (!CurrentMap.IsColliding(newPosX - halfOffset, width, height))
             {
                 _position = newPosX;
             }
 
             Vector2 newPosY = new Vector2(_position.X, _position.Y + velocity.Y);
-            if (!_map.IsColliding(newPosY - halfOffset, width, height))
+            if (!CurrentMap.IsColliding(newPosY - halfOffset, width, height))
             {
                 _position = newPosY;
             }
@@ -380,6 +379,10 @@ namespace SpellFall.Enemies
             }
 
             UpdateCollider();
+        }
+        public void SetMap(Map map)
+        {
+            CurrentMap = map ?? _gameManager.CurrentMap;
         }
     }
 }

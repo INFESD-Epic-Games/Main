@@ -15,6 +15,9 @@ namespace SpellFall.Background
         private const int _tileSize = 32;
         private const int _renderScale = 4;
         private const int _screenTileSize = _tileSize * _renderScale;
+        public bool EncounterStarted { get; private set; }
+        public bool EncounterCleared { get; private set; }
+        public bool PlayerEntered { get; private set; }
 
         private int[,] _collision;
 
@@ -191,6 +194,26 @@ namespace SpellFall.Background
             }
 
             return null;
+        }
+        public void StartEncounter()
+        {
+            EncounterStarted = true;
+            EncounterCleared = false;
+        }
+
+        public void CompleteEncounter()
+        {
+            EncounterCleared = true;
+        }
+
+        public void PlayerEnteredRoom()
+        {
+            if (PlayerEntered)
+                return;
+
+            PlayerEntered = true;
+
+            StartEncounter();
         }
 
         public bool IsColliding(Vector2 position, int width, int height)

@@ -195,32 +195,44 @@ namespace SpellFall
             _npc = new Npc(npcPosition);
             _npc.Initialize(_gameManager.QuestManager, () =>
             {
-                Point projectileEnemyPosition = new Point(
-                _player.GetPosition().Center.X + 300,
-                _player.GetPosition().Center.Y - 100
-                );
-                _gameManager.AddGameObject(new Goblin(projectileEnemyPosition));
+                Map currentRoom = _gameManager.CurrentMap;
 
-                Point bishopPosition = new Point(
-                    _player.GetPosition().Center.X + 500,
-                    _player.GetPosition().Center.Y + 100
-                );
-                _gameManager.AddGameObject(new Bishop(bishopPosition));
-
-                _gameManager.AddGameObject(new WeepingAngel(new Point(
-                    _player.GetPosition().Center.X + 200,
-                    _player.GetPosition().Center.Y + 100
-                )));
-                _gameManager.AddGameObject(new Eye(new Point(
-                    _player.GetPosition().Center.X + 200,
-                    _player.GetPosition().Center.Y + 150
-                )));
-
-                Point enemyPosition = new Point(
+                Point basePos = new Point(
                     _player.GetPosition().Center.X + 300,
-                    _player.GetPosition().Center.Y - 100
+                    _player.GetPosition().Center.Y
                 );
-                _gameManager.AddGameObject(new Ghost(enemyPosition));
+
+                void SpawnEnemy(GameObject enemy)
+                {
+                    if (enemy is Enemy e)
+                    {
+                        e.SetMap(currentRoom);
+                        
+                    }
+                    _gameManager.AddGameObject(enemy);
+                }
+
+                SpawnEnemy(new Goblin(new Point(basePos.X, basePos.Y - 100)));
+
+                SpawnEnemy(new Bishop(new Point(
+                    basePos.X + 200,
+                    basePos.Y + 100
+                )));
+
+                SpawnEnemy(new WeepingAngel(new Point(
+                    basePos.X - 100,
+                    basePos.Y + 100
+                )));
+
+                SpawnEnemy(new Eye(new Point(
+                    basePos.X - 100,
+                    basePos.Y + 150
+                )));
+
+                SpawnEnemy(new Ghost(new Point(
+                    basePos.X + 300,
+                    basePos.Y - 100
+                )));
             });
             _npc.SetPlayerHealthBar(_player.HealthBar);
 

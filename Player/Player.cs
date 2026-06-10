@@ -191,11 +191,31 @@ namespace SpellFall.Character
                 currentFrame = 0;
             }
             
-            Gate gate = _gameManager.GetObjectsOfType<Gate>().FirstOrDefault();
+           var gates = _gameManager.GetObjectsOfType<Gate>().ToList();
 
-            if (position.X > 2304 && gate != null && gate.IsOpen)
+            Gate gate1 = gates[0];
+            Gate gate2 = gates[1];
+
+            if (position.X > 2304 && gate1.IsOpen)
             {
                 _gameManager.CurrentMap = _gameManager.Maps[1];
+            }
+            if (position.X > 4608 && gate2.IsOpen)
+            {
+                _gameManager.CurrentMap = _gameManager.Maps[2];
+            }
+
+            if (position.X < 2304)
+            {
+                _gameManager.CurrentMap = _gameManager.Maps[0];
+            }
+            else if (position.X < 4608)
+            {
+                _gameManager.CurrentMap = _gameManager.Maps[1];
+            }
+            else
+            {
+                _gameManager.CurrentMap = _gameManager.Maps[2];
             }
 
             UpdateCollider();

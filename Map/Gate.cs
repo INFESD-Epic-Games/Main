@@ -47,11 +47,19 @@ namespace SpellFall.Background
         public override void Update(GameTime gameTime)
         {
             var enemiesInRoom = Enemy.GetActiveEnemies()
-                .Where(e => e.IsAlive &&
-                            e.CurrentMap == _room);
+                .Where(e =>
+                    e.IsAlive &&
+                    e.CurrentMap == _room);
 
+            if (_room.EncounterStarted)
+            {
+                if (!enemiesInRoom.Any())
+                {
+                    _room.CompleteEncounter();
+                }
+            }
 
-            IsOpen = !enemiesInRoom.Any();
+            IsOpen = _room.EncounterCleared;
 
             base.Update(gameTime);
         }

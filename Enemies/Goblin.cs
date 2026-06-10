@@ -56,16 +56,11 @@ namespace SpellFall.Enemies
                 FireProjectile();
             }
 
-            if (_map == null)
-            {
-                _map = _gameManager.CurrentMap;
-            }
-
             Vector2 playerPosition = _gameManager.Player.GetPosition().Center.ToVector2();
             Vector2 directionToPlayer = playerPosition - _position;
             float distanceToPlayer = directionToPlayer.Length();
 
-            if (_map == null || distanceToPlayer <= StopDistance)
+            if (CurrentMap == null || distanceToPlayer <= StopDistance)
             {
                 UpdateCollider();
                 base.Update(gameTime);
@@ -74,8 +69,8 @@ namespace SpellFall.Enemies
 
             _pathRecalcTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-            Point playerTile = _map.WorldToTile(playerPosition);
-            Point myTile = _map.WorldToTile(_position);
+            Point playerTile = CurrentMap.WorldToTile(playerPosition);
+            Point myTile = CurrentMap.WorldToTile(_position);
             HashSet<Point> blockedTiles = new HashSet<Point>();
 
             foreach (Enemy enemy in Enemy.GetActiveEnemies())
@@ -85,12 +80,12 @@ namespace SpellFall.Enemies
                     continue;
                 }
 
-                blockedTiles.Add(_map.WorldToTile(enemy.GetPosition()));
+                blockedTiles.Add(CurrentMap.WorldToTile(enemy.GetPosition()));
             }
 
             if (_path == null || _pathIndex >= (_path?.Count ?? 0) || _pathRecalcTimer <= 0f || !playerTile.Equals(_lastTargetTile))
             {
-                _path = _map.FindPath(myTile, playerTile, blockedTiles);
+                _path = CurrentMap.FindPath(myTile, playerTile, blockedTiles);
                 _pathIndex = 0;
                 _pathRecalcTimer = 0.2f;
                 _lastTargetTile = playerTile;
@@ -101,7 +96,7 @@ namespace SpellFall.Enemies
 
             if (_path != null && _path.Count > 0 && _pathIndex < _path.Count)
             {
-                Vector2 targetWorld = _map.TileToWorldCenter(_path[_pathIndex]);
+                Vector2 targetWorld = CurrentMap.TileToWorldCenter(_path[_pathIndex]);
                 Vector2 directionToTarget = targetWorld - _position;
                 float dist = directionToTarget.Length();
                 if (dist < 4f)
