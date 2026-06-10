@@ -50,12 +50,6 @@ namespace SpellFall.Background
 
         public override void Update(GameTime gameTime)
         {
-            if (!GameManager.GetGameManager().QuestManager.HasActiveQuest("Main Quest"))
-            {
-                IsOpen = false;
-                return;
-            }
-
             var enemiesInRoom = Enemy.GetActiveEnemies()
                 .Where(e => e.IsAlive &&
                             e.CurrentMap == _room);
