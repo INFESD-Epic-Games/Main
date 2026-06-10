@@ -54,6 +54,8 @@ namespace SpellFall.Character
 
         public float DashCooldownPercentage => _dashTimer / _dashCooldown;
 
+        public WeaponBase EquippedWeapon => _equippedWeapon;
+
         public Player(Point Position)
         {
             _gameManager = GameManager.GetGameManager();
@@ -260,7 +262,7 @@ namespace SpellFall.Character
 
         public void EquipWeapon(WeaponBase weapon)
         {
-            if (weapon == null)
+            if (weapon == null || weapon == _equippedWeapon)
             {
                 return;
             }
