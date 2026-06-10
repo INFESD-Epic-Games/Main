@@ -280,6 +280,7 @@ namespace SpellFall.Engine
 
         private void ResetWorldState()
         {
+            SpellFall.Enemies.Enemy.ResetActiveEnemies();
             _gameObjects.Clear();
             _toBeRemoved.Clear();
             _toBeAdded.Clear();

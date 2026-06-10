@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
@@ -18,7 +17,6 @@ namespace SpellFall.Enemies
         private Texture2D _texture;
         private SoundEffect _enemyDeathSFX;
         private Texture2D _healthBarTexture;
-        private static readonly HashSet<Bishop> _activeBishops = new HashSet<Bishop>();
 
         public Bishop(Point startPosition) : base(startPosition, MaxHealth)
         {
@@ -32,7 +30,6 @@ namespace SpellFall.Enemies
             _enemyDeathSFX = content.Load<SoundEffect>("Enemy Death");
             _texture = content.Load<Texture2D>("bishop");
             UpdateCollider();
-            _activeBishops.Add(this);
             base.Load(content);
         }
 
@@ -44,7 +41,6 @@ namespace SpellFall.Enemies
 
         public override void Destroy()
         {
-            _activeBishops.Remove(this);
             base.Destroy();
         }
 
@@ -85,9 +81,9 @@ namespace SpellFall.Enemies
 
         public static bool TryProtectEnemy(Enemy ally)
         {
-            foreach (Bishop bishop in _activeBishops)
+            foreach (Enemy enemy in Enemy.GetActiveEnemies())
             {
-                if (bishop.ProtectAlly(ally))
+                if (enemy is Bishop bishop && bishop.ProtectAlly(ally))
                 {
                     return true;
                 }
