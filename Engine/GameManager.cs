@@ -16,7 +16,7 @@ namespace SpellFall.Engine
     public class GameManager
     {
         private static GameManager gameManager;
-        
+
         private List<GameObject> _gameObjects;
         private List<GameObject> _toBeRemoved;
         private List<GameObject> _toBeAdded;
@@ -42,7 +42,7 @@ namespace SpellFall.Engine
 
         public static GameManager GetGameManager()
         {
-            if(gameManager == null)
+            if (gameManager == null)
                 gameManager = new GameManager();
             return gameManager;
         }
@@ -97,7 +97,7 @@ namespace SpellFall.Engine
             // Checks once for every pair of 2 GameObjects if the collide.
             for (int i = 0; i < _gameObjects.Count; i++)
             {
-                for (int j = i+1; j < _gameObjects.Count; j++)
+                for (int j = i + 1; j < _gameObjects.Count; j++)
                 {
                     if (_gameObjects[i].CheckCollision(_gameObjects[j]))
                     {
@@ -106,15 +106,15 @@ namespace SpellFall.Engine
                     }
                 }
             }
-            
+
         }
-        
+
         public void Update(GameTime gameTime)
         {
             if (GameState.InMainMenu) return;
             if (GameState.IsPaused) return;
             if (GameState.InGameOver) return;
-            
+
             InputManager.Update();
 
             // Handle input
@@ -151,23 +151,23 @@ namespace SpellFall.Engine
             int viewWidth = RenderManager.VirtualWidth;
             int viewHeight = RenderManager.VirtualHeight;
 
-            foreach(GameObject obj in _gameObjects)
-            {
-                if (obj is SpellFall.Enemies.Enemy enemy)
-                {
-                    Vector2 screenPos = Vector2.Transform(
-                        enemy.GetPosition(),
-                        Camera.Transform
-                    );
+            // foreach(GameObject obj in _gameObjects)
+            // {
+            //     if (obj is SpellFall.Enemies.Enemy enemy)
+            //     {
+            //         Vector2 screenPos = Vector2.Transform(
+            //             enemy.GetPosition(),
+            //             Camera.Transform
+            //         );
 
-                    if (screenPos.X >= 0 && screenPos.X <= viewWidth &&
-                        screenPos.Y >= 0 && screenPos.Y <= viewHeight)
-                    {
-                        enemyOnScreen = true;
-                        break;
-                    }
-                }
-            }
+            //         if (screenPos.X >= 0 && screenPos.X <= viewWidth &&
+            //             screenPos.Y >= 0 && screenPos.Y <= viewHeight)
+            //         {
+            //             enemyOnScreen = true;
+            //             break;
+            //         }
+            //     }
+            // }
 
             if (!enemyOnScreen && !_isOverWorldMusicPlaying)
             {
@@ -175,8 +175,8 @@ namespace SpellFall.Engine
                 MediaPlayer.IsRepeating = true;
                 _isOverWorldMusicPlaying = true;
             }
-            
-            
+
+
             else if (enemyOnScreen && !_isBattleMusicPlaying)
             {
                 MediaPlayer.Play(_battleMusic);
@@ -189,7 +189,7 @@ namespace SpellFall.Engine
             {
                 _battleMusicTimer = TimeSpan.Zero;
             }
-            
+
             else if (!enemyOnScreen && _isBattleMusicPlaying)
             {
                 if (_battleMusicTimer > _battleMusicBufferTime)
@@ -208,7 +208,7 @@ namespace SpellFall.Engine
 
         }
 
-        public void Draw(GameTime gameTime, SpriteBatch spriteBatch) 
+        public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
             spriteBatch.Begin(transformMatrix: Camera.Transform);
 
@@ -346,7 +346,7 @@ namespace SpellFall.Engine
         public List<T> GetObjectsOfType<T>() where T : class
         {
             List<T> result = new List<T>();
-    
+
             foreach (var o in _gameObjects)
             {
                 if (o is T matchedObject)
@@ -354,7 +354,7 @@ namespace SpellFall.Engine
                     result.Add(matchedObject);
                 }
             }
-    
+
             return result;
         }
 

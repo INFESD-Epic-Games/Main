@@ -268,13 +268,13 @@ namespace SpellFall
 
             Map map2 = new Map(
                 "map (1)",
-                new Vector2(2304,0),
+                new Vector2(2304, 0),
                 map2Collision
             );
 
             Map map3 = new Map(
                 "map (2)",
-                new Vector2(4608,0),
+                new Vector2(4608, 0),
                 map3Collision
             );
 
@@ -296,15 +296,15 @@ namespace SpellFall
                 ),
                 map1
             );
-             Gate roomGate2 = new Gate(
-                new Rectangle(
-                    4400,
-                    820,
-                    128,
-                    256
-                ),
-                map2
-            );
+            Gate roomGate2 = new Gate(
+               new Rectangle(
+                   4400,
+                   820,
+                   128,
+                   256
+               ),
+               map2
+           );
 
             _gameManager.AddGameObject(roomGate);
             _gameManager.AddGameObject(roomGate2);
@@ -338,8 +338,8 @@ namespace SpellFall
 
             if (GameState.IsPaused)
             {
-                bool isInteractKeyPressed = (currentKeyboard.IsKeyDown(Keys.E) && !_previousKeyboardState.IsKeyDown(Keys.E)) || 
-                                (currentKeyboard.IsKeyDown(Keys.Space) && !_previousKeyboardState.IsKeyDown(Keys.Space)) || 
+                bool isInteractKeyPressed = (currentKeyboard.IsKeyDown(Keys.E) && !_previousKeyboardState.IsKeyDown(Keys.E)) ||
+                                (currentKeyboard.IsKeyDown(Keys.Space) && !_previousKeyboardState.IsKeyDown(Keys.Space)) ||
                                 (currentKeyboard.IsKeyDown(Keys.Enter) && !_previousKeyboardState.IsKeyDown(Keys.Enter));
 
                 if (escapePressed)
