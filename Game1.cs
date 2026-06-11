@@ -197,32 +197,7 @@ namespace SpellFall
             _npc = new Npc(npcPosition);
             _npc.Initialize(_gameManager.QuestManager, () =>
             {
-                Point projectileEnemyPosition = new Point(
-                _player.GetPosition().Center.X + 300,
-                _player.GetPosition().Center.Y - 100
-                );
-                _gameManager.AddGameObject(new Goblin(projectileEnemyPosition));
-
-                Point bishopPosition = new Point(
-                    _player.GetPosition().Center.X + 500,
-                    _player.GetPosition().Center.Y + 100
-                );
-                _gameManager.AddGameObject(new Bishop(bishopPosition));
-
-                _gameManager.AddGameObject(new WeepingAngel(new Point(
-                    _player.GetPosition().Center.X + 200,
-                    _player.GetPosition().Center.Y + 100
-                )));
-                _gameManager.AddGameObject(new Eye(new Point(
-                    _player.GetPosition().Center.X + 200,
-                    _player.GetPosition().Center.Y + 150
-                )));
-
-                Point enemyPosition = new Point(
-                    _player.GetPosition().Center.X + 300,
-                    _player.GetPosition().Center.Y - 100
-                );
-                _gameManager.AddGameObject(new Ghost(enemyPosition));
+                EnemyRoomSpawn.SpawnEnemiesForRoom(_gameManager.CurrentMap, 1);
             });
             _npc.SetPlayerHealthBar(_player.HealthBar);
 
