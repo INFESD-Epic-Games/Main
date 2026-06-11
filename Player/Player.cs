@@ -227,6 +227,11 @@ namespace SpellFall.Character
                 }
             }
 
+            if (_gameManager.CurrentMap != selectedMap)
+            {
+                _gameManager.OpenGatesForMap(selectedMap);
+            }
+
             _gameManager.CurrentMap = selectedMap;
         }
 

@@ -380,6 +380,20 @@ namespace SpellFall.Engine
             }
         }
 
+        public void CloseGatesForMap(Map map)
+        {
+            if (map == null) return;
+
+            var gates = GetObjectsOfType<SpellFall.Background.Gate>();
+            foreach (var gate in gates)
+            {
+                if (gate.Room == map)
+                {
+                    gate.Deactivate();
+                }
+            }
+        }
+
         /// <summary>
         /// Spawn a loot chest at the given world position.
         /// </summary>
