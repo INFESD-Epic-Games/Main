@@ -44,6 +44,7 @@ namespace SpellFall
         private readonly IntroScroll _introScroll = new IntroScroll();
         private readonly GameOverScreen _gameOverScreen = new GameOverScreen();
         private readonly PauseMenu _pauseMenu = new PauseMenu();
+        private Inventory _inventory;
         GumService GumUI => GumService.Default;
 
         public Game1()
@@ -171,11 +172,12 @@ namespace SpellFall
                 )
             );
             _gameManager.Initialize(Content, this, _player);
-            StartingWeapon startingWeapon = new StartingWeapon();
-            _player.EquipWeapon(startingWeapon);
+            _inventory = new Inventory(_player);
+            _inventory.Load(Content, GraphicsDevice);
+            _startingWeapon = new StartingWeapon();
+            _player.EquipWeapon(_startingWeapon);
             // _player = new Player(new Point(RenderManager.VirtualWidth / 2 - 100, RenderManager.VirtualHeight / 2 - 100));
             _gameManager.Initialize(Content, this, _player);
-            _startingWeapon = new StartingWeapon();
             _lbow = new Lbow();
             _firebow = new Firebow();
             _icebow = new Icebow();
@@ -423,15 +425,11 @@ namespace SpellFall
                 return;
             }
 
-            if (currentKeyboard.IsKeyDown(Keys.B) && !_previousKeyboardState.IsKeyDown(Keys.B))
-            {
-                (_gameManager.Player ?? _player)?.UnlockAllWeapons();
-            }
-
             HandleWeaponSwitch(currentKeyboard);
 
             GumUI.Update(gameTime);
             _gameManager.Update(gameTime);
+            _inventory?.Update(Mouse.GetState(), GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
 
             if (_gameManager.Player?.HealthBar.currentHealth <= 0 && !GameState.InMainMenu)
             {
@@ -499,6 +497,13 @@ namespace SpellFall
             }
 
             _renderManager.PresentWorld(GraphicsDevice, _spriteBatch);
+
+            if (!GameState.InIntro && !GameState.InMainMenu && !GameState.IsPaused && !GameState.InGameOver)
+            {
+                _spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+                _inventory?.Draw(_spriteBatch);
+                _spriteBatch.End();
+            }
 
             if (GameState.IsPaused)
             {

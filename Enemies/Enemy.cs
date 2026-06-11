@@ -59,6 +59,11 @@ namespace SpellFall.Enemies
             return _activeEnemies;
         }
 
+        public static void ResetActiveEnemies()
+        {
+            _activeEnemies.Clear();
+        }
+
         public static Enemy GetClosestEnemy(Vector2 position, ISet<Enemy> excludedEnemies = null)
         {
             Enemy closestEnemy = null;

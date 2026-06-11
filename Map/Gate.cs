@@ -3,7 +3,6 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using SpellFall.Engine;
 using SpellFall.Enemies;
-using SpellFall.Character;
 using System.Linq;
 
 namespace SpellFall.Background
@@ -17,6 +16,11 @@ namespace SpellFall.Background
         public bool IsOpen;
 
         private Map _room;
+        public Map Room => _room;
+        private bool _permanentlyOpen = false;
+        private bool _activated = false;
+
+        public bool PermanentlyOpen => _permanentlyOpen;
 
         public Gate(Rectangle bounds, Map room)
         {
@@ -46,14 +50,74 @@ namespace SpellFall.Background
 
         public override void Update(GameTime gameTime)
         {
+            if (!GameManager.GetGameManager().QuestManager.HasActiveQuest("Main Quest"))
+            {
+                IsOpen = false;
+                return;
+            }
+
             var enemiesInRoom = Enemy.GetActiveEnemies()
                 .Where(e => e.IsAlive &&
                             e.CurrentMap == _room);
 
+            // If enemies are present, ensure the gate is activated so it can open when cleared.
+            if (enemiesInRoom.Any())
+            {
+                _activated = true;
+            }
 
-            IsOpen = !enemiesInRoom.Any();
+            if (_permanentlyOpen)
+            {
+                IsOpen = true;
+                base.Update(gameTime);
+                return;
+            }
+
+            // If the gate hasn't been activated yet, keep it closed by default.
+            if (!_activated)
+            {
+                IsOpen = false;
+                base.Update(gameTime);
+                return;
+            }
+
+            // Default behaviour: closed if any enemies in the room, otherwise open.
+            if (enemiesInRoom.Any())
+            {
+                IsOpen = false;
+            }
+            else
+            {
+                IsOpen = true;
+            }
 
             base.Update(gameTime);
+        }
+
+        public void Open()
+        {
+            IsOpen = true;
+        }
+
+        public void Close()
+        {
+            IsOpen = false;
+        }
+
+        public void SetPermanentlyOpen(bool value)
+        {
+            _permanentlyOpen = value;
+            if (value) IsOpen = true;
+        }
+
+        public void Activate()
+        {
+            _activated = true;
+        }
+
+        public void Deactivate()
+        {
+            _activated = false;
         }
         public override void Draw(
             GameTime gameTime,

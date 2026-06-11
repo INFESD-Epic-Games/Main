@@ -21,7 +21,7 @@ namespace SpellFall.Engine
         {
             int backBufferWidth = graphicsDevice.PresentationParameters.BackBufferWidth;
             int backBufferHeight = graphicsDevice.PresentationParameters.BackBufferHeight;
-            float scale = System.Math.Max(backBufferWidth / (float)VirtualWidth, backBufferHeight / (float)VirtualHeight);
+            float scale = System.Math.Min(backBufferWidth / (float)VirtualWidth, backBufferHeight / (float)VirtualHeight);
 
             int drawWidth = (int)(VirtualWidth * scale);
             int drawHeight = (int)(VirtualHeight * scale);

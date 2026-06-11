@@ -28,7 +28,7 @@ namespace SpellFall.Items
             if (_hadAnyEnemyLastFrame && !hasAnyEnemy && !HasActiveChest())
             {
                 Vector2 chestPosition = _gameManager.Player.GetPosition().Center.ToVector2() + new Vector2(0f, -96f);
-                _gameManager.AddGameObject(new Loot(chestPosition, _gameManager.Player.Stats.TotalLuck));
+                _gameManager.SpawnLootChest(chestPosition, _gameManager.Player.Stats.TotalLuck);
             }
 
             _hadAnyEnemyLastFrame = hasAnyEnemy;
