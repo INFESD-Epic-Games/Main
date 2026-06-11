@@ -197,32 +197,39 @@ namespace SpellFall
             _npc = new Npc(npcPosition);
             _npc.Initialize(_gameManager.QuestManager, () =>
             {
-                Point projectileEnemyPosition = new Point(
-                _player.GetPosition().Center.X + 300,
-                _player.GetPosition().Center.Y - 100
-                );
-                _gameManager.AddGameObject(new Goblin(projectileEnemyPosition));
+                // Point projectileEnemyPosition = new Point(
+                // _player.GetPosition().Center.X + 300,
+                // _player.GetPosition().Center.Y - 400
+                // );
+                // _gameManager.AddGameObject(new Goblin(projectileEnemyPosition));
 
-                Point bishopPosition = new Point(
-                    _player.GetPosition().Center.X + 500,
-                    _player.GetPosition().Center.Y + 100
-                );
-                _gameManager.AddGameObject(new Bishop(bishopPosition));
+                // Point bishopPosition = new Point(
+                //     _player.GetPosition().Center.X + 500,
+                //     _player.GetPosition().Center.Y + 100
+                // );
+                // _gameManager.AddGameObject(new Bishop(bishopPosition));
 
-                _gameManager.AddGameObject(new WeepingAngel(new Point(
-                    _player.GetPosition().Center.X + 200,
-                    _player.GetPosition().Center.Y + 100
-                )));
-                _gameManager.AddGameObject(new Eye(new Point(
-                    _player.GetPosition().Center.X + 200,
-                    _player.GetPosition().Center.Y + 150
-                )));
+                // _gameManager.AddGameObject(new WeepingAngel(new Point(
+                //     _player.GetPosition().Center.X + 200,
+                //     _player.GetPosition().Center.Y + 100
+                // )));
+                // _gameManager.AddGameObject(new Eye(new Point(
+                //     _player.GetPosition().Center.X + 200,
+                //     _player.GetPosition().Center.Y + 150
+                // )));
 
                 Point enemyPosition = new Point(
                     _player.GetPosition().Center.X + 300,
-                    _player.GetPosition().Center.Y - 100
+                    _player.GetPosition().Center.Y + 500
                 );
+
                 _gameManager.AddGameObject(new Ghost(enemyPosition));
+                _gameManager.AddGameObject(new Ghost(enemyPosition));
+                _gameManager.AddGameObject(new Ghost(enemyPosition));
+                _gameManager.AddGameObject(new AlienSpawner(new Point(
+                    _player.GetPosition().Center.X + 500,
+                    _player.GetPosition().Center.Y + 600
+                )));
             });
             _npc.SetPlayerHealthBar(_player.HealthBar);
 
@@ -293,13 +300,13 @@ namespace SpellFall
 
             Map map2 = new Map(
                 "map (1)",
-                new Vector2(2304,0),
+                new Vector2(2304, 0),
                 map2Collision
             );
 
             Map map3 = new Map(
                 "map (2)",
-                new Vector2(4608,0),
+                new Vector2(4608, 0),
                 map3Collision
             );
 
@@ -321,15 +328,15 @@ namespace SpellFall
                 ),
                 map1
             );
-             Gate roomGate2 = new Gate(
-                new Rectangle(
-                    4400,
-                    820,
-                    128,
-                    256
-                ),
-                map2
-            );
+            Gate roomGate2 = new Gate(
+               new Rectangle(
+                   4400,
+                   820,
+                   128,
+                   256
+               ),
+               map2
+           );
 
             _gameManager.AddGameObject(roomGate);
             _gameManager.AddGameObject(roomGate2);
@@ -363,8 +370,8 @@ namespace SpellFall
 
             if (GameState.IsPaused)
             {
-                bool isInteractKeyPressed = (currentKeyboard.IsKeyDown(Keys.E) && !_previousKeyboardState.IsKeyDown(Keys.E)) || 
-                                (currentKeyboard.IsKeyDown(Keys.Space) && !_previousKeyboardState.IsKeyDown(Keys.Space)) || 
+                bool isInteractKeyPressed = (currentKeyboard.IsKeyDown(Keys.E) && !_previousKeyboardState.IsKeyDown(Keys.E)) ||
+                                (currentKeyboard.IsKeyDown(Keys.Space) && !_previousKeyboardState.IsKeyDown(Keys.Space)) ||
                                 (currentKeyboard.IsKeyDown(Keys.Enter) && !_previousKeyboardState.IsKeyDown(Keys.Enter));
 
                 if (escapePressed)
