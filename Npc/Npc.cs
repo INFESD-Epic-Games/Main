@@ -38,6 +38,7 @@ namespace SpellFall.Npcs
         private bool hasGivenQuest = false;
         private bool questCompletedRewardGiven = false;
         private bool dialogueActive = false;
+        private bool _isFinalSpawnPlaced = false;
         private bool endDialogueActive = false;
         private int dialogueStage = 0;
         private int endDialogueStage = 0;
@@ -106,7 +107,7 @@ namespace SpellFall.Npcs
                 return;
             }
             
-            if (GameManager.GetGameManager().GetObjectsOfType<Enemy>().Count == 0 && GameManager.GetGameManager().CurrentMap == GameManager.GetGameManager().Maps[2])
+            if (!_isFinalSpawnPlaced && GameManager.GetGameManager().GetObjectsOfType<Enemy>().Count == 0 && GameManager.GetGameManager().CurrentMap == GameManager.GetGameManager().Maps[2])
             {
                 var room = GameManager.GetGameManager().CurrentMap;
                 quest.IsCompleted = true;
@@ -126,6 +127,8 @@ namespace SpellFall.Npcs
                 rectangleCollider.shape = new Rectangle(
                     (position - new Vector2(w / 2f, h / 2f)).ToPoint(),
                     new Point(w, h));
+
+                _isFinalSpawnPlaced = true;
             }
 
             bool npcVisible = !hasGivenQuest || quest.IsCompleted;
