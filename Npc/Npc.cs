@@ -40,6 +40,7 @@ namespace SpellFall.Npcs
         private bool dialogueActive = false;
         private bool _isFinalSpawnPlaced = false;
         private bool endDialogueActive = false;
+        private bool questOver = false;
         private int dialogueStage = 0;
         private int endDialogueStage = 0;
 
@@ -183,7 +184,7 @@ namespace SpellFall.Npcs
                 0f
             );
 
-            if (!hasGivenQuest || quest.IsCompleted)
+            if (!hasGivenQuest || (quest.IsCompleted && !questOver))
             {
                 _indicatorPosition = position + new Vector2(0, -150);
 
@@ -289,6 +290,7 @@ namespace SpellFall.Npcs
                 endDialogueStage = 0;
                 textBubble.Hide();
                 GameState.IsPaused = false;
+                questOver = true;
                 return;
             }
 
