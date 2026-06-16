@@ -96,7 +96,8 @@ namespace SpellFall.UI
                 Vector2 slotPos = _position + new Vector2(i * (SlotSize + SlotSpacing), 0);
                 WeaponBase weapon = _player.GetOwnedWeaponAtSlot(i + 1);
 
-                DrawSlot(spriteBatch, slotPos, weapon, i == _hoveredSlot);
+                // Pass i + 1 for the 1-based slot number
+                DrawSlot(spriteBatch, slotPos, weapon, i == _hoveredSlot, i + 1);
             }
 
             if (_hoveredSlot >= 0)
@@ -105,7 +106,7 @@ namespace SpellFall.UI
             }
         }
 
-        private void DrawSlot(SpriteBatch spriteBatch, Vector2 position, WeaponBase weapon, bool isHovered)
+        private void DrawSlot(SpriteBatch spriteBatch, Vector2 position, WeaponBase weapon, bool isHovered, int slotNumber)
         {
             Color slotColor = Color.White;
             if (isHovered)
@@ -142,14 +143,17 @@ namespace SpellFall.UI
                 bool isEquipped = weapon == _player.EquippedWeapon;
                 if (isEquipped)
                 {
-                    DrawEquippedIndicator(spriteBatch, position);
+                    DrawEquippedIndicator(spriteBatch, position, slotNumber);
                 }
             }
+
+            // Draw the slot number
+            spriteBatch.DrawString(_tooltipFont, slotNumber.ToString(), position + new Vector2(5, 5), Color.White);
         }
 
-        private void DrawEquippedIndicator(SpriteBatch spriteBatch, Vector2 position)
+        private void DrawEquippedIndicator(SpriteBatch spriteBatch, Vector2 position, int slotNumber)
         {
-            Vector2 indicatorPos = position + new Vector2(SlotSize - 15, 5);
+            Vector2 indicatorPos = position + new Vector2(SlotSize - 15, 5 + _tooltipFont.MeasureString(slotNumber.ToString()).Y);
             spriteBatch.DrawString(_tooltipFont, "E", indicatorPos, Color.Gold);
         }
 

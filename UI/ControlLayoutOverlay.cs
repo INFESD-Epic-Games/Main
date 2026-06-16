@@ -11,7 +11,7 @@ namespace SpellFall.UI
         private static readonly Vector2 WorldPosition = new Vector2(220f, 640f);
 
         private Texture2D _texture;
-        private Texture2D _textureInventory;
+        // private Texture2D _textureInventory;
         private Vector2 position = new Vector2(2600, 600); 
 
         private float scale = 8;
@@ -21,7 +21,7 @@ namespace SpellFall.UI
         public override void Load(ContentManager content)
         {
             _texture = content.Load<Texture2D>("Control_layout");
-            _textureInventory = content.Load<Texture2D>("inventory tut");
+            // _textureInventory = content.Load<Texture2D>("inventory tut");
             base.Load(content);
         }
 
@@ -32,22 +32,12 @@ namespace SpellFall.UI
                 return;
             }
             spriteBatch.Draw(_texture, 
-                            WorldPosition, 
-                            null,
-                            Color.White * opacity,
-                            0f,
-                            Vector2.Zero,
-                            scale2,
-                            SpriteEffects.None,
-                            0f);
-            spriteBatch.Draw(
-                _textureInventory,
-                position,
+                WorldPosition, 
                 null,
-                Color.White,
+                Color.White * opacity,
                 0f,
                 Vector2.Zero,
-                scale,
+                scale2,
                 SpriteEffects.None,
                 0f
             );
