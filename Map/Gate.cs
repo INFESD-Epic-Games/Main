@@ -138,7 +138,7 @@ namespace SpellFall.Background
                     _textureground,
                     new Rectangle(
                         Bounds.X + 64 + i * tileSize,
-                        Bounds.Y - 12 + Bounds.Height / 2,
+                        Bounds.Y - 30 + Bounds.Height / 2,
                         tileSize,
                         tileSize
                     ),
