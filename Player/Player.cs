@@ -89,7 +89,6 @@ namespace SpellFall.Character
 
         public override void HandleInput(InputManager inputManager)
         {
-            UpdateCurrentMapFromPosition();
             HandleCheatInput(inputManager);
 
             _previousPosition = position;
@@ -225,6 +224,16 @@ namespace SpellFall.Character
                 {
                     selectedMap = map;
                 }
+            }
+
+            if (_gameManager.CurrentMap != selectedMap)
+            {
+                Map previousMap = _gameManager.CurrentMap;
+
+                _gameManager.CloseGatesForMap(previousMap);
+                _gameManager.CurrentMap = selectedMap;
+                int roomNumber = _gameManager.Maps.IndexOf(selectedMap) + 1;
+                EnemyRoomSpawn.SpawnEnemiesForRoom(_gameManager.CurrentMap, roomNumber);
             }
 
             _gameManager.CurrentMap = selectedMap;

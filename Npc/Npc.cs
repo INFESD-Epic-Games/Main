@@ -9,6 +9,7 @@ using SpellFall.UI;
 using Microsoft.Xna.Framework.Input;
 using System;
 using SpellFall.Character;
+using SpellFall.Enemies;
 
 namespace SpellFall.Npcs
 {
@@ -37,7 +38,9 @@ namespace SpellFall.Npcs
         private bool hasGivenQuest = false;
         private bool questCompletedRewardGiven = false;
         private bool dialogueActive = false;
+        private bool _isFinalSpawnPlaced = false;
         private bool endDialogueActive = false;
+        private bool questOver = false;
         private int dialogueStage = 0;
         private int endDialogueStage = 0;
 
@@ -104,6 +107,30 @@ namespace SpellFall.Npcs
             {
                 return;
             }
+            
+            if (!_isFinalSpawnPlaced && GameManager.GetGameManager().GetObjectsOfType<Enemy>().Count == 0 && GameManager.GetGameManager().CurrentMap == GameManager.GetGameManager().Maps[2])
+            {
+                var room = GameManager.GetGameManager().CurrentMap;
+                quest.IsCompleted = true;
+
+                Vector2 targetPosition = new Vector2(room.Position.X + 1000, room.Position.Y + 1000);
+
+                // If the player is too close to the intended spawn point, offset the NPC to avoid clipping
+                float minSpawnDistance = 250f;
+                if (Vector2.Distance(player.GetPosition().Center.ToVector2(), targetPosition) < minSpawnDistance)
+                {
+                    targetPosition.Y += 300f;
+                }
+
+                position = targetPosition;
+                int w = rectangleCollider.shape.Width;
+                int h = rectangleCollider.shape.Height;
+                rectangleCollider.shape = new Rectangle(
+                    (position - new Vector2(w / 2f, h / 2f)).ToPoint(),
+                    new Point(w, h));
+
+                _isFinalSpawnPlaced = true;
+            }
 
             bool npcVisible = !hasGivenQuest || quest.IsCompleted;
 
@@ -157,7 +184,7 @@ namespace SpellFall.Npcs
                 0f
             );
 
-            if (!hasGivenQuest || quest.IsCompleted)
+            if (!hasGivenQuest || (quest.IsCompleted && !questOver))
             {
                 _indicatorPosition = position + new Vector2(0, -150);
 
@@ -263,6 +290,7 @@ namespace SpellFall.Npcs
                 endDialogueStage = 0;
                 textBubble.Hide();
                 GameState.IsPaused = false;
+                questOver = true;
                 return;
             }
 

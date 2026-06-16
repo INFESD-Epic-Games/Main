@@ -116,7 +116,7 @@ namespace SpellFall.Enemies
 
             if (_path != null && _path.Count > 0 && _pathIndex < _path.Count)
             {
-                Vector2 targetWorld = _map.TileToWorldCenter(_path[_pathIndex]);
+                Vector2 targetWorld = _map.Position + _map.TileToWorldCenter(_path[_pathIndex]);
                 Vector2 directionToTarget = targetWorld - _position;
                 float dist = directionToTarget.Length();
                 if (dist < 4f)
