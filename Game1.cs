@@ -335,6 +335,7 @@ namespace SpellFall
         {
             KeyboardState currentKeyboard = Keyboard.GetState();
             bool escapePressed = currentKeyboard.IsKeyDown(Keys.Escape) && !_previousKeyboardState.IsKeyDown(Keys.Escape);
+            bool dialogueActive = _npc != null && _npc.IsDialogueActive;
 
             if (GameState.IsPaused)
             {
@@ -344,21 +345,32 @@ namespace SpellFall
 
                 if (escapePressed)
                 {
-                    if (_settings.IsVisible)
+                    if (GameState.InPauseMenu)
                     {
-                        _settings.IsVisible = false;
-                        GameState.InPauseMenu = true;
-                        _pauseMenu.IsVisible = true;
+                        if (_settings.IsVisible)
+                        {
+                            _settings.IsVisible = false;
+                            _pauseMenu.IsVisible = true;
+                        }
+                        else if (dialogueActive)
+                        {
+                            _pauseMenu.IsVisible = false;
+                            GameState.InPauseMenu = false;
+                        }
+                        else
+                        {
+                            GameState.IsPaused = false;
+                            GameState.InPauseMenu = false;
+                            _pauseMenu.IsVisible = false;
+                        }
                     }
                     else
                     {
-                        GameState.IsPaused = false;
-                        GameState.InPauseMenu = false;
-                        _pauseMenu.IsVisible = false;
+                        PauseGame();
                     }
                 }
 
-                if (isInteractKeyPressed)
+                if (isInteractKeyPressed && !GameState.InPauseMenu)
                 {
                     _npc?.ContinueDialogue();
                 }
@@ -516,9 +528,13 @@ namespace SpellFall
             _pauseMenu.CreatePanel(Content);
             _pauseMenu.ResumeClicked += () =>
             {
-                GameState.IsPaused = false;
                 GameState.InPauseMenu = false;
                 _pauseMenu.IsVisible = false;
+
+                if (!(_npc != null && _npc.IsDialogueActive))
+                {
+                    GameState.IsPaused = false;
+                }
             };
             _pauseMenu.MainMenuClicked += () =>
             {

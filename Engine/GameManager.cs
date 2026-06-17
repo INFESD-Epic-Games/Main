@@ -287,6 +287,8 @@ namespace SpellFall.Engine
             _toBeAdded.Clear();
             Maps.Clear();
             CurrentMap = null;
+            textBubble?.Hide();
+            textBubble?.SetText(string.Empty);
             _toBeAdded.Add(textBubble);
             _toBeAdded.Add(new ControlLayoutOverlay());
             Player = null;

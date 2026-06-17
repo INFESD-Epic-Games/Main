@@ -94,14 +94,14 @@ namespace SpellFall.Items
         {
             return tierName switch
             {
-                "Rusty" => -5,
+                "Rusty" => 0,
                 "Common" => 5,
                 "Uncommon" => 8,
                 "Rare" => 12,
                 "Epic" => 16,
                 "Legendary" => 20,
                 "Mythic" => 25,
-                _ => 0,
+                _ => 5,
             };
         }
 

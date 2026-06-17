@@ -68,6 +68,8 @@ namespace SpellFall.Npcs
             textBubble = GameManager.GetGameManager().textBubble;
         }
 
+        public bool IsDialogueActive => dialogueActive || endDialogueActive;
+
         public void Initialize(QuestManager questManager, Action onQuestAccepted = null)
         {
             this.questManager = questManager;
