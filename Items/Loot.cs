@@ -45,7 +45,7 @@ namespace SpellFall.Items
         private readonly RectangleCollider _rectangleCollider;
         private readonly List<LootTier> lootTable = new List<LootTier>()
         {
-            new LootTier("Rusty", 50f, 1f),
+            new LootTier("Rusty", 2f, 5f),
             new LootTier("Common", 30f, 1f),
             new LootTier("Uncommon", 15f, 2f),
             new LootTier("Rare", 8f, 3f),
@@ -96,11 +96,11 @@ namespace SpellFall.Items
             {
                 "Rusty" => 0,
                 "Common" => 5,
-                "Uncommon" => 8,
-                "Rare" => 10,
-                "Epic" => 13,
-                "Legendary" => 15,
-                "Mythic" => 18,
+                "Uncommon" => 10,
+                "Rare" => 15,
+                "Epic" => 20,
+                "Legendary" => 25,
+                "Mythic" => 30,
                 _ => 5,
             };
         }

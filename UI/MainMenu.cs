@@ -13,7 +13,6 @@ namespace SpellFall.UI;
 
 public class MainMenu
 {
-    public event Action LoadGameClicked;
     public event Action NewGameClicked;
     public event Action SettingsClicked;
     public event Action QuitClicked;
@@ -26,7 +25,6 @@ public class MainMenu
 
     private Panel _panel;
 
-    private FluentButton _loadGameButton;
     private FluentButton _newGameButton;
     private FluentButton _settingsButton;
     private FluentButton _quitButton;
@@ -38,7 +36,7 @@ public class MainMenu
         _backgroundmusic = content.Load<Song>("Title Theme");
         Texture2D titleTexture = content.Load<Texture2D>("Titlescreen_logo");
 
-        MediaPlayer.Play(_backgroundmusic);
+        PlayBackgroundMusic();
 
         _panel = new Panel();
         _panel.Dock(Dock.Fill);
@@ -88,5 +86,16 @@ public class MainMenu
             .At(startX, -16)
             .OnClick(() => QuitClicked?.Invoke())
             .AddTo(_panel);
+    }
+
+    public void PlayBackgroundMusic()
+    {
+        if (_backgroundmusic == null)
+        {
+            return;
+        }
+
+        MediaPlayer.Play(_backgroundmusic);
+        MediaPlayer.IsRepeating = true;
     }
 }

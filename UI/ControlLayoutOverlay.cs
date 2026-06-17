@@ -14,7 +14,6 @@ namespace SpellFall.UI
         // private Texture2D _textureInventory;
         private Vector2 position = new Vector2(2600, 600); 
 
-        private float scale = 8;
         private float scale2 = 0.75f;
         private float opacity = 0.5f;
 

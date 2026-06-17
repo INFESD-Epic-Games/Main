@@ -15,7 +15,7 @@ namespace SpellFall.Weapons
         private Point _target;
         private Vector2 _bowCenter;
 
-        public Lightningbow() : base(damageBonus: 5, baseCdFrames: 72, fireRateBonus: 0.2f)
+        public Lightningbow() : base(damageBonus: 5, baseCdFrames: 60, fireRateBonus: 0.2f)
         {
             _target = Point.Zero;
             _bowCenter = Vector2.Zero;

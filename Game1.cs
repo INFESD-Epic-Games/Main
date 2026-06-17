@@ -81,7 +81,6 @@ namespace SpellFall
             {
                 _mainMenu.IsVisible = false;
                 _settings.IsVisible = false;
-                MediaPlayer.Stop();
                 GameState.InIntro = true;
                 GameState.InMainMenu = true;
                 _introScroll.Reset();
@@ -155,6 +154,7 @@ namespace SpellFall
                 _gameManager.ClearWorldState();
                 _settings.IsVisible = false;
                 _mainMenu.IsVisible = true;
+                _mainMenu.PlayBackgroundMusic();
             };
         }
 
@@ -534,6 +534,7 @@ namespace SpellFall
                 _gameManager.ClearWorldState();
                 _pauseMenu.IsVisible = false;
                 _mainMenu.IsVisible = true;
+                _mainMenu.PlayBackgroundMusic();
             };
             _pauseMenu.SettingsClicked += () =>
             {

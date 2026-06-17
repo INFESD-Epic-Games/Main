@@ -147,9 +147,7 @@ namespace SpellFall.Engine
             }
             _toBeRemoved.Clear();
 
-            bool enemyOnScreen = false;
-            int viewWidth = RenderManager.VirtualWidth;
-            int viewHeight = RenderManager.VirtualHeight;
+            bool enemyOnScreen = CurrentMap != null && CurrentMap.EnemiesSpawned && HasEnemies();
 
             // foreach(GameObject obj in _gameObjects)
             // {
@@ -345,6 +343,18 @@ namespace SpellFall.Engine
             }
 
             return Math.Max(0, alienCount);
+        }
+
+        public bool HasEnemies()
+        {
+            foreach (GameObject gameObject in _gameObjects)
+            {
+                if (gameObject is SpellFall.Enemies.Enemy)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public List<T> GetObjectsOfType<T>() where T : class
