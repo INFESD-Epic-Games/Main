@@ -285,6 +285,8 @@ namespace SpellFall.Engine
             _gameObjects.Clear();
             _toBeRemoved.Clear();
             _toBeAdded.Clear();
+            Maps.Clear();
+            CurrentMap = null;
             _toBeAdded.Add(textBubble);
             _toBeAdded.Add(new ControlLayoutOverlay());
             Player = null;
