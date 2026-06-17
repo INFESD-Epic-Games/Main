@@ -282,8 +282,8 @@ namespace SpellFall.Items
 
         private void TryLoadWeaponSpinTextures(ContentManager content)
         {
-            AddSpinEntry(content, typeof(StartingWeapon), "BOOG", 0.45f);
-            AddSpinEntry(content, typeof(Lbow), "Lbow", 4.9f);
+            AddSpinEntry(content, typeof(Startingbow), "BOOG", 0.45f);
+            AddSpinEntry(content, typeof(Lightningbow), "Lbow", 4.9f);
             AddSpinEntry(content, typeof(Firebow), "Firebow", 4.9f);
             AddSpinEntry(content, typeof(Icebow), "Icebow", 4.9f);
             AddSpinEntry(content, typeof(Earthbow), "Earthbow", 4.9f);
@@ -318,7 +318,7 @@ namespace SpellFall.Items
 
             foreach (WeaponSpinEntry entry in _weaponSpinEntries)
             {
-                if (entry.WeaponType == typeof(StartingWeapon))
+                if (entry.WeaponType == typeof(Startingbow))
                 {
                     continue;
                 }

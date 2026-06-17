@@ -7,7 +7,7 @@ using SpellFall.Weapons.Projectiles;
 
 namespace SpellFall.Weapons
 {
-    public class Lbow : Weapons
+    public class Lightningbow : Weapons
     {
         private const float BowScale = 4.9f;
 
@@ -15,7 +15,7 @@ namespace SpellFall.Weapons
         private Point _target;
         private Vector2 _bowCenter;
 
-        public Lbow() : base(damageBonus: 5, baseCdFrames: 36, fireRateBonus: 0.2f)
+        public Lightningbow() : base(damageBonus: 5, baseCdFrames: 72, fireRateBonus: 0.2f)
         {
             _target = Point.Zero;
             _bowCenter = Vector2.Zero;
@@ -47,7 +47,7 @@ namespace SpellFall.Weapons
             if (inputManager.LeftMouseDown() && TryStartPrimaryAttackCooldown())
             {
                 int totalDamage = _gameManager.Player.Stats.TotalDamage;
-                _gameManager.AddGameObject(new LightningBolt(_bowCenter, aimDirection, 320f, totalDamage));
+                _gameManager.AddGameObject(new LightningBolt(_bowCenter, aimDirection, 360f, totalDamage));
             }
 
             base.HandleInput(inputManager);

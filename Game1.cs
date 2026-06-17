@@ -29,8 +29,8 @@ namespace SpellFall
         private GameManager _gameManager;
         private Npc _npc;
         private Player _player;
-        private StartingWeapon _startingWeapon;
-        private Lbow _lbow;
+        private Startingbow _startingWeapon;
+        private Lightningbow _lbow;
         private Firebow _firebow;
         private Icebow _icebow;
         private Earthbow _earthbow;
@@ -174,11 +174,11 @@ namespace SpellFall
             _gameManager.Initialize(Content, this, _player);
             _inventory = new Inventory(_player);
             _inventory.Load(Content, GraphicsDevice);
-            _startingWeapon = new StartingWeapon();
+            _startingWeapon = new Startingbow();
             _player.EquipWeapon(_startingWeapon);
             // _player = new Player(new Point(RenderManager.VirtualWidth / 2 - 100, RenderManager.VirtualHeight / 2 - 100));
             _gameManager.Initialize(Content, this, _player);
-            _lbow = new Lbow();
+            _lbow = new Lightningbow();
             _firebow = new Firebow();
             _icebow = new Icebow();
             _earthbow = new Earthbow();

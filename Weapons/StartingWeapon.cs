@@ -7,7 +7,7 @@ using SpellFall.Weapons.Projectiles;
 
 namespace SpellFall.Weapons
 {
-	public class StartingWeapon : Weapons
+	public class Startingbow : Weapons
 	{
 		private const float BowScale = 0.45f;
 
@@ -15,7 +15,7 @@ namespace SpellFall.Weapons
 		private Point _target;
 		private Vector2 _bowCenter;
 
-		public StartingWeapon() : base(damageBonus: 5, baseCdFrames: 36, fireRateBonus: 0.2f)
+		public Startingbow() : base(damageBonus: 5, baseCdFrames: 72, fireRateBonus: 0.2f)
 		{
 			_target = Point.Zero;
 			_bowCenter = Vector2.Zero;
@@ -47,7 +47,7 @@ namespace SpellFall.Weapons
 			if (inputManager.LeftMouseDown() && TryStartPrimaryAttackCooldown())
 			{
 				int totalDamage = _gameManager.Player.Stats.TotalDamage;
-				_gameManager.AddGameObject(new Arrow(_bowCenter, aimDirection, 320f, totalDamage));
+				_gameManager.AddGameObject(new Arrow(_bowCenter, aimDirection, 360f, totalDamage));
 			}
 
 			base.HandleInput(inputManager);

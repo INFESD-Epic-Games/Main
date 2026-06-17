@@ -210,8 +210,8 @@ namespace SpellFall.UI
             string weaponTypeName = weapon.GetType().Name;
             string textureKey = weaponTypeName switch
             {
-                "StartingWeapon" => "BOOG",
-                "Lbow" => "Lbow",
+                "Startingbow" => "BOOG",
+                "Lightningbow" => "Lbow",
                 "Firebow" => "Firebow",
                 "Icebow" => "Icebow",
                 "Earthbow" => "Earthbow",

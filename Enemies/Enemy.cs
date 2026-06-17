@@ -237,6 +237,18 @@ namespace SpellFall.Enemies
             ApplyDamage(damage);
         }
 
+        public void ApplyKnockback(Vector2 knockback)
+        {
+            if (!CanBePushedByEnemies || knockback == Vector2.Zero)
+            {
+                return;
+            }
+
+            int colliderWidth = Math.Max(1, _rectangleCollider.shape.Width);
+            int colliderHeight = Math.Max(1, _rectangleCollider.shape.Height);
+            TryMove(knockback, colliderWidth, colliderHeight);
+        }
+
         protected void KillEnemy(Action onKilled = null)
         {
             if (!IsAlive)
