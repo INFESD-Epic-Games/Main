@@ -140,16 +140,14 @@ namespace SpellFall.Engine
             }
             _toBeAdded.Clear();
 
-            foreach (GameObject gameObject in _toBeRemoved)
+            foreach (GameObject gameObject in _toBeRemoved.ToArray())
             {
                 gameObject.Destroy();
                 _gameObjects.Remove(gameObject);
             }
             _toBeRemoved.Clear();
 
-            bool enemyOnScreen = false;
-            int viewWidth = RenderManager.VirtualWidth;
-            int viewHeight = RenderManager.VirtualHeight;
+            bool enemyOnScreen = CurrentMap != null && CurrentMap.EnemiesSpawned && HasEnemies();
 
             // foreach(GameObject obj in _gameObjects)
             // {
@@ -285,6 +283,10 @@ namespace SpellFall.Engine
             _gameObjects.Clear();
             _toBeRemoved.Clear();
             _toBeAdded.Clear();
+            Maps.Clear();
+            CurrentMap = null;
+            textBubble?.Hide();
+            textBubble?.SetText(string.Empty);
             _toBeAdded.Add(textBubble);
             _toBeAdded.Add(new ControlLayoutOverlay());
             Player = null;
@@ -341,6 +343,18 @@ namespace SpellFall.Engine
             }
 
             return Math.Max(0, alienCount);
+        }
+
+        public bool HasEnemies()
+        {
+            foreach (GameObject gameObject in _gameObjects)
+            {
+                if (gameObject is SpellFall.Enemies.Enemy)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public List<T> GetObjectsOfType<T>() where T : class

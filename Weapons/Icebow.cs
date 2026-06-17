@@ -15,7 +15,7 @@ namespace SpellFall.Weapons
         private Point _target;
         private Vector2 _bowCenter;
 
-        public Icebow() : base(damageBonus: 5, baseCdFrames: 36, fireRateBonus: 0.2f)
+        public Icebow() : base(damageBonus: 10, baseCdFrames: 60, fireRateBonus: 0.2f)
         {
             _target = Point.Zero;
             _bowCenter = Vector2.Zero;
@@ -47,7 +47,7 @@ namespace SpellFall.Weapons
             if (inputManager.LeftMouseDown() && TryStartPrimaryAttackCooldown())
             {
                 int totalDamage = _gameManager.Player.Stats.TotalDamage;
-                _gameManager.AddGameObject(new IceArrow(_bowCenter, aimDirection, 250f, totalDamage));
+                _gameManager.AddGameObject(new IceArrow(_bowCenter, aimDirection, 390f, totalDamage));
             }
 
             base.HandleInput(inputManager);

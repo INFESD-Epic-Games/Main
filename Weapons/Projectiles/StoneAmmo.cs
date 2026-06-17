@@ -1,9 +1,7 @@
 using System;
-using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using SpellFall.Enemies;
 using SpellFall.Engine;
 
 namespace SpellFall.Weapons.Projectiles
@@ -12,11 +10,8 @@ namespace SpellFall.Weapons.Projectiles
     {
         private const float StoneAmmoScale = 1.8f;
         private const float StoneAmmoHitboxRatio = 0.34f;
-        private const int MaxEnemyPierces = 1;
-        private const float PierceForwardStep = 12f;
+        private const float KnockbackDistance = 120f;
         public int Damage { get; }
-        private int _enemiesPierced;
-        private readonly HashSet<Enemy> _hitEnemies;
 
         public StoneAmmo(Vector2 location, Vector2 direction, float speed, int damage, float maxLifetime = 5f)
             : base(
@@ -28,8 +23,6 @@ namespace SpellFall.Weapons.Projectiles
                 maxLifetime)
         {
             Damage = Math.Max(0, damage);
-            _enemiesPierced = 0;
-            _hitEnemies = new HashSet<Enemy>();
         }
 
         public override void Load(ContentManager content)
@@ -63,38 +56,10 @@ namespace SpellFall.Weapons.Projectiles
             return Damage;
         }
 
-        public override void OnCollision(GameObject other)
+        protected override void OnEnemyHit(Enemies.Enemy enemy)
         {
-            if (other is Enemy enemy && CanDamageEnemies)
-            {
-                if (_hitEnemies.Contains(enemy))
-                {
-                    return;
-                }
-
-                if (Bishop.TryProtectEnemy(enemy))
-                {
-                    _gameManager.RemoveGameObject(this);
-                    return;
-                }
-
-                _hitEnemies.Add(enemy);
-                OnEnemyHit(enemy);
-
-                if (_enemiesPierced >= MaxEnemyPierces)
-                {
-                    _gameManager.RemoveGameObject(this);
-                }
-                else
-                {
-                    _enemiesPierced++;
-                    // Move past the target collider to avoid repeated overlap callbacks.
-                    _circleCollider.Center += Vector2.Normalize(_velocity) * PierceForwardStep;
-                }
-                return;
-            }
-
-            base.OnCollision(other);
+            base.OnEnemyHit(enemy);
+            enemy.ApplyKnockback(Vector2.Normalize(_velocity) * KnockbackDistance);
         }
     }
 }

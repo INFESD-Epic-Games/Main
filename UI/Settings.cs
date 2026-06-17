@@ -33,7 +33,6 @@ public class Settings
     private CheckBox _fullscreenToggle;
     private Slider _volumeSlider;
     private Slider _sfx;
-    private Slider _music;
     private FluentButton _returnButton;
 
     public static readonly List<DisplayMode> Resolutions = GraphicsAdapter.DefaultAdapter.SupportedDisplayModes

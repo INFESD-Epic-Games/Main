@@ -45,7 +45,7 @@ namespace SpellFall.Items
         private readonly RectangleCollider _rectangleCollider;
         private readonly List<LootTier> lootTable = new List<LootTier>()
         {
-            new LootTier("Rusty", 50f, 1f),
+            new LootTier("Rusty", 2f, 5f),
             new LootTier("Common", 30f, 1f),
             new LootTier("Uncommon", 15f, 2f),
             new LootTier("Rare", 8f, 3f),
@@ -94,14 +94,14 @@ namespace SpellFall.Items
         {
             return tierName switch
             {
-                "Rusty" => -5,
+                "Rusty" => 0,
                 "Common" => 5,
-                "Uncommon" => 8,
-                "Rare" => 12,
-                "Epic" => 16,
-                "Legendary" => 20,
-                "Mythic" => 25,
-                _ => 0,
+                "Uncommon" => 10,
+                "Rare" => 10,
+                "Epic" => 12,
+                "Legendary" => 15,
+                "Mythic" => 20,
+                _ => 5,
             };
         }
 
@@ -282,8 +282,8 @@ namespace SpellFall.Items
 
         private void TryLoadWeaponSpinTextures(ContentManager content)
         {
-            AddSpinEntry(content, typeof(StartingWeapon), "BOOG", 0.45f);
-            AddSpinEntry(content, typeof(Lbow), "Lbow", 4.9f);
+            AddSpinEntry(content, typeof(Startingbow), "BOOG", 0.45f);
+            AddSpinEntry(content, typeof(Lightningbow), "Lbow", 4.9f);
             AddSpinEntry(content, typeof(Firebow), "Firebow", 4.9f);
             AddSpinEntry(content, typeof(Icebow), "Icebow", 4.9f);
             AddSpinEntry(content, typeof(Earthbow), "Earthbow", 4.9f);
@@ -318,7 +318,7 @@ namespace SpellFall.Items
 
             foreach (WeaponSpinEntry entry in _weaponSpinEntries)
             {
-                if (entry.WeaponType == typeof(StartingWeapon))
+                if (entry.WeaponType == typeof(Startingbow))
                 {
                     continue;
                 }

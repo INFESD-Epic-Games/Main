@@ -12,7 +12,7 @@ namespace SpellFall.Enemies
 {
     public class Alien : Enemy
     {
-        private const float MoveSpeed = 70f;
+        private const float MoveSpeed = 120f;
         private const float AlienScale = 0.5f;
         private const float HitboxScale = 0.4f;
         private const int MaxHealth = 28;
