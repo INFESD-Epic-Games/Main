@@ -77,15 +77,30 @@ namespace SpellFall.Background
                         (int)room.Position.X + 1300,
                         (int)room.Position.Y + 1200
                     );
+                    Point thirdGhostSpawnPosition = new Point(
+                        (int)room.Position.X + 1700,
+                        (int)room.Position.Y + 600
+                    );
+                    Point fourthGhostSpawnPosition = new Point(
+                        (int)room.Position.X + 1700,
+                        (int)room.Position.Y + 1200
+                    );
                     Point weepingAngelSpawnPosition = new Point(
                         (int)room.Position.X + 1200,
+                        (int)room.Position.Y + 900
+                    );
+                    Point weepingAngel2SpawnPosition = new Point(
+                        (int)room.Position.X + 1800,
                         (int)room.Position.Y + 900
                     );
 
                     GameManager.GetGameManager().AddGameObject(new Bishop(bishopSpawnPosition));
                     GameManager.GetGameManager().AddGameObject(new Ghost(leftGhostSpawnPosition));
                     GameManager.GetGameManager().AddGameObject(new Ghost(rightGhostSpawnPosition));
+                    GameManager.GetGameManager().AddGameObject(new Ghost(thirdGhostSpawnPosition));
+                    GameManager.GetGameManager().AddGameObject(new Ghost(fourthGhostSpawnPosition));
                     GameManager.GetGameManager().AddGameObject(new WeepingAngel(weepingAngelSpawnPosition));
+                    GameManager.GetGameManager().AddGameObject(new WeepingAngel(weepingAngel2SpawnPosition));
                     break;
             }
         }
