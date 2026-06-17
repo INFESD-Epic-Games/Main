@@ -17,6 +17,7 @@ namespace SpellFall.Background
         private const int _screenTileSize = _tileSize * _renderScale;
 
         private int[,] _collision;
+        public bool EnemiesSpawned { get; set; }
 
         public Map(
             string textureName,
@@ -26,6 +27,7 @@ namespace SpellFall.Background
             _textureName = textureName;
             Position = position;
             _collision = collision;
+            EnemiesSpawned = false;
         }
 
         public override void Load(ContentManager content)

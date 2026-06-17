@@ -8,6 +8,13 @@ namespace SpellFall.Background
     {
         public static void SpawnEnemiesForRoom(Map room, int roomNumber)
         {
+            if (room == null || room.EnemiesSpawned)
+            {
+                return;
+            }
+
+            room.EnemiesSpawned = true;
+
             // Example: Spawn different enemies based on the room number
             switch (roomNumber)
             {
