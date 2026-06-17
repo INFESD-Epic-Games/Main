@@ -39,6 +39,9 @@ namespace SpellFall.Enemies
         private float _fireTickAccumulator = 0f;
         private Color _healthBarTintColor = Color.LimeGreen;
         private float _healthBarTintTimer = 0f;
+        private Vector2 _knockbackVelocity = Vector2.Zero;
+        private const float KnockbackVelocityMultiplier = 6f;
+        private const float KnockbackDecayPerSecond = 14f;
 
         protected Enemy(Point startPosition, int maxHealth)
         {
@@ -90,6 +93,11 @@ namespace SpellFall.Enemies
             }
 
             return closestEnemy;
+        }
+
+        public Rectangle GetCollisionBounds()
+        {
+            return _rectangleCollider.GetBoundingBox();
         }
 
         protected void TryMove(Vector2 velocity, int width, int height)
@@ -244,9 +252,7 @@ namespace SpellFall.Enemies
                 return;
             }
 
-            int colliderWidth = Math.Max(1, _rectangleCollider.shape.Width);
-            int colliderHeight = Math.Max(1, _rectangleCollider.shape.Height);
-            TryMove(knockback, colliderWidth, colliderHeight);
+            _knockbackVelocity += knockback * KnockbackVelocityMultiplier;
         }
 
         protected void KillEnemy(Action onKilled = null)
@@ -265,6 +271,22 @@ namespace SpellFall.Enemies
         public override void Update(GameTime gameTime)
         {
             float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            if (_knockbackVelocity != Vector2.Zero)
+            {
+                int colliderWidth = Math.Max(1, _rectangleCollider.shape.Width);
+                int colliderHeight = Math.Max(1, _rectangleCollider.shape.Height);
+
+                TryMove(_knockbackVelocity * dt, colliderWidth, colliderHeight);
+
+                float decay = (float)Math.Exp(-KnockbackDecayPerSecond * dt);
+                _knockbackVelocity *= decay;
+
+                if (_knockbackVelocity.LengthSquared() < 4f)
+                {
+                    _knockbackVelocity = Vector2.Zero;
+                }
+            }
 
             if (_iceSlowTimer > 0f)
             {

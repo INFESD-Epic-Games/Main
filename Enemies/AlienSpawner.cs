@@ -13,7 +13,7 @@ namespace SpellFall.Enemies
     {
         private const float SpawnerScale = 0.75f;
         private const float HitboxScale = 0.5f;
-        private const int MaxHealth = 140;
+        private const int MaxHealth = 120;
         private const float SpawnIntervalSeconds = 8f;
         private const int SpawnCountPerWave = 3;
         private const int MaxAliensInGame = 15;
@@ -74,6 +74,29 @@ namespace SpellFall.Enemies
             base.Update(gameTime);
         }
 
+        public override void Destroy()
+        {
+            base.Destroy();
+
+            foreach (AlienSpawner spawner in _gameManager.GetObjectsOfType<AlienSpawner>())
+            {
+                if (spawner.IsAlive)
+                {
+                    return;
+                }
+            }
+
+            foreach (SpawnIndicator spawnIndicator in _gameManager.GetObjectsOfType<SpawnIndicator>())
+            {
+                _gameManager.RemoveGameObject(spawnIndicator);
+            }
+
+            foreach (Alien alien in _gameManager.GetObjectsOfType<Alien>())
+            {
+                _gameManager.RemoveGameObject(alien);
+            }
+        }
+
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
             if (_texture == null)
@@ -129,6 +152,21 @@ namespace SpellFall.Enemies
 
         private void TrySpawnAlien(Point spawnPoint)
         {
+            bool hasAliveAlienSpawner = false;
+            foreach (AlienSpawner spawner in _gameManager.GetObjectsOfType<AlienSpawner>())
+            {
+                if (spawner.IsAlive)
+                {
+                    hasAliveAlienSpawner = true;
+                    break;
+                }
+            }
+
+            if (!hasAliveAlienSpawner)
+            {
+                return;
+            }
+
             if (_gameManager.GetAlienCount() >= MaxAliensInGame)
             {
                 return;

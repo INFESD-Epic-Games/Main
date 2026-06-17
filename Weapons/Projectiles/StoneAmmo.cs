@@ -10,7 +10,7 @@ namespace SpellFall.Weapons.Projectiles
     {
         private const float StoneAmmoScale = 1.8f;
         private const float StoneAmmoHitboxRatio = 0.34f;
-        private const float KnockbackDistance = 100f;
+        private const float KnockbackDistance = 120f;
         public int Damage { get; }
 
         public StoneAmmo(Vector2 location, Vector2 direction, float speed, int damage, float maxLifetime = 5f)

@@ -10,8 +10,8 @@ namespace SpellFall.Enemies
     public class Bishop : Enemy
     {
         private const float EnemyScale = 0.20f;
-        private const float HitboxScale = 0.45f;
-        private const int MaxHealth = 55;
+        private const float HitboxScale = 0.40f;
+        private const int MaxHealth = 420;
         private const float ProtectionEffectDurationSeconds = 1f;
 
         private Texture2D _texture;

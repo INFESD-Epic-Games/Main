@@ -140,7 +140,7 @@ namespace SpellFall.Engine
             }
             _toBeAdded.Clear();
 
-            foreach (GameObject gameObject in _toBeRemoved)
+            foreach (GameObject gameObject in _toBeRemoved.ToArray())
             {
                 gameObject.Destroy();
                 _gameObjects.Remove(gameObject);

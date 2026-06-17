@@ -200,7 +200,13 @@ namespace SpellFall.Enemies
         {
             if (Map == null)
             {
-                _position += velocity;
+                Vector2 candidatePosition = _position + velocity;
+                if (WouldCollideWithEnemyAt(candidatePosition))
+                {
+                    return false;
+                }
+
+                _position = candidatePosition;
                 return true;
             }
 
@@ -209,18 +215,44 @@ namespace SpellFall.Enemies
             int height = _rectangleCollider.shape.Height;
 
             Vector2 newPosX = new Vector2(_position.X + velocity.X, _position.Y);
-            if (!Map.IsColliding(newPosX - new Vector2(width / 2f, height / 2f), width, height))
+            if (!Map.IsColliding(newPosX - new Vector2(width / 2f, height / 2f), width, height) && !WouldCollideWithEnemyAt(newPosX))
             {
                 _position.X += velocity.X;
                 moved = true;
             }
             Vector2 newPosY = new Vector2(_position.X, _position.Y + velocity.Y);
-            if (!Map.IsColliding(newPosY - new Vector2(width / 2f, height / 2f), width, height))
+            if (!Map.IsColliding(newPosY - new Vector2(width / 2f, height / 2f), width, height) && !WouldCollideWithEnemyAt(newPosY))
             {                
                 _position.Y += velocity.Y;
                 moved = true;
             }
             return moved;
+        }
+
+        private bool WouldCollideWithEnemyAt(Vector2 candidateCenter)
+        {
+            int width = _rectangleCollider.shape.Width;
+            int height = _rectangleCollider.shape.Height;
+            Rectangle candidateBounds = new Rectangle(
+                (int)(candidateCenter.X - width / 2f),
+                (int)(candidateCenter.Y - height / 2f),
+                width,
+                height);
+
+            foreach (Enemy enemy in Enemy.GetActiveEnemies())
+            {
+                if (enemy == this || !enemy.IsAlive)
+                {
+                    continue;
+                }
+
+                if (candidateBounds.Intersects(enemy.GetCollisionBounds()))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private void Attack(float angleOffset = 0f)

@@ -65,11 +65,27 @@ namespace SpellFall.Background
                     GameManager.GetGameManager().AddGameObject(new AlienSpawner(bottomSpawnerPosition));
                     break;
                 case 3:
-                    Point alienSpawnPosition = new Point(
-                        (int)room.Position.X + 500,
-                        (int)room.Position.Y + 500
+                    Point bishopSpawnPosition = new Point(
+                        (int)room.Position.X + 1500,
+                        (int)room.Position.Y + 900
                     );
-                    GameManager.GetGameManager().AddGameObject(new Alien(alienSpawnPosition));
+                    Point leftGhostSpawnPosition = new Point(
+                        (int)room.Position.X + 1300,
+                        (int)room.Position.Y + 600
+                    );
+                    Point rightGhostSpawnPosition = new Point(
+                        (int)room.Position.X + 1300,
+                        (int)room.Position.Y + 1200
+                    );
+                    Point weepingAngelSpawnPosition = new Point(
+                        (int)room.Position.X + 1200,
+                        (int)room.Position.Y + 900
+                    );
+
+                    GameManager.GetGameManager().AddGameObject(new Bishop(bishopSpawnPosition));
+                    GameManager.GetGameManager().AddGameObject(new Ghost(leftGhostSpawnPosition));
+                    GameManager.GetGameManager().AddGameObject(new Ghost(rightGhostSpawnPosition));
+                    GameManager.GetGameManager().AddGameObject(new WeepingAngel(weepingAngelSpawnPosition));
                     break;
             }
         }
