@@ -106,16 +106,6 @@ namespace SpellFall.Enemies
             base.Draw(gameTime, spriteBatch);
         }
 
-        public override void Destroy()
-        {
-            if (_gameManager.Player != null)
-            {
-                _gameManager.SpawnLootChest(_position, _gameManager.Player.Stats.TotalLuck);
-            }
-
-            base.Destroy();
-        }
-
         private void QueueSpawnWave()
         {
             int availableSlots = MaxAliensInGame - _gameManager.GetAlienCount();

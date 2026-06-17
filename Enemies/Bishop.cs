@@ -39,11 +39,6 @@ namespace SpellFall.Enemies
             base.Update(gameTime);
         }
 
-        public override void Destroy()
-        {
-            base.Destroy();
-        }
-
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
             Vector2 origin = new Vector2(_texture.Width / 2f, _texture.Height / 2f);
