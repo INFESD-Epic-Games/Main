@@ -228,6 +228,14 @@ namespace SpellFall.Character
 
             if (_gameManager.CurrentMap != selectedMap)
             {
+                int currentMapIndex = _gameManager.Maps.IndexOf(_gameManager.CurrentMap);
+                int selectedMapIndex = _gameManager.Maps.IndexOf(selectedMap);
+
+                if (_gameManager.CurrentMap != null && selectedMapIndex <= currentMapIndex)
+                {
+                    return;
+                }
+
                 Map previousMap = _gameManager.CurrentMap;
 
                 _gameManager.CloseGatesForMap(previousMap);
