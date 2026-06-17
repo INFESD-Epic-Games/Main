@@ -70,6 +70,15 @@ namespace SpellFall.Npcs
 
         public bool IsDialogueActive => dialogueActive || endDialogueActive;
 
+        public void CancelDialogue()
+        {
+            dialogueActive = false;
+            endDialogueActive = false;
+            dialogueStage = 0;
+            endDialogueStage = 0;
+            textBubble?.Hide();
+        }
+
         public void Initialize(QuestManager questManager, Action onQuestAccepted = null)
         {
             this.questManager = questManager;

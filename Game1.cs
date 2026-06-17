@@ -37,6 +37,7 @@ namespace SpellFall
         private Poisonbow _poisonbow;
         private KeyboardState _previousKeyboardState;
         private bool _settingsOpenedFromPause;
+        private bool _pauseOpenedFromDialogue;
         private Texture2D _pauseOverlayTexture;
 
         private readonly MainMenu _mainMenu = new MainMenu();
@@ -335,7 +336,6 @@ namespace SpellFall
         {
             KeyboardState currentKeyboard = Keyboard.GetState();
             bool escapePressed = currentKeyboard.IsKeyDown(Keys.Escape) && !_previousKeyboardState.IsKeyDown(Keys.Escape);
-            bool dialogueActive = _npc != null && _npc.IsDialogueActive;
 
             if (GameState.IsPaused)
             {
@@ -352,16 +352,9 @@ namespace SpellFall
                             _settings.IsVisible = false;
                             _pauseMenu.IsVisible = true;
                         }
-                        else if (dialogueActive)
-                        {
-                            _pauseMenu.IsVisible = false;
-                            GameState.InPauseMenu = false;
-                        }
                         else
                         {
-                            GameState.IsPaused = false;
-                            GameState.InPauseMenu = false;
-                            _pauseMenu.IsVisible = false;
+                            ResumeFromPause();
                         }
                     }
                     else
@@ -522,19 +515,14 @@ namespace SpellFall
 
         private void PauseGame()
         {
+            _pauseOpenedFromDialogue = _npc != null && _npc.IsDialogueActive;
             GameState.IsPaused = true;
             GameState.InPauseMenu = true;
 
             _pauseMenu.CreatePanel(Content);
             _pauseMenu.ResumeClicked += () =>
             {
-                GameState.InPauseMenu = false;
-                _pauseMenu.IsVisible = false;
-
-                if (!(_npc != null && _npc.IsDialogueActive))
-                {
-                    GameState.IsPaused = false;
-                }
+                ResumeFromPause();
             };
             _pauseMenu.MainMenuClicked += () =>
             {
@@ -556,6 +544,19 @@ namespace SpellFall
             };
             _pauseMenu.QuitClicked += Exit;
 
+        }
+
+        private void ResumeFromPause()
+        {
+            if (_pauseOpenedFromDialogue)
+            {
+                _npc?.CancelDialogue();
+            }
+
+            _pauseOpenedFromDialogue = false;
+            GameState.IsPaused = false;
+            GameState.InPauseMenu = false;
+            _pauseMenu.IsVisible = false;
         }
     }
 }
