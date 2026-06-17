@@ -2,6 +2,7 @@ using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using SpellFall.Background;
 using SpellFall.Engine;
 using SpellFall.Weapons.Projectiles;
 using Microsoft.Xna.Framework.Audio;
@@ -12,12 +13,12 @@ namespace SpellFall.Enemies
     {
         private const float SpawnerScale = 0.75f;
         private const float HitboxScale = 0.5f;
-        private const int MaxHealth = 100;
+        private const int MaxHealth = 140;
         private const float SpawnIntervalSeconds = 8f;
         private const int SpawnCountPerWave = 3;
-        private const int MaxAliensInGame = 20;
+        private const int MaxAliensInGame = 15;
         private const float SpawnIndicatorDurationSeconds = 2f;
-        private readonly Random _rng;
+        private const int SpawnCollisionSize = 48;
         private Texture2D _texture;
         private Texture2D _healthBarTexture;
         private float _spawnTimer;
@@ -26,7 +27,6 @@ namespace SpellFall.Enemies
         public AlienSpawner(Point startPosition)
             : base(startPosition, MaxHealth)
         {
-            _rng = new Random();
             _spawnTimer = SpawnIntervalSeconds;
         }
 
@@ -117,7 +117,7 @@ namespace SpellFall.Enemies
             int spawnCount = Math.Min(SpawnCountPerWave, availableSlots);
             for (int i = 0; i < spawnCount; i++)
             {
-                Vector2 spawnPosition = GetSpawnPosition();
+                Vector2 spawnPosition = GetSpawnPosition(i);
                 Point alienPoint = spawnPosition.ToPoint();
 
                 _gameManager.AddGameObject(new SpawnIndicator(
@@ -134,14 +134,59 @@ namespace SpellFall.Enemies
                 return;
             }
 
+            Map currentMap = _gameManager.CurrentMap;
+            if (currentMap != null && !IsSafeSpawnPosition(currentMap, spawnPoint.ToVector2()))
+            {
+                return;
+            }
+
             _gameManager.AddGameObject(new Alien(spawnPoint));
         }
 
-        private Vector2 GetSpawnPosition()
+        private Vector2 GetSpawnPosition(int spawnIndex)
         {
-            float angle = (float)(_rng.NextDouble() * Math.PI * 2d);
-            float distance = _rng.Next(120, 260);
-            return _position + new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle)) * distance;
+            Map currentMap = _gameManager.CurrentMap;
+
+            Vector2[] spawnCandidates = spawnIndex switch
+            {
+                0 => new Vector2[]
+                {
+                    _position + new Vector2(0f, -220f),
+                    _position + new Vector2(220f, 0f),
+                    _position + new Vector2(0f, 220f),
+                    _position + new Vector2(-220f, 0f)
+                },
+                1 => new Vector2[]
+                {
+                    _position + new Vector2(220f, 0f),
+                    _position + new Vector2(0f, 220f),
+                    _position + new Vector2(0f, -220f),
+                    _position + new Vector2(-220f, 0f)
+                },
+                _ => new Vector2[]
+                {
+                    _position + new Vector2(0f, 220f),
+                    _position + new Vector2(-220f, 0f),
+                    _position + new Vector2(220f, 0f),
+                    _position + new Vector2(0f, -220f)
+                }
+            };
+
+            foreach (Vector2 spawnCandidate in spawnCandidates)
+            {
+                if (currentMap == null || IsSafeSpawnPosition(currentMap, spawnCandidate))
+                {
+                    return spawnCandidate;
+                }
+            }
+
+            return _position + new Vector2(220f, 0f);
+        }
+
+        private bool IsSafeSpawnPosition(Map map, Vector2 spawnPosition)
+        {
+            Vector2 topLeft = spawnPosition - new Vector2(SpawnCollisionSize / 2f, SpawnCollisionSize / 2f);
+            return !map.IsColliding(topLeft, SpawnCollisionSize, SpawnCollisionSize);
         }
 
         protected override void UpdateCollider()

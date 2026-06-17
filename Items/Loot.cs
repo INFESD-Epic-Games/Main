@@ -97,10 +97,10 @@ namespace SpellFall.Items
                 "Rusty" => 0,
                 "Common" => 5,
                 "Uncommon" => 8,
-                "Rare" => 12,
-                "Epic" => 16,
-                "Legendary" => 20,
-                "Mythic" => 25,
+                "Rare" => 10,
+                "Epic" => 13,
+                "Legendary" => 15,
+                "Mythic" => 18,
                 _ => 5,
             };
         }
